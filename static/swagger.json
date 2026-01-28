@@ -1,0 +1,184 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Documentación de MicroServicios Web" ,
+    "version": "1.0.0",
+    "title": "Documentación de MS_Seguridad",
+    "termsOfService": "Leer wwww.ug.edu.com",
+    "contact": {
+      "email": "galo.izquierdov@ug.edu.ec"
+    },
+    "license": {
+      "name": "UG",
+      "url": "none"
+    }
+  },
+  "tags": [
+    {
+      "name": "WS Security",
+      "description": "WS Security"
+    }
+  ],
+  "paths": {
+    "/security/login": {
+      "post": {
+        "tags": [
+          "WS Security"
+        ],
+        "summary": "Login de Usuario",
+        "description": "Login de Usuario",
+        "operationId": "loginUser",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/loginUserDef"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          },
+          "500": {
+            "description": "Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "400": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/NotFound"
+            }
+          }
+        }
+      }
+    },
+    "/user/list": {
+      "get": {
+        "tags": [
+          "WS Security"
+        ],
+        "summary": "Lista de Usuarios",
+        "description": "Lista de Usuarios",
+        "operationId": "userList",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          },
+          "500": {
+            "description": "Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "400": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/NotFound"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+   "loginUserDef": {
+     "type": "object",
+     "properties": {
+       "login_user": {
+         "type": "string",
+         "format": "string"
+       },
+       "login_password": {
+         "type": "string",
+         "format": "string"
+       }
+     }
+    },
+   "NotFound": {
+      "type": "object",
+      "properties": {
+        "success": {
+            "type": "boolean",
+            "default": false
+        },
+        "message": {
+            "type": "string",
+            "example": "Recurso no encontrado"
+        },
+        "data": {
+          "type": "string",
+          "example": "{}"
+        },
+        "status": {
+          "type": "string",
+          "example": "404"
+        }
+      }
+    },
+   "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+            "type": "boolean",
+            "default": false
+        },
+        "message": {
+            "type": "string"
+        },
+        "data": {
+          "type": "string",
+          "example": "{}"
+        },
+        "status": {
+          "type": "string",
+          "example": "500"
+        }
+      }
+    },
+   "Response": {
+      "type": "object",
+      "properties": {
+        "success": {
+            "type": "boolean",
+            "default": false
+        },
+        "message": {
+            "type": "string",
+            "example": "ok"
+        },
+        "data": {
+          "type": "string",
+          "example": "{}"
+        },
+        "status": {
+          "type": "string",
+          "example": "200"
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  }
+}
