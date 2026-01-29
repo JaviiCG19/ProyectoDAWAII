@@ -26,6 +26,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.app.executor": "Debug",
     "settings.editor.selected.configurable": "preferences.general"
   }
 }]]></component>

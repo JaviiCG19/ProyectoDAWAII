@@ -7,4 +7,3 @@ def load_routes(api):
     api.add_resource(UserService, '/user/list')
     api.add_resource(LoginService, '/security/login')
     api.add_resource(TokenValService, '/security/validate')
-

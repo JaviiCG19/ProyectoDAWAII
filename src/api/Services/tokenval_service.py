@@ -8,7 +8,6 @@ from ..Components.jwt_component import JwtComponent
 class TokenValService(Resource):
 
     @staticmethod
-
     def post():
         try:
             HandleLogs.write_log("Servicio de validación de token")
