@@ -1,9 +1,9 @@
 from flask_restful import Resource
 from flask import request
-from src.api.Components.login_component import LoginComponent
-from src.utils.general.logs import HandleLogs
-from src.utils.general.response import response_error, response_success, response_not_found
-from src.api.Model.Request.login_request import LoginRequest
+from ..Components.login_component import LoginComponent
+from ...utils.general.logs import HandleLogs
+from ...utils.general.response import response_error, response_success, response_not_found
+from ..Model.Request.login_request import LoginRequest
 
 #Clase que implemente metodos http
 class LoginService(Resource):

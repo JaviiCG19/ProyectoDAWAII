@@ -2,6 +2,7 @@
 from ...utils.database.connection_db import DataBaseHandle
 from ...utils.general.logs import HandleLogs
 from ...utils.general.response import internal_response
+from .jwt_component import JwtComponent
 
 class LoginComponent:
 
@@ -15,18 +16,33 @@ class LoginComponent:
             # Crear el código SQL para validar
 
             sql = """
-                SELECT count(*) as valor
-                FROM dawa.tb_user
-                WHERE user_login = %s
-                AND user_password = %s
-                AND user_state = true;
+                SELECT count(*) as valor, roles, detalle
+                FROM dawa.usuarios
+                WHERE nombre = %s
+                AND clave = %s
+                AND estado = 0;
             """
             record = (p_user, p_password)
+            # Buscamos un solo registro
             result_login = DataBaseHandle.getRecords(sql, 1, record)
+
             if result_login['result']:
-                if result_login['data']['valor'] > 0:
-                    result = True
-                    data = "Login Exitoso"
+                # Si existe la data, significa que las credenciales son correctas
+                if result_login['data']:
+                    user_info = result_login['data']
+
+                    # 2. Generamos el Token pasándole quizás más contexto si tu componente lo permite
+                    token = JwtComponent.token_generate(p_user)
+                    if token is None:
+                        message = "Error al generar el Token"
+                    else:
+                        result = True
+                        # 3. Construimos el objeto con toda la información solicitada
+                        data = {
+                            "token": token,
+                            "user_name": user_info['detalle'],
+                            "user_role": user_info['roles']
+                        }
                 else:
                     message = "Credenciales Inválidas"
             else:

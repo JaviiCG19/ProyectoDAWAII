@@ -24,6 +24,5 @@ class UserComponent:
         except Exception as ex:
             HandleLogs.write_error(ex)
             message = ex.__str__()
-
         finally:
             return internal_response(result, data, message)

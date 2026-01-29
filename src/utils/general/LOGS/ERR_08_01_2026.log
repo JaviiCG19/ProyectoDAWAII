@@ -1,3 +1,0 @@
-12:55:16 - ERR - post - (KeyError('user_login'),)
-12:56:35 - ERR - getRecords - (UndefinedTable('relation "tb_user" does not exist\nLINE 3:                 FROM tb_user\n                             ^\n'),)
-13:00:37 - ERR - post - ("Error al validar el request -> {'login_password': ['Missing data for required field.']}",)
