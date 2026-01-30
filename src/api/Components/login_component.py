@@ -1,4 +1,5 @@
 #importar las clases que vamos a necesitar
+from werkzeug.security import check_password_hash
 from ...utils.database.connection_db import DataBaseHandle
 from ...utils.general.logs import HandleLogs
 from ...utils.general.response import internal_response
@@ -16,41 +17,42 @@ class LoginComponent:
             # Crear el código SQL para validar
 
             sql = """
-                SELECT roles, detalle
+                SELECT roles, detalle, rol_prioritario
                 FROM dawa.usuarios
                 WHERE nombre = %s
                 AND clave = %s
                 AND estado = 0;
             """
-            record = (p_user, p_password)
+            record = (p_user,)
             # Buscamos un solo registro
             result_login = DataBaseHandle.getRecords(sql, 1, record)
 
-            if result_login['result']:
-                # Si existe la data, significa que las credenciales son correctas
-                if result_login['data']:
-                    user_info = result_login['data']
+            if result_login['result'] and result_login['data']:
+                user_info = result_login['data']
+                hash_en_db = user_info['clave']  # El hash guardado (pbkdf2:sha256...)
 
-                    # 2. Generamos el Token pasándole quizás más contexto si tu componente lo permite
-                    token = JwtComponent.token_generate(p_user)
-                    if token is None:
-                        message = "Error al generar el Token"
-                    else:
-                        result = True
-                        # 3. Construimos el objeto con toda la información solicitada
-                        data = {
-                            "token": token,
-                            "user_name": user_info['detalle'],
-                            "user_role": user_info['roles']
-                        }
+                # 2. Comparamos matemátixcamente:
+                # Flask toma p_password, la encripta igual y ve si coincide con hash_en_db
+                if check_password_hash(hash_en_db, p_password):
+
+                    # ¡Login Exitoso! Generamos Token
+                    token = JwtComponent.token_generate(user_info['usr_login'])
+
+                    data = {
+                        "token": token,
+                        "usr_name": user_info['detalle'],
+                        "usr_role": user_info['roles'],
+                        "usr_rolp": user_info['rol_prioritario']
+                    }
+                    message = "Login Exitoso"
                 else:
-                    message = "Credenciales Inválidas"
+                    message = "Contraseña Incorrecta"
             else:
-                message = result_login['message']
+                message = "Usuario no existe"
+
         except Exception as err:
             HandleLogs.write_error(err)
             message = "Error en Login -> " + err.__str__()
         finally:
             return internal_response(result, data, message)
-
 
