@@ -16,7 +16,7 @@ class LoginComponent:
             # Crear el código SQL para validar
 
             sql = """
-                SELECT count(*) as valor, roles, detalle
+                SELECT roles, detalle
                 FROM dawa.usuarios
                 WHERE nombre = %s
                 AND clave = %s

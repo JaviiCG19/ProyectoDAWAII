@@ -6,6 +6,7 @@ from ...utils.general.response import internal_response
 class UserComponent:
 
     @staticmethod
+
     def getAllUsers():
         try:
             result = False
@@ -13,7 +14,7 @@ class UserComponent:
             message = None
             # Logica
             sql = """
-                SELECT * FROM dawa.tb_user WHERE user_state = true;
+                SELECT * FROM dawa.usuarios WHERE estado = 0;
             """
             result_user = DataBaseHandle.getRecords(sql, 0)
             if result_user['result']:
