@@ -18,19 +18,11 @@ def conn_db():
 
 
 class DataBaseHandle:
-    """
-    Clase para manejar operaciones de base de datos
-    """
+
 
     @staticmethod
     def getRecords(query, tamanio, record=()):
-        """
-        Ejecuta consultas SELECT
-        :param query: Consulta SQL
-        :param tamanio: 0=todos, 1=uno, >1=n registros
-        :param record: Tupla de parámetros
-        :return: Diccionario con resultado
-        """
+
         try:
             result = False
             message = None
@@ -63,12 +55,7 @@ class DataBaseHandle:
 
     @staticmethod
     def ExecuteNonQuery(query, record):
-        """
-        Ejecuta INSERT, UPDATE, DELETE
-        :param query: Consulta SQL
-        :param record: Tupla de parámetros
-        :return: Diccionario con resultado
-        """
+
         try:
             result = False
             message = None

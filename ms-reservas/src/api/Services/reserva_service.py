@@ -14,14 +14,11 @@ class ReservaCreateService(Resource):
     @staticmethod
     @valida_api_token
     def post():
-        """
-        Crear una nueva reserva
-        """
+
         try:
             HandleLogs.write_log("Servicio para crear reserva ejecutado")
             rq_json = request.get_json()
 
-            # Validar request
             new_request = ReservaCreateRequest()
             error_en_validacion = new_request.validate(rq_json)
 
@@ -53,9 +50,7 @@ class ReservaListService(Resource):
     @staticmethod
     @valida_api_token
     def get():
-        """
-        Listar reservas activas
-        """
+
         try:
             HandleLogs.write_log("Servicio para listar reservas activas ejecutado")
 
@@ -76,9 +71,7 @@ class ReservaDetailService(Resource):
     @staticmethod
     @valida_api_token
     def get(reserva_id):
-        """
-        Obtener una reserva por ID
-        """
+
         try:
             HandleLogs.write_log(f"Servicio para obtener reserva {reserva_id} ejecutado")
 
@@ -96,9 +89,7 @@ class ReservaDetailService(Resource):
     @staticmethod
     @valida_api_token
     def delete(reserva_id):
-        """
-        Eliminar una reserva
-        """
+
         try:
             HandleLogs.write_log(f"Servicio para eliminar reserva {reserva_id} ejecutado")
 
@@ -119,9 +110,7 @@ class ReservaConfirmarService(Resource):
     @staticmethod
     @valida_api_token
     def put(reserva_id):
-        """
-        Confirmar una reserva
-        """
+
         try:
             HandleLogs.write_log(f"Servicio para confirmar reserva {reserva_id} ejecutado")
 
@@ -142,9 +131,7 @@ class ReservaCancelarService(Resource):
     @staticmethod
     @valida_api_token
     def put(reserva_id):
-        """
-        Cancelar una reserva
-        """
+
         try:
             HandleLogs.write_log(f"Servicio para cancelar reserva {reserva_id} ejecutado")
 
@@ -165,9 +152,7 @@ class ReservaCheckinService(Resource):
     @staticmethod
     @valida_api_token
     def put(reserva_id):
-        """
-        Realizar check-in de una reserva
-        """
+
         try:
             HandleLogs.write_log(f"Servicio para check-in reserva {reserva_id} ejecutado")
 
@@ -188,9 +173,7 @@ class ReservaNoShowService(Resource):
     @staticmethod
     @valida_api_token
     def put(reserva_id):
-        """
-        Marcar reserva como no-show
-        """
+
         try:
             HandleLogs.write_log(f"Servicio para marcar no-show reserva {reserva_id} ejecutado")
 

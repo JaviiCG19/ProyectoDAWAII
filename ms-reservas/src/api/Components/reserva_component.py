@@ -8,15 +8,12 @@ class ReservaComponent:
 
     @staticmethod
     def crear_reserva(idlocal, idmesa, idcliente, fecha, franja_id, numper):
-        """
-        Crea una nueva reserva
-        """
+
         try:
             result = False
             data = None
             message = None
 
-            # Verificar si ya existe reserva
             sql_check = """
                         SELECT COUNT(*) as total
                         FROM dawa.reservas
@@ -54,9 +51,7 @@ class ReservaComponent:
 
     @staticmethod
     def listar_reservas_activas():
-        """
-        Lista todas las reservas activas (estado = 0)
-        """
+
         try:
             result = False
             data = None
@@ -92,9 +87,7 @@ class ReservaComponent:
 
     @staticmethod
     def obtener_reserva(reserva_id):
-        """
-        Obtiene una reserva por ID
-        """
+
         try:
             result = False
             data = None
@@ -130,15 +123,12 @@ class ReservaComponent:
 
     @staticmethod
     def confirmar_reserva(idreserva):
-        """
-        Confirma una reserva (cambia estado a 2)
-        """
+
         try:
             result = False
             data = None
             message = None
 
-            # Verificar que existe y está pendiente
             sql_check = """
                         SELECT id \
                         FROM dawa.reservas
@@ -151,7 +141,6 @@ class ReservaComponent:
                 message = "Reserva no encontrada o no está pendiente"
                 return internal_response(False, None, message)
 
-            # Verificar anticipo
             sql_anticipo = """
                            SELECT id \
                            FROM dawa.anticipos
@@ -188,9 +177,7 @@ class ReservaComponent:
 
     @staticmethod
     def cancelar_reserva(idreserva):
-        """
-        Cancela una reserva (cambia estado a 1)
-        """
+
         try:
             result = False
             data = None
@@ -220,9 +207,7 @@ class ReservaComponent:
 
     @staticmethod
     def checkin_reserva(reserva_id):
-        """
-        Realiza check-in de una reserva (cambia estado a 3)
-        """
+
         try:
             result = False
             data = None
@@ -252,9 +237,7 @@ class ReservaComponent:
 
     @staticmethod
     def marcar_no_show(reserva_id):
-        """
-        Marca una reserva como no-show (cambia estado a 4)
-        """
+
         try:
             result = False
             data = None
@@ -284,9 +267,7 @@ class ReservaComponent:
 
     @staticmethod
     def eliminar_reserva(reserva_id):
-        """
-        Elimina una reserva
-        """
+
         try:
             result = False
             data = None

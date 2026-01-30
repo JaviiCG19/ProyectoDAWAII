@@ -8,7 +8,6 @@ def response_inserted(datos):
         'data': datos,
         'status_code': 201,
     }
-    # Serializamos manualmente para manejar fechas
     json_str = json.dumps(response_data, default=str, ensure_ascii=False)
     return make_response(json_str, 201, {'Content-Type': 'application/json'})
 
@@ -68,7 +67,6 @@ def response_conflict(mensaje):
     return make_response(json_str, 409, {'Content-Type': 'application/json'})
 
 
-# Esta función interna no devuelve respuesta HTTP, así que se deja como está
 def internal_response(result, datos, mensaje):
     return {
         'result': result,

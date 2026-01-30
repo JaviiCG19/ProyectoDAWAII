@@ -12,13 +12,10 @@ class MesaDisponibleService(Resource):
     @staticmethod
     @valida_api_token
     def get(fecha):
-        """
-        Obtener mesas disponibles para una fecha
-        """
+
         try:
             HandleLogs.write_log(f"Servicio para obtener mesas disponibles en {fecha} ejecutado")
 
-            # Validar formato de fecha
             try:
                 fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
             except ValueError:

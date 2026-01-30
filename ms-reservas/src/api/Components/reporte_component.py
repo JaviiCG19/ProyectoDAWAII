@@ -7,9 +7,7 @@ class ReporteComponent:
 
     @staticmethod
     def reservas_por_periodo(fecha_inicio, fecha_fin):
-        """
-        Reporte de reservas por período con conteo por estado
-        """
+
         try:
             result = False
             data = None
@@ -44,9 +42,7 @@ class ReporteComponent:
 
     @staticmethod
     def top_clientes(limite=10):
-        """
-        Top clientes con más reservas
-        """
+
         try:
             result = False
             data = None
@@ -86,9 +82,7 @@ class ReporteComponent:
 
     @staticmethod
     def uso_mesas():
-        """
-        Estadísticas de uso por mesa
-        """
+
         try:
             result = False
             data = None
@@ -134,9 +128,7 @@ class ReporteComponent:
 
     @staticmethod
     def tasa_noshow_cancelaciones(fecha_inicio, fecha_fin):
-        """
-        Calcula tasas de no-show y cancelaciones en un período
-        """
+
         try:
             result = False
             data = None
@@ -180,9 +172,7 @@ class ReporteComponent:
 
     @staticmethod
     def reservas_por_franja():
-        """
-        Reservas agrupadas por franja horaria
-        """
+
         try:
             result = False
             data = None

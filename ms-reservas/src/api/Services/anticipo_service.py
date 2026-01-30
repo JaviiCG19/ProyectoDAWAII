@@ -13,9 +13,7 @@ class AnticipoCreateService(Resource):
     @staticmethod
     @valida_api_token
     def post():
-        """
-        Crear un anticipo para una reserva
-        """
+
         try:
             HandleLogs.write_log("Servicio para registrar anticipo ejecutado")
             rq_json = request.get_json()
@@ -48,9 +46,7 @@ class AnticipoReservaService(Resource):
     @staticmethod
     @valida_api_token
     def get(idreserva):
-        """
-        Obtener el anticipo de una reserva
-        """
+
         try:
             HandleLogs.write_log(f"Servicio para obtener anticipo de reserva {idreserva} ejecutado")
 

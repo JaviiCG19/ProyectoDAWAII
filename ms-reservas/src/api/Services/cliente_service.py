@@ -13,9 +13,7 @@ class ClienteCreateService(Resource):
     @staticmethod
     @valida_api_token
     def post():
-        """
-        Crear un nuevo cliente
-        """
+
         try:
             HandleLogs.write_log("Servicio para crear cliente ejecutado")
             rq_json = request.get_json()
@@ -49,9 +47,7 @@ class ClienteListService(Resource):
     @staticmethod
     @valida_api_token
     def get():
-        """
-        Listar clientes con paginación
-        """
+
         try:
             HandleLogs.write_log("Servicio para listar clientes ejecutado")
 
@@ -75,9 +71,7 @@ class ClienteDetailService(Resource):
     @staticmethod
     @valida_api_token
     def get(cliente_id):
-        """
-        Obtener un cliente por ID
-        """
+
         try:
             HandleLogs.write_log(f"Servicio para obtener cliente {cliente_id} ejecutado")
 
@@ -95,9 +89,7 @@ class ClienteDetailService(Resource):
     @staticmethod
     @valida_api_token
     def put(cliente_id):
-        """
-        Actualizar un cliente
-        """
+
         try:
             HandleLogs.write_log(f"Servicio para actualizar cliente {cliente_id} ejecutado")
             rq_json = request.get_json()
@@ -129,9 +121,7 @@ class ClienteDetailService(Resource):
     @staticmethod
     @valida_api_token
     def delete(cliente_id):
-        """
-        Eliminar un cliente
-        """
+
         try:
             HandleLogs.write_log(f"Servicio para eliminar cliente {cliente_id} ejecutado")
 

@@ -10,12 +10,9 @@ class JwtComponent:
 
     @staticmethod
     def token_generate(p_user):
-        """
-        Genera un token JWT para el usuario
-        """
+
         respuesta = None
         try:
-            # Usar UTC siempre para JWT
             now_utc = datetime.now(timezone.utc)  # o datetime.utcnow() (deprecated en Python 3.12+)
 
             payload = {
@@ -34,7 +31,6 @@ class JwtComponent:
     @staticmethod
     def token_validate(p_token):
         try:
-            # Opcional: verbose=True para ver más detalles en excepciones
             resp_jwt = jwt.decode(
                 p_token,
                 Parametros.secret_jwt,

@@ -1,17 +1,14 @@
 services:
   ms-reservas:
     container_name: ms-reservas
-    image: alexissuarez27/ms-reservas:latest          # ← Cambia esto: usa la imagen de Docker Hub
-    # build:                                           # ← Comenta o elimina todo este bloque
-    #   context: .
-    #   dockerfile: Dockerfile
+    image: alexissuarez27/ms-reservas:latest
+
     restart: always
     ports:
       - '5000:5000'
     environment:
       - PORT=5000
     volumes:
-      # Volumen para logs persistentes (buena idea, se mantiene)
       - ./logs:/app/reservas/src/utils/general/LOGS
     networks:
       - reservas-network

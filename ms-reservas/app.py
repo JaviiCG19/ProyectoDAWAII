@@ -41,7 +41,7 @@ if __name__ == '__main__':
     try:
         HandleLogs.write_log("Microservicio de Reservas Iniciado")
         port_os = int(os.environ.get('PORT', 5000))
-        app.run(debug=True, host='0.0.0.0', port=port_os, threaded=True)
+        app.run(debug=False, host='0.0.0.0', port=port_os, threaded=True)
 
     except Exception as err:
         HandleLogs.write_error(err)

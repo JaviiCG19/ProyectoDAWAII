@@ -7,9 +7,7 @@ class MesaComponent:
 
     @staticmethod
     def mesas_disponibles_por_fecha(fecha):
-        """
-        Obtiene mesas disponibles para una fecha específica
-        """
+
         try:
             result = False
             data = None

@@ -8,15 +8,12 @@ class AnticipoComponent:
 
     @staticmethod
     def crear_anticipo(idreserva, monto):
-        """
-        Crea un anticipo para una reserva
-        """
+
         try:
             result = False
             data = None
             message = None
 
-            # Verificar que la reserva existe y está activa
             sql_check = """
                         SELECT id \
                         FROM dawa.reservas
@@ -51,9 +48,7 @@ class AnticipoComponent:
 
     @staticmethod
     def obtener_anticipo_por_reserva(idreserva):
-        """
-        Obtiene el anticipo de una reserva
-        """
+
         try:
             result = False
             data = None

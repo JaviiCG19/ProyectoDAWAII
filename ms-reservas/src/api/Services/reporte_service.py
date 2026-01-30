@@ -13,9 +13,7 @@ class ReportePeriodoService(Resource):
     @staticmethod
     @valida_api_token
     def post():
-        """
-        Reporte de reservas por período
-        """
+
         try:
             HandleLogs.write_log("Servicio de reporte por período ejecutado")
             rq_json = request.get_json()
@@ -47,9 +45,7 @@ class ReporteTopClientesService(Resource):
     @staticmethod
     @valida_api_token
     def get():
-        """
-        Top clientes con más reservas
-        """
+
         try:
             HandleLogs.write_log("Servicio de top clientes ejecutado")
 
@@ -72,9 +68,7 @@ class ReporteUsoMesasService(Resource):
     @staticmethod
     @valida_api_token
     def get():
-        """
-        Estadísticas de uso de mesas
-        """
+
         try:
             HandleLogs.write_log("Servicio de uso de mesas ejecutado")
 
@@ -95,9 +89,7 @@ class ReporteTasasService(Resource):
     @staticmethod
     @valida_api_token
     def post():
-        """
-        Tasa de no-show y cancelaciones
-        """
+
         try:
             HandleLogs.write_log("Servicio de tasas ejecutado")
             rq_json = request.get_json()
@@ -129,9 +121,7 @@ class ReporteFranjasService(Resource):
     @staticmethod
     @valida_api_token
     def get():
-        """
-        Reservas por franja horaria
-        """
+
         try:
             HandleLogs.write_log("Servicio de reservas por franja ejecutado")
 

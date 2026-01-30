@@ -8,9 +8,7 @@ class ClienteComponent:
 
     @staticmethod
     def crear_cliente(nombre, ruc_cc, telefono):
-        """
-        Crea un nuevo cliente
-        """
+
         try:
             result = False
             data = None
@@ -37,9 +35,7 @@ class ClienteComponent:
 
     @staticmethod
     def listar_clientes(skip=0, limit=10):
-        """
-        Lista todos los clientes con paginación
-        """
+
         try:
             result = False
             data = None
@@ -68,9 +64,7 @@ class ClienteComponent:
 
     @staticmethod
     def obtener_cliente(cliente_id):
-        """
-        Obtiene un cliente por ID
-        """
+
         try:
             result = False
             data = None
@@ -98,15 +92,12 @@ class ClienteComponent:
 
     @staticmethod
     def actualizar_cliente(cliente_id, nombre=None, ruc_cc=None, telefono=None):
-        """
-        Actualiza un cliente existente
-        """
+
         try:
             result = False
             data = None
             message = None
 
-            # Construir SQL dinámicamente
             campos = []
             valores = []
 
@@ -148,9 +139,7 @@ class ClienteComponent:
 
     @staticmethod
     def eliminar_cliente(cliente_id):
-        """
-        Elimina un cliente
-        """
+
         try:
             result = False
             data = None
