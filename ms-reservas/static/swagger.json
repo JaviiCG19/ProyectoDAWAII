@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "Documentación del Microservicio de Reservas",
+    "description": "Documentación del Microservicio de Reservas - DAWA\n\n**Nota:** La autenticación está temporalmente desactivada para pruebas. No es necesario enviar el header 'tokenapp'.",
     "version": "1.0.0",
     "title": "API de Reservas - DAWA",
     "contact": {
@@ -35,12 +35,14 @@
       "post": {
         "tags": ["Clientes"],
         "summary": "Crear un nuevo cliente",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
         "parameters": [
           {
             "in": "header",
             "name": "tokenapp",
-            "description": "Token de autenticación",
-            "required": true,
+            "description": "Token de autenticación (temporalmente opcional)",
+            "required": false,
             "type": "string"
           },
           {
@@ -54,7 +56,15 @@
         ],
         "responses": {
           "201": {
-            "description": "Cliente creado exitosamente"
+            "description": "Cliente creado exitosamente",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": { "type": "boolean" },
+                "message": { "type": "string" },
+                "data": { "type": "integer", "description": "ID del cliente creado" }
+              }
+            }
           }
         }
       }
@@ -62,30 +72,129 @@
     "/clientes/list": {
       "get": {
         "tags": ["Clientes"],
-        "summary": "Listar clientes",
+        "summary": "Listar clientes con paginación",
         "parameters": [
           {
             "in": "header",
             "name": "tokenapp",
-            "required": true,
+            "required": false,
             "type": "string"
           },
           {
             "in": "query",
             "name": "skip",
             "type": "integer",
-            "default": 0
+            "default": 0,
+            "description": "Registros a saltar"
           },
           {
             "in": "query",
             "name": "limit",
             "type": "integer",
-            "default": 10
+            "default": 10,
+            "description": "Límite de registros por página"
           }
         ],
         "responses": {
           "200": {
-            "description": "Lista de clientes"
+            "description": "Lista de clientes",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": { "type": "boolean" },
+                "message": { "type": "string" },
+                "data": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Cliente" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clientes/{cliente_id}": {
+      "get": {
+        "tags": ["Clientes"],
+        "summary": "Obtener un cliente por ID",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "cliente_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cliente encontrado",
+            "schema": {
+              "$ref": "#/definitions/Cliente"
+            }
+          },
+          "404": {
+            "description": "Cliente no encontrado"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Clientes"],
+        "summary": "Actualizar datos de un cliente",
+        "consumes": ["application/json"],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "cliente_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ClienteUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cliente actualizado"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Clientes"],
+        "summary": "Eliminar un cliente",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "cliente_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cliente eliminado"
           }
         }
       }
@@ -94,11 +203,12 @@
       "post": {
         "tags": ["Reservas"],
         "summary": "Crear una nueva reserva",
+        "consumes": ["application/json"],
         "parameters": [
           {
             "in": "header",
             "name": "tokenapp",
-            "required": true,
+            "required": false,
             "type": "string"
           },
           {
@@ -112,10 +222,17 @@
         ],
         "responses": {
           "201": {
-            "description": "Reserva creada exitosamente"
+            "description": "Reserva creada",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": { "type": "boolean" },
+                "data": { "type": "integer" }
+              }
+            }
           },
           "409": {
-            "description": "Conflicto - Mesa ya reservada"
+            "description": "Conflicto - Mesa ya reservada o no disponible"
           }
         }
       }
@@ -123,18 +240,46 @@
     "/reservas/list": {
       "get": {
         "tags": ["Reservas"],
-        "summary": "Listar reservas activas",
+        "summary": "Listar reservas activas (pendientes)",
         "parameters": [
           {
             "in": "header",
             "name": "tokenapp",
-            "required": true,
+            "required": false,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Lista de reservas activas"
+            "description": "Lista de reservas"
+          }
+        }
+      }
+    },
+    "/reservas/{reserva_id}": {
+      "get": {
+        "tags": ["Reservas"],
+        "summary": "Obtener detalles de una reserva",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "reserva_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalles de la reserva"
+          },
+          "404": {
+            "description": "Reserva no encontrada"
           }
         }
       }
@@ -142,12 +287,12 @@
     "/reservas/{reserva_id}/confirmar": {
       "put": {
         "tags": ["Reservas"],
-        "summary": "Confirmar una reserva",
+        "summary": "Confirmar una reserva (requiere anticipo)",
         "parameters": [
           {
             "in": "header",
             "name": "tokenapp",
-            "required": true,
+            "required": false,
             "type": "string"
           },
           {
@@ -164,15 +309,90 @@
         }
       }
     },
-    "/mesas/disponibles/{fecha}": {
-      "get": {
-        "tags": ["Mesas"],
-        "summary": "Obtener mesas disponibles por fecha",
+    "/reservas/{reserva_id}/cancelar": {
+      "put": {
+        "tags": ["Reservas"],
+        "summary": "Cancelar una reserva",
         "parameters": [
           {
             "in": "header",
             "name": "tokenapp",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "reserva_id",
             "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reserva cancelada"
+          }
+        }
+      }
+    },
+    "/reservas/{reserva_id}/checkin": {
+      "put": {
+        "tags": ["Reservas"],
+        "summary": "Realizar check-in de una reserva",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "reserva_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Check-in realizado"
+          }
+        }
+      }
+    },
+    "/reservas/{reserva_id}/noshow": {
+      "put": {
+        "tags": ["Reservas"],
+        "summary": "Marcar reserva como no-show",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "reserva_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No-show marcado"
+          }
+        }
+      }
+    },
+    "/mesas/disponibles/{fecha}": {
+      "get": {
+        "tags": ["Mesas"],
+        "summary": "Obtener mesas disponibles para una fecha",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": false,
             "type": "string"
           },
           {
@@ -194,12 +414,13 @@
     "/anticipos": {
       "post": {
         "tags": ["Anticipos"],
-        "summary": "Registrar anticipo para reserva",
+        "summary": "Registrar un anticipo para una reserva",
+        "consumes": ["application/json"],
         "parameters": [
           {
             "in": "header",
             "name": "tokenapp",
-            "required": true,
+            "required": false,
             "type": "string"
           },
           {
@@ -217,6 +438,34 @@
           }
         }
       }
+    },
+    "/anticipos/reserva/{idreserva}": {
+      "get": {
+        "tags": ["Anticipos"],
+        "summary": "Obtener anticipo asociado a una reserva",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "idreserva",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Datos del anticipo"
+          },
+          "404": {
+            "description": "No hay anticipo para esta reserva"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -224,58 +473,48 @@
       "type": "object",
       "required": ["nombre", "ruc_cc", "telefono"],
       "properties": {
-        "nombre": {
-          "type": "string",
-          "maxLength": 60
-        },
-        "ruc_cc": {
-          "type": "string",
-          "maxLength": 13
-        },
-        "telefono": {
-          "type": "string",
-          "maxLength": 10
-        }
+        "nombre": { "type": "string", "maxLength": 60 },
+        "ruc_cc": { "type": "string", "maxLength": 13 },
+        "telefono": { "type": "string", "maxLength": 10 }
+      }
+    },
+    "ClienteUpdate": {
+      "type": "object",
+      "properties": {
+        "nombre": { "type": "string", "maxLength": 60 },
+        "telefono": { "type": "string", "maxLength": 10 }
+      }
+    },
+    "Cliente": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "nombre": { "type": "string" },
+        "ruc_cc": { "type": "string" },
+        "telefono": { "type": "string" },
+        "fecing": { "type": "string", "format": "date" }
       }
     },
     "ReservaCreate": {
       "type": "object",
       "required": ["idlocal", "idmesa", "idcliente", "fecha", "franja_id"],
       "properties": {
-        "idlocal": {
-          "type": "integer"
-        },
-        "idmesa": {
-          "type": "integer"
-        },
-        "idcliente": {
-          "type": "integer"
-        },
-        "fecha": {
-          "type": "string",
-          "format": "date"
-        },
-        "franja_id": {
-          "type": "integer"
-        },
-        "numper": {
-          "type": "integer",
-          "default": 1
-        }
+        "idlocal": { "type": "integer" },
+        "idmesa": { "type": "integer" },
+        "idcliente": { "type": "integer" },
+        "fecha": { "type": "string", "format": "date" },
+        "franja_id": { "type": "integer" },
+        "numper": { "type": "integer", "default": 1 }
       }
     },
     "AnticipoCreate": {
       "type": "object",
       "required": ["idreserva", "monto"],
       "properties": {
-        "idreserva": {
-          "type": "integer"
-        },
-        "monto": {
-          "type": "number",
-          "format": "decimal"
-        }
+        "idreserva": { "type": "integer" },
+        "monto": { "type": "number" }
       }
     }
   }
 }
+
