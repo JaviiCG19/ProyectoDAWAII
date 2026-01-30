@@ -1,0 +1,235 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Documentación de Servicios Web de Administración - DAWA",
+    "version": "1.0.0",
+    "title": "Documentación de Administración UG",
+    "termsOfService": "Leer wwww.ug.edu.ec",
+    "contact": {
+      "email": "juan.cedenor@ug.edu.ec"
+    },
+    "license": {
+      "name": "Dawa UG",
+      "url": "none"
+    }
+  },
+  "tags": [
+    {
+      "name": "Administración",
+      "description": "Gestión de Locales, Mesas y Franjas Horarias"
+    }
+  ],
+  "paths": {
+    "/admin/locales": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Lista de Locales",
+        "description": "Obtiene la lista completa de locales registrados",
+        "operationId": "localList",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          },
+          "500": {
+            "description": "Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Registrar Nuevo Local",
+        "description": "Crea un nuevo registro de local en la base de datos",
+        "operationId": "localCreate",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Datos del local a registrar",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LocalSaveDef"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Registro exitoso",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          },
+          "400": {
+            "description": "Error de validación",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/admin/mesas": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Lista de Mesas por Local",
+        "description": "Obtiene las mesas filtrando por ID de local",
+        "operationId": "mesaList",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "idlocal",
+            "in": "query",
+            "description": "ID del local",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          }
+        }
+      }
+    },
+    "/admin/franjas": {
+      "get": {
+        "tags": [
+          "Administración"
+        ],
+        "summary": "Lista de Franjas Horarias",
+        "description": "Obtiene las franjas horarias de un local",
+        "operationId": "franjaList",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "idlocal",
+            "in": "query",
+            "description": "ID del local",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación exitosa",
+            "schema": {
+              "$ref": "#/definitions/Response"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "LocalSaveDef": {
+      "type": "object",
+      "properties": {
+        "nombre": {
+          "type": "string",
+          "example": "Restaurante La Esquina"
+        },
+        "direccion": {
+          "type": "string",
+          "example": "Calle Falsa 123"
+        },
+        "telefono": {
+          "type": "string",
+          "example": "0987654321"
+        }
+      }
+    },
+    "NotFound": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "boolean",
+          "default": false
+        },
+        "message": {
+          "type": "string",
+          "example": "Recurso no encontrado"
+        },
+        "data": {
+          "type": "string",
+          "example": "{}"
+        },
+        "status": {
+          "type": "string",
+          "example": "404"
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "boolean",
+          "default": false
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "type": "string",
+          "example": "{}"
+        },
+        "status": {
+          "type": "string",
+          "example": "500"
+        }
+      }
+    },
+    "Response": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "boolean",
+          "default": true
+        },
+        "message": {
+          "type": "string",
+          "example": "ok"
+        },
+        "data": {
+          "type": "string",
+          "example": "{}"
+        },
+        "status": {
+          "type": "string",
+          "example": "200"
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Más sobre Swagger",
+    "url": "http://swagger.io"
+  }
+}
