@@ -13,3 +13,4 @@
 01:41:04 - ERR - token_validate - ('Error al validar el token -> Signature has expired',)
 01:44:49 - ERR - token_generate - ("Ocurrio un error al generar el token name 'timezone' is not defined",)
 01:47:09 - ERR - token_validate - ('Token expirado (ExpiredSignatureError)',)
+05:37:43 - ERR - post - (<UnsupportedMediaType '415: Unsupported Media Type'>,)

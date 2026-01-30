@@ -28,6 +28,10 @@
     {
       "name": "Anticipos",
       "description": "Gestión de anticipos"
+    },
+    {
+      "name": "Reportes",
+      "description": "Reportes y estadísticas de reservas"
     }
   ],
   "paths": {
@@ -134,9 +138,7 @@
         "responses": {
           "200": {
             "description": "Cliente encontrado",
-            "schema": {
-              "$ref": "#/definitions/Cliente"
-            }
+            "schema": { "$ref": "#/definitions/Cliente" }
           },
           "404": {
             "description": "Cliente no encontrado"
@@ -466,6 +468,264 @@
           }
         }
       }
+    },
+    "/reportes/periodo": {
+      "get": {
+        "tags": ["Reportes"],
+        "summary": "Reporte de reservas por período (total y por estado)",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "inicio",
+            "type": "string",
+            "format": "date",
+            "description": "Fecha inicio (YYYY-MM-DD)",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "fin",
+            "type": "string",
+            "format": "date",
+            "description": "Fecha fin (YYYY-MM-DD)",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reporte de reservas por período",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": { "type": "boolean" },
+                "message": { "type": "string" },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "fecha": { "type": "string", "format": "date" },
+                      "total": { "type": "integer" },
+                      "pendientes": { "type": "integer" },
+                      "confirmadas": { "type": "integer" },
+                      "canceladas": { "type": "integer" },
+                      "no_show": { "type": "integer" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reportes/top-clientes": {
+      "get": {
+        "tags": ["Reportes"],
+        "summary": "Top clientes con más reservas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "default": 10,
+            "description": "Número de clientes a mostrar"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de top clientes",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": { "type": "boolean" },
+                "message": { "type": "string" },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "nombre": { "type": "string" },
+                      "ruc_cc": { "type": "string" },
+                      "telefono": { "type": "string" },
+                      "total_reservas": { "type": "integer" },
+                      "total_personas": { "type": "integer" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reportes/uso-mesas": {
+      "get": {
+        "tags": ["Reportes"],
+        "summary": "Uso y ocupación de mesas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "mes",
+            "type": "string",
+            "description": "Mes en formato YYYY-MM (opcional)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reporte de uso de mesas",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": { "type": "boolean" },
+                "message": { "type": "string" },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "idmesa": { "type": "integer" },
+                      "total_reservas": { "type": "integer" },
+                      "confirmadas": { "type": "integer" },
+                      "canceladas": { "type": "integer" },
+                      "no_show": { "type": "integer" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reportes/tasas": {
+  "post": {
+    "tags": ["Reportes"],
+    "summary": "Tasa de asistencia, no-show y cancelaciones en un período",
+    "consumes": ["application/json"],
+    "produces": ["application/json"],
+    "parameters": [
+      {
+        "in": "header",
+        "name": "tokenapp",
+        "description": "Token de autenticación (temporalmente opcional)",
+        "required": false,
+        "type": "string"
+      },
+      {
+        "in": "body",
+        "name": "body",
+        "description": "Rango de fechas para el reporte",
+        "required": true,
+        "schema": {
+          "type": "object",
+          "required": ["fecha_inicio", "fecha_fin"],
+          "properties": {
+            "fecha_inicio": {
+              "type": "string",
+              "format": "date",
+              "description": "Fecha de inicio (YYYY-MM-DD)",
+              "example": "2026-01-01"
+            },
+            "fecha_fin": {
+              "type": "string",
+              "format": "date",
+              "description": "Fecha de fin (YYYY-MM-DD)",
+              "example": "2026-02-28"
+            }
+          }
+        }
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Tasas de reservas en el período",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "result": { "type": "boolean" },
+            "message": { "type": "string" },
+            "data": {
+              "type": "object",
+              "properties": {
+                "total_reservas": { "type": "integer" },
+                "confirmadas": { "type": "integer" },
+                "canceladas": { "type": "integer" },
+                "no_show": { "type": "integer" },
+                "porcentaje_no_show": { "type": "number", "format": "float" },
+                "porcentaje_canceladas": { "type": "number", "format": "float" }
+              }
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Faltan parámetros fecha_inicio o fecha_fin"
+      }
+    }
+  }
+},
+    "/reportes/franjas": {
+      "get": {
+        "tags": ["Reportes"],
+        "summary": "Reservas por franja horaria",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "fecha",
+            "type": "string",
+            "format": "date",
+            "description": "Fecha específica (opcional)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reservas agrupadas por franja",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": { "type": "boolean" },
+                "message": { "type": "string" },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "franja_id": { "type": "integer" },
+                      "total_reservas": { "type": "integer" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -517,4 +777,4 @@
     }
   }
 }
-
+>>>>>>> c575a2e (commit2 Microservicio de reservas)
