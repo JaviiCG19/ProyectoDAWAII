@@ -15,7 +15,7 @@ class UserComponent:
             message = None
             # Logica
             sql = """
-                SELECT * FROM dawa.usuarios WHERE estado = 0;
+                SELECT nombre,detalle,roles,rol_prioritario,estado FROM dawa.usuarios WHERE estado = 0;
             """
             result_user = DataBaseHandle.getRecords(sql, 0)
             if result_user['result']:
@@ -41,8 +41,8 @@ class UserComponent:
             pass_encriptada = generate_password_hash(user_data['usr_clave'], method='pbkdf2:sha256')
 
             sql = """
-                    INSERT INTO dawa.usuarios (nombre,clave,detalle,roles,rol_prioritario,estado)
-                    VALUES (%s, %s, %s, %s, %s, 0)
+                    INSERT INTO dawa.usuarios (nombre,clave,detalle,roles,rol_prioritario,respuesta,estado)
+                    VALUES (%s, %s, %s, %s, %s, %s, 0)
                     RETURNING user_id;
                 """
             # Tip: Recuerda encriptar la password antes de enviarla aquí en un entorno real
@@ -51,7 +51,8 @@ class UserComponent:
                 pass_encriptada,
                 user_data.get('usr_detalle', ''),
                 user_data.get('usr_roles', '0;'),
-                user_data.get('usr_rolp','0')
+                user_data.get('usr_rolp','0'),
+                user_data.get('usr_respuesta', '')
             )
 
             res = DataBaseHandle.ExecuteNonQuery(sql, record)  # Asumiendo que tienes este método
@@ -77,13 +78,14 @@ class UserComponent:
 
             sql = """
                     UPDATE dawa.usuarios
-                    SET detalle = %s, roles = %s, rol_prioritario = %s
+                    SET detalle = %s, roles = %s, rol_prioritario = %s, respuesta = %s
                     WHERE id = %s;
                 """
             record = (
                 user_data.get('usr_detalle'),
                 user_data.get('usr_roles'),
                 user_data.get('usr_rolp'),
+                user_data.get('usr_respuesta'),
                 user_data['usr_id']
             )
 
