@@ -1,0 +1,281 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Documentación del Microservicio de Reservas",
+    "version": "1.0.0",
+    "title": "API de Reservas - DAWA",
+    "contact": {
+      "email": "reservas@dawa.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "none"
+    }
+  },
+  "tags": [
+    {
+      "name": "Clientes",
+      "description": "Gestión de clientes"
+    },
+    {
+      "name": "Reservas",
+      "description": "Gestión de reservas"
+    },
+    {
+      "name": "Mesas",
+      "description": "Consulta de mesas disponibles"
+    },
+    {
+      "name": "Anticipos",
+      "description": "Gestión de anticipos"
+    }
+  ],
+  "paths": {
+    "/clientes": {
+      "post": {
+        "tags": ["Clientes"],
+        "summary": "Crear un nuevo cliente",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "description": "Token de autenticación",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ClienteCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Cliente creado exitosamente"
+          }
+        }
+      }
+    },
+    "/clientes/list": {
+      "get": {
+        "tags": ["Clientes"],
+        "summary": "Listar clientes",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "type": "integer",
+            "default": 0
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "default": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de clientes"
+          }
+        }
+      }
+    },
+    "/reservas": {
+      "post": {
+        "tags": ["Reservas"],
+        "summary": "Crear una nueva reserva",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ReservaCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Reserva creada exitosamente"
+          },
+          "409": {
+            "description": "Conflicto - Mesa ya reservada"
+          }
+        }
+      }
+    },
+    "/reservas/list": {
+      "get": {
+        "tags": ["Reservas"],
+        "summary": "Listar reservas activas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de reservas activas"
+          }
+        }
+      }
+    },
+    "/reservas/{reserva_id}/confirmar": {
+      "put": {
+        "tags": ["Reservas"],
+        "summary": "Confirmar una reserva",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "reserva_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reserva confirmada"
+          }
+        }
+      }
+    },
+    "/mesas/disponibles/{fecha}": {
+      "get": {
+        "tags": ["Mesas"],
+        "summary": "Obtener mesas disponibles por fecha",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "fecha",
+            "required": true,
+            "type": "string",
+            "format": "date",
+            "description": "Fecha en formato YYYY-MM-DD"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de mesas disponibles"
+          }
+        }
+      }
+    },
+    "/anticipos": {
+      "post": {
+        "tags": ["Anticipos"],
+        "summary": "Registrar anticipo para reserva",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AnticipoCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Anticipo registrado"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ClienteCreate": {
+      "type": "object",
+      "required": ["nombre", "ruc_cc", "telefono"],
+      "properties": {
+        "nombre": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "ruc_cc": {
+          "type": "string",
+          "maxLength": 13
+        },
+        "telefono": {
+          "type": "string",
+          "maxLength": 10
+        }
+      }
+    },
+    "ReservaCreate": {
+      "type": "object",
+      "required": ["idlocal", "idmesa", "idcliente", "fecha", "franja_id"],
+      "properties": {
+        "idlocal": {
+          "type": "integer"
+        },
+        "idmesa": {
+          "type": "integer"
+        },
+        "idcliente": {
+          "type": "integer"
+        },
+        "fecha": {
+          "type": "string",
+          "format": "date"
+        },
+        "franja_id": {
+          "type": "integer"
+        },
+        "numper": {
+          "type": "integer",
+          "default": 1
+        }
+      }
+    },
+    "AnticipoCreate": {
+      "type": "object",
+      "required": ["idreserva", "monto"],
+      "properties": {
+        "idreserva": {
+          "type": "integer"
+        },
+        "monto": {
+          "type": "number",
+          "format": "decimal"
+        }
+      }
+    }
+  }
+}
