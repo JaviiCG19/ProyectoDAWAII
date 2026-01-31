@@ -4,32 +4,55 @@ from ..Services.local_service import LocalService
 from ..Model.Request.local_request import LocalRequest
 from ...utils.general.logs import HandleLogs
 
+
 class LocalComponent(Resource):
-    def get(self):
-        """Lista todos los locales """
+    def get(self, id=None):
         try:
-            resultado = LocalService.listar_locales()
-            if resultado['result']:
-                return resultado, 200
-            return resultado, 500
+            # Si el endpoint es /list_sucursales
+            if id:
+                resultado = LocalService.obtener_local_por_id(id)
+            else:
+                resultado = LocalService.listar_locales()
+            return resultado, 200 if resultado['result'] else 500
         except Exception as e:
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
-    def post(self):
-        """Registra un nuevo local """
+    def post(self, id=None):
+        # Manejo de la restauración (Ruta: /admin/locales/restaurar/<id>)
+        if id and "restaurar" in request.path:
+            return LocalService.restaurar_local(id), 200
+
+        # Registro normal de Sucursal (idcia obligatorio en el body)
         try:
             data = request.get_json()
-
-            # VALIDAR: Ahora sí encontrará LocalRequest
+            # La validación asegura que idcia, detalle y direccion existan
             errors = LocalRequest().validate(data)
             if errors:
-                return {"result": False, "data": None, "message": errors}, 400
+                return {"result": False, "message": errors}, 400
 
-            # PROCESAR
+
             resultado = LocalService.crear_local(data)
-            return resultado, 201 if resultado['result'] else 500
+            return resultado, 201
+        except Exception as e:
+            HandleLogs.write_error(e)
+            return {"result": False, "message": str(e)}, 500
 
+    def put(self, id):
+        try:
+            data = request.get_json()
+            errors = LocalRequest().validate(data)
+            if errors:
+                return {"result": False, "message": errors}, 400
+            return LocalService.actualizar_local(id, data), 200
+        except Exception as e:
+            HandleLogs.write_error(e)
+            return {"result": False, "message": str(e)}, 500
+
+    def delete(self, id):
+        try:
+            # Ejecuta el borrado lógico que definimos en el Service
+            return LocalService.eliminar_local(id), 200
         except Exception as e:
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500

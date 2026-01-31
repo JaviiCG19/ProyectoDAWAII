@@ -7,7 +7,7 @@ from flask_swagger_ui import get_swaggerui_blueprint
 
 from src.api.Routes.routes import load_routes
 from src.utils.general.logs import HandleLogs
-# Definimos el origen (puedes traerlo de tu config.ini si prefieres)
+# Definimos el origen
 FRONTEND_ORIGIN = os.environ.get('FRONTEND_URL', '*')
 
 app = Flask(__name__)

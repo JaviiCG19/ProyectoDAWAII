@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "Documentación de Servicios Web de Administración - DAWA",
+    "description": "Documentación de Servicios Web de Administración - DAWA.",
     "version": "1.0.0",
     "title": "Documentación de Administración UG",
     "termsOfService": "Leer wwww.ug.edu.ec",
@@ -14,222 +14,142 @@
     }
   },
   "tags": [
-    {
-      "name": "Administración",
-      "description": "Gestión de Locales, Mesas y Franjas Horarias"
-    }
+    { "name": "Empresas", "description": "Entidad principal de Restaurantes" },
+    { "name": "Administración", "description": "Gestión de Locales, Mesas y Franjas Horarias" },
+    { "name": "Marketing", "description": "Gestión de Promociones" },
+    { "name": "Reportes", "description": "Dashboard de control" }
   ],
   "paths": {
-    "/admin/locales": {
+    "/admin/empresas": {
       "get": {
-        "tags": [
-          "Administración"
-        ],
-        "summary": "Lista de Locales",
-        "description": "Obtiene la lista completa de locales registrados",
-        "operationId": "localList",
-        "produces": [
-          "application/json"
-        ],
+        "tags": ["Empresas"],
+        "summary": "Lista de Empresas",
+        "operationId": "empresaList",
         "responses": {
-          "200": {
-            "description": "Operación exitosa",
-            "schema": {
-              "$ref": "#/definitions/Response"
-            }
-          },
-          "500": {
-            "description": "Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
+          "200": { "description": "OK", "schema": { "$ref": "#/definitions/Response" } }
         }
       },
       "post": {
-        "tags": [
-          "Administración"
-        ],
-        "summary": "Registrar Nuevo Local",
-        "description": "Crea un nuevo registro de local en la base de datos",
-        "operationId": "localCreate",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Datos del local a registrar",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/LocalSaveDef"
-            }
-          }
-        ],
+        "tags": ["Empresas"],
+        "summary": "Registrar Empresa",
+        "parameters": [{
+          "in": "body", "name": "body", "required": true,
+          "schema": { "$ref": "#/definitions/EmpresaSaveDef" }
+        }],
+        "responses": { "201": { "description": "Creado" } }
+      }
+    },
+    "/admin/locales": {
+      "get": {
+        "tags": ["Administración"],
+        "summary": "Lista de Locales",
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "tags": ["Administración"],
+        "summary": "Registrar Local",
+        "parameters": [{
+          "in": "body", "name": "body", "required": true,
+          "schema": { "$ref": "#/definitions/LocalSaveDef" }
+        }],
+        "responses": { "201": { "description": "Creado" } }
+      }
+    },
+    "/admin/locales/restaurar/{id}": {
+      "post": {
+        "tags": ["Administración"],
+        "summary": "Restaurar Local",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/admin/promociones": {
+      "get": {
+        "tags": ["Marketing"],
+        "summary": "Listar Promociones",
+        "description": "Obtiene las promociones vigentes por local",
+        "operationId": "promoList",
         "responses": {
-          "201": {
-            "description": "Registro exitoso",
-            "schema": {
-              "$ref": "#/definitions/Response"
-            }
-          },
-          "400": {
-            "description": "Error de validación",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
+          "200": { "description": "Operación exitosa", "schema": { "$ref": "#/definitions/Response" } }
+        }
+      },
+      "post": {
+        "tags": ["Marketing"],
+        "summary": "Crear Promoción",
+        "description": "Registra una oferta vinculada a un local específico",
+        "parameters": [{
+          "in": "body", "name": "body", "required": true,
+          "schema": { "$ref": "#/definitions/PromoSaveDef" }
+        }],
+        "responses": {
+          "201": { "description": "Promoción creada", "schema": { "$ref": "#/definitions/Response" } }
         }
       }
     },
-    "/admin/mesas": {
+    "/admin/dashboard": {
       "get": {
-        "tags": [
-          "Administración"
-        ],
-        "summary": "Lista de Mesas por Local",
-        "description": "Obtiene las mesas filtrando por ID de local",
-        "operationId": "mesaList",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "idlocal",
-            "in": "query",
-            "description": "ID del local",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Operación exitosa",
-            "schema": {
-              "$ref": "#/definitions/Response"
-            }
-          }
-        }
-      }
-    },
-    "/admin/franjas": {
-      "get": {
-        "tags": [
-          "Administración"
-        ],
-        "summary": "Lista de Franjas Horarias",
-        "description": "Obtiene las franjas horarias de un local",
-        "operationId": "franjaList",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "idlocal",
-            "in": "query",
-            "description": "ID del local",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Operación exitosa",
-            "schema": {
-              "$ref": "#/definitions/Response"
-            }
-          }
-        }
+        "tags": ["Reportes"],
+        "summary": "Resumen del Dashboard",
+        "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Response" } } }
       }
     }
   },
   "definitions": {
+    "EmpresaSaveDef": {
+      "type": "object",
+      "required": ["nomleg", "nomfan", "ruc"],
+      "properties": {
+        "nomleg": { "type": "string" },
+        "nomfan": { "type": "string" },
+        "ruc": { "type": "string" }
+      }
+    },
     "LocalSaveDef": {
       "type": "object",
+      "required": ["idcia", "detalle", "direccion"],
       "properties": {
-        "nombre": {
-          "type": "string",
-          "example": "Restaurante La Esquina"
-        },
-        "direccion": {
-          "type": "string",
-          "example": "Calle Falsa 123"
-        },
-        "telefono": {
-          "type": "string",
-          "example": "0987654321"
-        }
+        "idcia": { "type": "integer" },
+        "detalle": { "type": "string" },
+        "direccion": { "type": "string" },
+        "totmesas": { "type": "integer" }
       }
     },
-    "NotFound": {
+    "PromoSaveDef": {
       "type": "object",
+      "required": ["idlocal", "nombre", "descuento"],
       "properties": {
-        "result": {
-          "type": "boolean",
-          "default": false
-        },
-        "message": {
-          "type": "string",
-          "example": "Recurso no encontrado"
-        },
-        "data": {
-          "type": "string",
-          "example": "{}"
-        },
-        "status": {
-          "type": "string",
-          "example": "404"
-        }
-      }
-    },
-    "ErrorResponse": {
-      "type": "object",
-      "properties": {
-        "result": {
-          "type": "boolean",
-          "default": false
-        },
-        "message": {
-          "type": "string"
-        },
-        "data": {
-          "type": "string",
-          "example": "{}"
-        },
-        "status": {
-          "type": "string",
-          "example": "500"
-        }
+        "idlocal": { "type": "integer", "description": "ID del local que aplica la promo" },
+        "nombre": { "type": "string" },
+        "descripcion": { "type": "string" },
+        "descuento": { "type": "number" },
+        "fec_inicio": { "type": "string", "format": "date" },
+        "fec_fin": { "type": "string", "format": "date" }
       }
     },
     "Response": {
       "type": "object",
       "properties": {
-        "result": {
-          "type": "boolean",
-          "default": true
-        },
-        "message": {
-          "type": "string",
-          "example": "ok"
-        },
-        "data": {
-          "type": "string",
-          "example": "{}"
-        },
-        "status": {
-          "type": "string",
-          "example": "200"
-        }
+        "result": { "type": "boolean", "default": true },
+        "message": { "type": "string", "example": "ok" },
+        "data": { "type": "object" },
+        "status": { "type": "integer", "example": 200 }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "result": { "type": "boolean", "default": false },
+        "message": { "type": "string" },
+        "status": { "type": "integer", "example": 500 }
+      }
+    },
+    "NotFound": {
+      "type": "object",
+      "properties": {
+        "result": { "type": "boolean", "default": false },
+        "message": { "type": "string", "example": "Recurso no encontrado" },
+        "status": { "type": "integer", "example": 404 }
       }
     }
-  },
-  "externalDocs": {
-    "description": "Más sobre Swagger",
-    "url": "http://swagger.io"
   }
 }
