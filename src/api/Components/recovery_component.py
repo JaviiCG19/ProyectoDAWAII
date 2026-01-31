@@ -29,13 +29,27 @@ class RecoveryComponent:
             return {'result': False, 'message': str(err)}
 
     @staticmethod
-    def resetPassword(user_login, new_password):
-        # Este se usa para "Recuperar" (sin saber la anterior)
-        # Nota: Aquí deberías validar un código enviado al correo previamente
+    def resetPassword(usr_nombre, usr_respuesta, new_password):
         try:
-            new_hash = generate_password_hash(new_password, method='scrypt')
-            sql = "UPDATE dawa.tb_user SET user_password = %s WHERE user_login = %s;"
-            return DataBaseHandle.ExecuteNonQuery(sql, (new_hash, user_login))
+            # 1. Traer la respuesta secreta hasheada de la DB
+            sql = "SELECT respuesta FROM dawa.usuarios WHERE nombre = %s AND estado = 0;"
+            res = DataBaseHandle.getRecords(sql, 1, (usr_nombre,))
+
+            if not res['result'] or not res['data']:
+                return {'result': False, 'message': "Usuario no encontrado o inactivo"}
+
+            hash_respuesta_db = res['data']['respuesta']
+
+            # 2. Verificar si la respuesta es correcta (ignorando mayúsculas/minúsculas)
+            if check_password_hash(hash_respuesta_db, usr_respuesta.lower().strip()):
+                # 3. Si es correcta, hashear la nueva clave y actualizar
+                new_hash = generate_password_hash(new_password, method='scrypt')
+                sql_update = "UPDATE dawa.usuarios SET clave = %s WHERE nombre = %s;"
+                return DataBaseHandle.ExecuteNonQuery(sql_update, (new_hash, usr_nombre))
+            else:
+                return {'result': False, 'message': "La respuesta a la pregunta de seguridad es incorrecta"}
+
         except Exception as err:
             HandleLogs.write_error(err)
             return {'result': False, 'message': str(err)}
+

@@ -22,7 +22,6 @@ class ChangePasswordService(Resource):
             return response_success(None, "Contraseña actualizada exitosamente")
         return response_error(res['message'])
 
-
 class ResetPasswordService(Resource):
     def post(self):
         """ Recuperar clave olvidada """
