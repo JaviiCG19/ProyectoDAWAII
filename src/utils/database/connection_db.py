@@ -70,9 +70,11 @@ class DataBaseHandle:
                 conn.commit()
                 data = ult_id
             else:
-                data = 0
+                conn.commit()
+                data = cursor.rowcount  # Devuelve cuántas filas se afectaron
             result = True
         except Exception as ex:
+            conn.rollback()  # Deshacer cambios si hay error
             HandleLogs.write_error(ex)
             message = ex.__str__()
         finally:

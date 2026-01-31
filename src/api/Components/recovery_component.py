@@ -1,7 +1,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from ...utils.database.database_handle import DataBaseHandle
+from ...utils.database.connection_db import DataBaseHandle
 from ...utils.general.logs import HandleLogs
-
+from ...utils.general.response import internal_response, response_error, response_success
 
 class RecoveryComponent:
 
@@ -13,20 +13,22 @@ class RecoveryComponent:
             res = DataBaseHandle.getRecords(sql_check, 1, (user_id,))
 
             if not res['result'] or not res['data']:
-                return {'result': False, 'message': "Usuario no encontrado"}
+                return internal_response(False, None, "Usuario no encontrado")
 
             # 2. Validar que la clave vieja coincida
             if not check_password_hash(res['data']['clave'], old_password):
-                return {'result': False, 'message': "La contraseña actual es incorrecta"}
+                return internal_response(False, None,"La contraseña actual es incorrecta")
 
             # 3. Hashear la nueva y actualizar
             new_hash = generate_password_hash(new_password, method='scrypt')
-            sql_update = "UPDATE dawa.usuarios SET clave = %s WHERE id = %s;"
-            return DataBaseHandle.ExecuteNonQuery(sql_update, (new_hash, user_id))
+            sql_update = "UPDATE dawa.usuarios SET clave = %s WHERE id = %s"
+            DataBaseHandle.ExecuteNonQuery(sql_update, (new_hash, int(user_id)))
+            print('si')
+            return internal_response(True, None, "")
 
         except Exception as err:
             HandleLogs.write_error(err)
-            return {'result': False, 'message': str(err)}
+            return internal_response(False, None,str(err))
 
     @staticmethod
     def resetPassword(usr_nombre, usr_respuesta, new_password):
@@ -36,7 +38,7 @@ class RecoveryComponent:
             res = DataBaseHandle.getRecords(sql, 1, (usr_nombre,))
 
             if not res['result'] or not res['data']:
-                return {'result': False, 'message': "Usuario no encontrado o inactivo"}
+                return internal_response(False, None,"Usuario no encontrado o inactivo")
 
             hash_respuesta_db = res['data']['respuesta']
 
@@ -45,11 +47,11 @@ class RecoveryComponent:
                 # 3. Si es correcta, hashear la nueva clave y actualizar
                 new_hash = generate_password_hash(new_password, method='scrypt')
                 sql_update = "UPDATE dawa.usuarios SET clave = %s WHERE nombre = %s;"
-                return DataBaseHandle.ExecuteNonQuery(sql_update, (new_hash, usr_nombre))
+                DataBaseHandle.ExecuteNonQuery(sql_update, (new_hash, usr_nombre))
+                return internal_response(True,None,"")
             else:
-                return {'result': False, 'message': "La respuesta a la pregunta de seguridad es incorrecta"}
+                return internal_response(False, None,"La respuesta a la pregunta de seguridad es incorrecta")
 
         except Exception as err:
             HandleLogs.write_error(err)
-            return {'result': False, 'message': str(err)}
-
+            return internal_response(False, None,str(err))

@@ -19,7 +19,7 @@ class ChangePasswordService(Resource):
 
         res = RecoveryComponent.changePassword(user_id, old_p, new_p)
         if res['result']:
-            return response_success(None, "Contraseña actualizada exitosamente")
+            return response_success("Contraseña actualizada exitosamente")
         return response_error(res['message'])
 
 class ResetPasswordService(Resource):

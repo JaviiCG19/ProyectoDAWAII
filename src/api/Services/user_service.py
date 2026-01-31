@@ -3,7 +3,7 @@ from flask import request
 from ..Components.user_component import UserComponent
 from ...utils.general.logs import HandleLogs
 from ...utils.general.response import (response_error, response_success,
-                                       response_not_found, response_created)
+                                       response_not_found)
 from .middleware import valida_api_token
 
 
@@ -40,7 +40,7 @@ class UserService(Resource):
             resultado = UserComponent.createUser(data)
 
             if resultado['result']:
-                return response_created(resultado['data'])  # Usamos un 201 Created
+                return response_success(resultado['data'])  # Usamos un 201 Created
             else:
                 return response_error(resultado['message'])
         except Exception as err:

@@ -1,187 +1,212 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "Documentación  de Servicios Web de DAWA",
-    "version": "1.0.0",
-    "title": "Documentación  de DAWA",
-    "termsOfService": "Leer wwww.ug.edu.com",
+    "description": "Documentación Micro servicio Security",
+    "version": "2.0.0",
+    "title": "Documentación de MS_Security",
+    "termsOfService": "Leer wwww.ug.edu.ec",
     "contact": {
-      "email": "juan.cedenor@ug.edu.ec"
+      "email": "galo.izquierdov@ug.edu.ec"
     },
     "license": {
-      "name": "Dawa UG",
+      "name": "MS-Security",
       "url": "none"
     }
   },
   "tags": [
-    {
-      "name": "WS Security",
-      "description": "WS Security"
-    }
+    { "name": "Security", "description": "Autenticación y Recuperación" },
+    { "name": "Users", "description": "Operaciones de Usuarios" },
+    { "name": "Roles", "description": "Gestión de Roles" }
   ],
   "paths": {
-
     "/security/login": {
       "post": {
-        "tags": [
-          "WS Security"
-        ],
+        "tags": ["Security"],
         "summary": "Login de Usuario",
-        "description": "Login de Usuario",
-        "operationId": "loginUser",
-        "produces": [
-          "application/json"
-        ],
+        "parameters": [{
+          "in": "body", "name": "body", "required": true,
+          "schema": { "$ref": "#/definitions/loginUserDef" }
+        }],
+        "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Response" } } }
+      }
+    },
+    "/security/change-password": {
+      "post": {
+        "tags": ["Security"],
+        "summary": "Cambio de contraseña (logueado)",
         "parameters": [
+          { "in": "header", "name": "tokenapp", "required": true, "type": "string" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/changePassDef" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/security/reset-password": {
+      "post": {
+        "tags": ["Security"],
+        "summary": "Recuperar clave con pregunta secreta",
+        "parameters": [{
+          "in": "body", "name": "body", "required": true,
+          "schema": { "$ref": "#/definitions/resetPassDef" }
+        }],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Lista de Usuarios",
+        "parameters": [{ "in": "header", "name": "tokenapp", "required": true, "type": "string" }],
+        "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Response" } } }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Crear Usuario",
+        "parameters": [
+          { "in": "header", "name": "tokenapp", "required": true, "type": "string" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/userDef" } }
+        ],
+        "responses": { "201": { "description": "Creado" } }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Actualizar Usuario (ID en el Body)",
+        "parameters": [
+          { "in": "header", "name": "tokenapp", "required": true, "type": "string" },
           {
             "in": "body",
             "name": "body",
-            "description": "",
+            "description": "Objeto usuario con usr_id incluido",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/loginUserDef"
-            }
+            "schema": { "$ref": "#/definitions/userUpdateDef" }
           }
         ],
         "responses": {
-          "200": {
-            "description": "Operación exitosa",
-            "schema": {
-              "$ref": "#/definitions/Response"
-            }
-          },
-          "500": {
-            "description": "Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "400": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/NotFound"
-            }
-          }
+          "200": { "description": "Actualizado con éxito" },
+          "400": { "description": "Falta usr_id o datos inválidos" }
         }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Eliminar Usuario",
+        "parameters": [
+          { "in": "header", "name": "tokenapp", "required": true, "type": "string" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/deleteDef" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
       }
     },
-    "/user/list": {
+
+    "/roles": {
       "get": {
-        "tags": [
-          "WS Security"
-        ],
-        "summary": "Lista de Usuarios",
-        "description": "Lista de Usuarios",
-        "operationId": "userList",
-        "produces": [
-          "application/json"
-        ],
+        "tags": ["Roles"],
+        "summary": "Lista de Roles",
+        "parameters": [{ "in": "header", "name": "tokenapp", "required": true, "type": "string" }],
+        "responses": { "200": { "description": "OK" } }
+      },
+      "post": {
+        "tags": ["Roles"],
+        "summary": "Crear Roles",
         "parameters": [
-          {
-            "in": "header",
-            "name": "tokenapp",
-            "description": "Token para aplicación",
-            "required": true,
-            "type": "string"
-          }
+          { "in": "header", "name": "tokenapp", "required": true, "type": "string" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/rolDef" } }
         ],
-        "responses": {
-          "200": {
-            "description": "Operación exitosa",
-            "schema": {
-              "$ref": "#/definitions/Response"
-            }
-          },
-          "500": {
-            "description": "Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "400": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/NotFound"
-            }
-          }
-        }
+        "responses": { "201": { "description": "Creado" } }
+      },
+      "put": {
+        "tags": ["Roles"],
+        "summary": "Actualizar Rol",
+        "parameters": [
+          { "in": "header", "name": "tokenapp", "required": true, "type": "string" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/rolUpdateDef" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      },
+      "delete": {
+        "tags": ["Roles"],
+        "summary": "Eliminar Rol",
+        "parameters": [
+          { "in": "header", "name": "tokenapp", "required": true, "type": "string" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/deleteDef" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
       }
-    }
+    },
   },
   "definitions": {
-   "loginUserDef": {
-     "type": "object",
-     "properties": {
-       "login_user": {
-         "type": "string",
-         "format": "string"
-       },
-       "login_password": {
-         "type": "string",
-         "format": "string"
-       }
-     }
-    },
-   "NotFound": {
+    "loginUserDef": {
       "type": "object",
       "properties": {
-        "success": {
-            "type": "boolean",
-            "default": false
-        },
-        "message": {
-            "type": "string",
-            "example": "Recurso no encontrado"
-        },
-        "data": {
-          "type": "string",
-          "example": "{}"
-        },
-        "status": {
-          "type": "string",
-          "example": "404"
-        }
+        "login_user": { "type": "string" },
+        "login_password": { "type": "string" }
       }
     },
-   "ErrorResponse": {
+    "userDef": {
       "type": "object",
       "properties": {
-        "success": {
-            "type": "boolean",
-            "default": false
-        },
-        "message": {
-            "type": "string"
-        },
-        "data": {
-          "type": "string",
-          "example": "{}"
-        },
-        "status": {
-          "type": "string",
-          "example": "500"
-        }
+        "usr_nombre": { "type": "string" },
+        "usr_clave": { "type": "string" },
+        "usr_detalle": { "type": "string" },
+        "usr_roles": { "type": "string", "example": "2;3;" },
+        "usr_rolp": { "type": "integer" },
+        "usr_respuesta": { "type": "string" }
       }
     },
-   "Response": {
+    "userUpdateDef": {
       "type": "object",
       "properties": {
-        "success": {
-            "type": "boolean",
-            "default": false
-        },
-        "message": {
-            "type": "string",
-            "example": "ok"
-        },
-        "data": {
-          "type": "string",
-          "example": "{}"
-        },
-        "status": {
-          "type": "string",
-          "example": "200"
-        }
+        "usr_id": { "type": "integer", "example": 1, "description": "ID del usuario a modificar" },
+        "usr_detalle": { "type": "string" },
+        "usr_roles": { "type": "string", "example": "1;2;" },
+        "usr_rolp": { "type": "integer" },
+        "usr_respuesta": { "type": "string" }
+      },
+      "required": ["usr_id"]
+    },
+    "rolDef": {
+      "type": "object",
+      "properties": {
+        "nombre": { "type": "string" }
+      }
+    },
+    "rolUpdateDef": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "nombre": { "type": "string" }
+      },
+      "required": ["id"]
+    },
+    "deleteDef": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer", "example": 1 }
+      },
+      "required": ["id"]
+    },
+    "changePassDef": {
+      "type": "object",
+      "properties": {
+        "usr_id": { "type": "integer" },
+        "old_password": { "type": "string" },
+        "new_password": { "type": "string" }
+      }
+    },
+    "resetPassDef": {
+      "type": "object",
+      "properties": {
+        "usr_nombre": { "type": "string" },
+        "respuesta": { "type": "string" },
+        "new_password": { "type": "string" }
+      }
+    },
+    "Response": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean" },
+        "message": { "type": "string" },
+        "data": { "type": "object" },
+        "status": { "type": "integer" }
       }
     }
   },

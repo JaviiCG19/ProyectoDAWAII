@@ -1,8 +1,8 @@
 #importar las clases que vamos a necesitar
+from werkzeug.security import generate_password_hash
 from ...utils.database.connection_db import DataBaseHandle
 from ...utils.general.logs import HandleLogs
 from ...utils.general.response import internal_response
-from werkzeug.security import generate_password_hash
 
 class UserComponent:
 
@@ -43,7 +43,7 @@ class UserComponent:
             sql = """
                     INSERT INTO dawa.usuarios (nombre,clave,detalle,roles,rol_prioritario,respuesta,estado)
                     VALUES (%s, %s, %s, %s, %s, %s, 0)
-                    RETURNING user_id;
+                    RETURNING id;
                 """
             # Tip: Recuerda encriptar la password antes de enviarla aquí en un entorno real
             record = (
@@ -98,8 +98,8 @@ class UserComponent:
                 message = "Error al actualizar o usuario no encontrado"
 
         except Exception as err:
-            # ... manejo de error estándar ...
-            pass
+            HandleLogs.write_error(err)
+            message = str(err)
         finally:
             return {'result': result, 'message': message}
 
