@@ -1,16 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, Clock, Users, DollarSign, Check, Store, MapPin } from 'lucide-react';
+import api from '@/lib/api';
+import { useRouter } from 'next/navigation';
 
 export default function CrearReservaPage() {
+  const router = useRouter();
   const [paso, setPaso] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const [mesasDisponibles, setMesasDisponibles] = useState<any[]>([]);
+  const [cargandoMesas, setCargandoMesas] = useState(false)
 
-  // Datos simulados
-  const restaurantes = [
+  // Restaurantes simulados (temporal)
+  const [restaurantes, setRestaurantes] = useState([
     { id: 1, nombre: 'La Parrilla Dorada', sucursales: ['Samborondón', 'Urdesa'] },
     { id: 2, nombre: 'El Sabor del Mar', sucursales: ['Urdesa', 'Alborada'] },
-  ];
+  ]);
 
   const horariosDisponibles = ['19:00', '19:30', '20:00', '20:30', '21:00'];
 
@@ -24,7 +32,24 @@ export default function CrearReservaPage() {
     anticipo: false,
   });
 
-  // Tipamos el evento para evitar el error "any"
+  // Cargar mesas disponibles cuando se seleccione fecha (paso 3)
+  useEffect(() => {
+  if (paso === 3 && formData.fecha) {
+    setCargandoMesas(true);
+    api.get(`/mesas/disponibles/${formData.fecha}`)
+      .then(response => {
+        const data = response.data.data || response.data || [];
+        setMesasDisponibles(Array.isArray(data) ? data : []);
+      })
+      .catch(err => {
+        console.error('Error al cargar mesas:', err);
+        setMesasDisponibles([]);
+      })
+      .finally(() => setCargandoMesas(false));
+  }
+}, [paso, formData.fecha]);
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
@@ -42,10 +67,40 @@ export default function CrearReservaPage() {
   const siguientePaso = () => setPaso(paso + 1);
   const anteriorPaso = () => setPaso(paso - 1);
 
-  const confirmarReserva = (e: React.FormEvent) => {
+  const confirmarReserva = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Reserva creada correctamente (simulada)');
-    // Aquí iría la llamada real al backend
+    setError(null);
+    setLoading(true);
+
+    try {
+      const payload = {
+        idlocal: parseInt(formData.restauranteId),
+        idmesa: formData.mesa ? parseInt(formData.mesa) : 0,
+        idcliente: 9,  // ← CAMBIA POR ID REAL DEL CLIENTE LOGUEADO
+        fecha: formData.fecha,
+        franja_id: 1, // temporal
+        numper: formData.personas,
+      };
+
+      const response = await api.post('/reservas', payload);
+      const reservaId = response.data.data;
+
+      // Si anticipo está marcado, registrar anticipo real
+      if (formData.anticipo) {
+        await api.post('/anticipos', {
+          idreserva: reservaId,
+          monto: 20, // monto fijo o calculado
+        });
+      }
+
+      alert('Reserva creada con éxito! ID: ' + reservaId);
+      router.push('/reservas/list');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'No se pudo crear la reserva');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -69,6 +124,12 @@ export default function CrearReservaPage() {
           </div>
         ))}
       </div>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
+          {error}
+        </div>
+      )}
 
       {/* Paso 1: Restaurante y sucursal */}
       {paso === 1 && (
@@ -115,8 +176,8 @@ export default function CrearReservaPage() {
           <div className="flex justify-end">
             <button
               onClick={siguientePaso}
-              disabled={!formData.restauranteId || !formData.sucursal}
-              className="flex items-center gap-2 bg-[#F2B847] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!formData.restauranteId || !formData.sucursal || loading}
+              className={`flex items-center gap-2 bg-[#F2B847] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               Siguiente
             </button>
@@ -161,13 +222,14 @@ export default function CrearReservaPage() {
           <div className="flex justify-between">
             <button
               onClick={anteriorPaso}
-              className="px-6 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-100 transition"
+              disabled={loading}
+              className="px-6 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-100 transition disabled:opacity-50"
             >
               Anterior
             </button>
             <button
               onClick={siguientePaso}
-              disabled={!formData.fecha || !formData.hora}
+              disabled={!formData.fecha || !formData.hora || loading}
               className="flex items-center gap-2 bg-[#F2B847] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Siguiente
@@ -176,70 +238,81 @@ export default function CrearReservaPage() {
         </div>
       )}
 
-      {/* Paso 3: Mesa y anticipo */}
+
+    {/* Paso 3: MESAS */}
       {paso === 3 && (
-        <div className="bg-white rounded-2xl shadow-lg p-6 space-y-6">
-          <h2 className="text-xl font-bold text-[#F2B847]">3. Mesa y anticipo</h2>
+  <div className="bg-white rounded-2xl shadow-lg p-6 space-y-6">
+    <h2 className="text-xl font-bold text-[#F2B847]">3. Mesa y anticipo</h2>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Número de personas</label>
-              <input
-                type="number"
-                name="personas"
-                value={formData.personas}
-                onChange={handleChange}
-                min="1"
-                max="12"
-                className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F2B847]"
-              />
-            </div>
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-700">Número de personas</label>
+        <input
+          type="number"
+          name="personas"
+          value={formData.personas}
+          onChange={handleChange}
+          min="1"
+          max="12"
+          className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F2B847]"
+        />
+      </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Mesa preferida (opcional)</label>
-              <select
-                name="mesa"
-                value={formData.mesa}
-                onChange={handleChange}
-                className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F2B847]"
-              >
-                <option value="">Automática (mejor disponible)</option>
-                <option value="Mesa 1 (4 personas)">Mesa 1 (4 personas)</option>
-                <option value="Mesa 5 (6 personas)">Mesa 5 (6 personas)</option>
-                <option value="Mesa 12 (8 personas)">Mesa 12 (8 personas)</option>
-              </select>
-            </div>
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-700">Mesa preferida</label>
+        {cargandoMesas ? (
+          <p className="text-sm text-gray-600">Cargando mesas disponibles...</p>
+        ) : mesasDisponibles.length > 0 ? (
+          <select
+            name="mesa"
+            value={formData.mesa}
+            onChange={handleChange}
+            className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F2B847]"
+          >
+            <option value="">Automática (mejor disponible)</option>
+            {mesasDisponibles.map(mesa => (
+              <option key={mesa.id} value={mesa.id}>
+                {mesa.nombre || `Mesa ${mesa.id}`} ({mesa.capacidad} personas)
+              </option>
+            ))}
+          </select>
+        ) : (
+          <p className="text-sm text-orange-600">No hay mesas disponibles para esta fecha/hora</p>
+        )}
+      </div>
 
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="anticipo"
-                checked={formData.anticipo}
-                onChange={handleCheckbox}
-                className="w-5 h-5 text-[#F2B847] border-gray-300 rounded"
-              />
-              <label htmlFor="anticipo" className="text-sm font-medium text-gray-700">
-                Requiere anticipo (obligatorio en algunos casos)
-              </label>
-            </div>
-          </div>
+      {/* Anticipo */}
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id="anticipo"
+          checked={formData.anticipo}
+          onChange={handleCheckbox}
+          className="w-5 h-5 text-[#F2B847] border-gray-300 rounded"
+        />
+        <label htmlFor="anticipo" className="text-sm font-medium text-gray-700">
+          Requiere anticipo (obligatorio en algunos casos)
+        </label>
+      </div>
+    </div>
 
-          <div className="flex justify-between">
-            <button
-              onClick={anteriorPaso}
-              className="px-6 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-100 transition"
-            >
-              Anterior
-            </button>
-            <button
-              onClick={siguientePaso}
-              className="flex items-center gap-2 bg-[#F2B847] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
-      )}
+    <div className="flex justify-between">
+      <button
+        onClick={anteriorPaso}
+        className="px-6 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-100 transition"
+      >
+        Anterior
+      </button>
+      <button
+        onClick={siguientePaso}
+        disabled={cargandoMesas}
+        className="flex items-center gap-2 bg-[#F2B847] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50"
+      >
+        Siguiente
+      </button>
+         </div>
+      </div>
+     )}
 
       {/* Paso 4: Confirmación */}
       {paso === 4 && (
@@ -252,23 +325,27 @@ export default function CrearReservaPage() {
               <p><strong>Restaurante:</strong> {restaurantes.find(r => r.id === parseInt(formData.restauranteId))?.nombre} ({formData.sucursal})</p>
               <p><strong>Fecha y hora:</strong> {formData.fecha} {formData.hora}</p>
               <p><strong>Personas:</strong> {formData.personas}</p>
-              <p><strong>Mesa:</strong> {formData.mesa || 'Automática'}</p>
+              <p><strong>Mesa:</strong> {formData.mesa ? `Mesa ${formData.mesa}` : 'Automática'}</p>
               <p><strong>Anticipo:</strong> {formData.anticipo ? 'Sí' : 'No'}</p>
             </div>
 
             <div className="flex justify-between">
               <button
                 onClick={anteriorPaso}
-                className="px-6 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-100 transition"
+                disabled={loading}
+                className="px-6 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-100 transition disabled:opacity-50"
               >
                 Anterior
               </button>
               <button
                 onClick={confirmarReserva}
-                className="flex items-center gap-2 bg-[#F2B847] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition"
+                disabled={loading}
+                className={`flex items-center gap-2 bg-[#F2B847] text-white px-6 py-3 rounded-xl font-semibold transition ${
+                  loading ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90'
+                }`}
               >
                 <Check size={18} />
-                Confirmar Reserva
+                {loading ? 'Creando...' : 'Confirmar Reserva'}
               </button>
             </div>
           </div>
