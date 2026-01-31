@@ -1,6 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+
 
 export const metadata: Metadata = {
   title: "Gestión de Reservas | Restaurante",
@@ -15,16 +17,11 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="bg-[#F5EFE6] text-gray-800 flex flex-col min-h-screen">
-        <Navbar />
-
-        {/* MAIN crece solo si es necesario */}
-        <main className="flex-1 container mx-auto px-6 py-8">
-          {children}
-        </main>
-
-        <footer className="bg-[#F2B847] text-white text-center py-4">
-          © {new Date().getFullYear()} Sistema de Gestión de Reservas
-        </footer>
+          <Navbar />
+          <main className="flex-1 container mx-auto px-6 py-8">
+            {children}
+          </main>
+          <Footer />
       </body>
     </html>
   );
