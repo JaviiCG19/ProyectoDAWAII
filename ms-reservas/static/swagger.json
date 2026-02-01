@@ -386,33 +386,61 @@
         }
       }
     },
-    "/mesas/disponibles/{fecha}": {
-      "get": {
-        "tags": ["Mesas"],
-        "summary": "Obtener mesas disponibles para una fecha",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "tokenapp",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "path",
-            "name": "fecha",
-            "required": true,
-            "type": "string",
-            "format": "date",
-            "description": "Fecha en formato YYYY-MM-DD"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Lista de mesas disponibles"
-          }
+  "/mesas/disponibles/{fecha}": {
+    "get": {
+      "tags": ["Mesas"],
+      "summary": "Obtener mesas disponibles por fecha y opcionalmente por franja",
+      "parameters": [
+        {
+          "in": "header",
+          "name": "tokenapp",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "in": "path",
+          "name": "fecha",
+          "required": true,
+          "type": "string",
+          "format": "date",
+          "description": "Fecha en formato YYYY-MM-DD"
+        },
+        {
+          "in": "query",
+          "name": "franja_id",
+          "required": false,
+          "type": "integer",
+          "description": "ID de la franja horaria (opcional)"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Lista de mesas disponibles"
         }
       }
-    },
+    }
+  },
+  "/mesas/list": {
+    "get": {
+      "tags": [
+        "Mesas"
+      ],
+      "summary": "Listar todas las mesas del sistema",
+      "parameters": [
+        {
+          "in": "header",
+          "name": "tokenapp",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Lista de todas las mesas"
+        }
+      }
+    }
+  },
     "/anticipos": {
       "post": {
         "tags": ["Anticipos"],

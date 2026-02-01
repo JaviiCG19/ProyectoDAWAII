@@ -4,7 +4,7 @@ from ..Services.reserva_service import (ReservaCreateService, ReservaListService
                                         ReservaDetailService, ReservaConfirmarService,
                                         ReservaCancelarService, ReservaCheckinService,
                                         ReservaNoShowService)
-from ..Services.mesa_service import MesaDisponibleService
+from ..Services.mesa_service import MesaDisponibleService, MesaListService
 from ..Services.anticipo_service import AnticipoCreateService, AnticipoReservaService
 from ..Services.reporte_service import (ReportePeriodoService, ReporteTopClientesService,
                                        ReporteUsoMesasService, ReporteTasasService,
@@ -12,9 +12,7 @@ from ..Services.reporte_service import (ReportePeriodoService, ReporteTopCliente
 
 
 def load_routes(api):
-    """
-    Carga todas las rutas de la API
-    """
+
     # Rutas de clientes
     api.add_resource(ClienteCreateService, '/clientes')
     api.add_resource(ClienteListService, '/clientes/list')
@@ -31,6 +29,7 @@ def load_routes(api):
 
     # Rutas de mesas
     api.add_resource(MesaDisponibleService, '/mesas/disponibles/<string:fecha>')
+    api.add_resource(MesaListService, '/mesas/list')
 
     # Rutas de anticipos
     api.add_resource(AnticipoCreateService, '/anticipos')
