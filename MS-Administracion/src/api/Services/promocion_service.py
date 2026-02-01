@@ -4,7 +4,11 @@ from datetime import datetime
 class PromocionService:
     @staticmethod
     def listar_por_local(id_local):
-        # Filtro vital para que el Restaurante A no vea las promos del B
+        """
+        CORRECCIÓN
+        Filtramos por 'idlocal' para que el Admin de Sucursal solo vea sus promociones.
+        Solo mostramos las activas (estado = 1).
+        """
         query = """
             SELECT id, idlocal, nombre, descripcion, descuento, fec_inicio, fec_fin 
             FROM dawa.promociones 
@@ -15,12 +19,16 @@ class PromocionService:
 
     @staticmethod
     def obtener_por_id(id_promo):
+        """Busca una promoción específica para edición o detalle."""
         query = "SELECT id, idlocal, nombre, descripcion, descuento, fec_inicio, fec_fin FROM dawa.promociones WHERE id = %s"
         return DataBaseHandle.getRecords(query, 1, (id_promo,))
 
     @staticmethod
     def crear_promocion(data):
-        # Estado 1 = Activa
+        """
+        Aquí definimos todos los campos validados por el Request:
+        fechas de vigencia, descuento y el vínculo obligatorio al local.
+        """
         query = """
             INSERT INTO dawa.promociones (idlocal, nombre, descripcion, descuento, fec_inicio, fec_fin, estado, fecact)
             VALUES (%s, %s, %s, %s, %s, %s, 1, %s)
@@ -33,6 +41,10 @@ class PromocionService:
 
     @staticmethod
     def eliminar_promocion(id_promo):
-        # Borrado lógico: estado 0 = Inactiva/Borrada
+        """
+        BORRADO LÓGICO: Estado 0.
+        validacion de cada acción se mantine el registro como 'inactivo'
+        permite auditoría y reportes para el Gerente.
+        """
         query = "UPDATE dawa.promociones SET estado = 0, fecact = %s WHERE id = %s"
         return DataBaseHandle.ExecuteNonQuery(query, (datetime.now(), id_promo))

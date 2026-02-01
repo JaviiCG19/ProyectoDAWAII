@@ -6,36 +6,42 @@ from ..Components.promocion_component import PromocionComponent
 from ..Components.dashboard_component import DashboardComponent
 from ..Components.empresa_component import EmpresaComponent
 
+
 def load_routes(api):
-    # --- EMPRESAS (Restaurantes principales) ---
 
-    api.add_resource(EmpresaComponent, '/admin/empresas')
+    # 1. RUTAS DE GERENCIA (Dueños de Restaurante / Cuentas Maestras)
 
-    # --- LOCALES (Sucursales) ---
+    # Dashboard y Reportes de la Empresa
+    api.add_resource(DashboardComponent, '/gerente/dashboard')
 
+    # Gestión de la Entidad Legal
+    api.add_resource(EmpresaComponent, '/gerente/empresa')
+
+    # Gestión de Sucursales (Solo el Gerente crea/borra sucursales)
     api.add_resource(LocalComponent,
-                     '/admin/locales',
-                     '/admin/locales/<int:id>',
-                     '/admin/locales/restaurar/<int:id>')
+                     '/gerente/sucursales',
+                     '/gerente/sucursales/<int:id>',
+                     '/gerente/sucursales/restaurar/<int:id>')
 
-    api.add_resource(LocalComponent, '/admin/sucursales/list', endpoint='list_sucursales')
+    # 2. RUTAS DE SUCURSAL (Administradores de Local)
+    # Horarios, promociones y mesas son manejados por el admin del local.
 
-    # --- MESAS ---
+    # Gestión de Mesas por Sucursal
     api.add_resource(MesaComponent,
-                     '/admin/mesas',
-                     '/admin/mesas/<int:id>',
-                     '/admin/mesas/restaurar/<int:id>')
+                     '/sucursal/mesas',
+                     '/sucursal/mesas/<int:id>',
+                     '/sucursal/mesas/restaurar/<int:id>')
 
-    # --- FRANJAS ---
+    # Gestión de Franjas Horarias (Configuración de Reservas)
     api.add_resource(FranjaComponent,
-                     '/admin/franjas',
-                     '/admin/franjas/<int:id>',
-                     '/admin/franjas/restaurar/<int:id>')
+                     '/sucursal/horarios',
+                     '/sucursal/horarios/<int:id>',
+                     '/sucursal/horarios/restaurar/<int:id>')
 
-    # --- PROMOCIONES ---
+    # Gestión de Promociones Vigentes
     api.add_resource(PromocionComponent,
-                     '/admin/promociones',
-                     '/admin/promociones/<int:id>')
+                     '/sucursal/promociones',
+                     '/sucursal/promociones/<int:id>')
 
-    # --- DASHBOARD ---
-    api.add_resource(DashboardComponent, '/admin/dashboard')
+    # Endpoint utilitario para selectores/combos en el Front
+    api.add_resource(LocalComponent, '/sucursal/listado-sucursales', endpoint='list_sucursales')

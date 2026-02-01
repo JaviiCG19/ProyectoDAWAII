@@ -1,20 +1,22 @@
 from marshmallow import Schema, fields, validate
 
 class MesaRequest(Schema):
-    # Clave para el multitenant: vincula la mesa a la sucursal exacta
+    # Con idlocal obligatorio, aseguramos el aislamiento .
+    # Ninguna mesa puede existir sin ser dueña de un local.
     idlocal = fields.Int(
         required=True,
         error_messages={"required": "El ID del local es obligatorio para el aislamiento de datos."}
     )
 
-    # Coincide con character(2) de tu SQL
+    # Aquí definimos el número físico. Validamos que sean 2 caracteres
+    # para que coincida exactamente con el tipo de dato SQL character(2).
     numero = fields.Str(
         required=True,
         validate=validate.Length(equal=2),
         error_messages={"required": "El número de mesa debe tener 2 dígitos (ej: 01, 05, 12)."}
     )
 
-    # Capacidad de personas
+    # Definimos la capacidad de aforo por mesa individual.
     maxper = fields.Int(
         required=True,
         validate=validate.Range(min=1),
