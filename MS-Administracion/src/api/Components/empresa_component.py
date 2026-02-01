@@ -6,38 +6,72 @@ from ...utils.general.logs import HandleLogs
 from ..Services.middleware import valida_api_token
 
 class EmpresaComponent(Resource):
-    @valida_api_token # El backend ahora valora el token para listar empresas
-    def get(self):
+    @valida_api_token
+    def get(self, id=None): # Agregamos id=None por si quieres buscar una sola
         """
-        Este metodo lista las empresas/clientes del sistema.
-        Solo lo usa el Administrador Global de la plataforma para ver
-        quiénes están registrados.
+        LISTAR: Solo empresas con estado = 1.
         """
         try:
+            # Si el service devuelve un error de conexión o SQL, mandamos 500
             resultado = EmpresaService.listar_empresas()
             return resultado, 200 if resultado['result'] else 500
         except Exception as e:
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
-    @valida_api_token # Protección para la creación de nuevas entidades
+    @valida_api_token
     def post(self):
         """
-        CORRECCIÓN
-        Aquí es donde nace el 'idcia'. Al crear la empresa, el sistema
-        genera el ID que luego usará el Gerente para ver su Dashboard
-        y el Admin de Sucursal para ver sus locales.
+        CREAR: Registra FETAC y pone estado = 1 automáticamente.
         """
         try:
             data = request.get_json()
 
-            # Validación estricta del esquema (RUC, Nombre, Representante)
+            # CORRECCIÓN: Si el JSON viene vacío o mal formado
+            if not data:
+                return {"result": False, "message": "No se recibieron datos"}, 400
+
             errors = EmpresaRequest().validate(data)
             if errors:
                 return {"result": False, "message": errors}, 400
 
             resultado = EmpresaService.crear_empresa(data)
+            # 201 es el código estándar para "Recurso Creado"
             return resultado, 201 if resultado['result'] else 500
+        except Exception as e:
+            HandleLogs.write_error(e)
+            return {"result": False, "message": str(e)}, 500
+
+    @valida_api_token
+    def put(self, id):
+        """
+        EDITAR: Actualiza datos y refresca el fecact.
+        """
+        try:
+            data = request.get_json()
+            errors = EmpresaRequest().validate(data)
+            if errors:
+                return {"result": False, "message": errors}, 400
+
+            resultado = EmpresaService.actualizar_empresa(id, data)
+            # CORRECCIÓN: Si el resultado es exitoso 200, si no, 404 (No encontrado) o 500
+            if resultado['result']:
+                return resultado, 200
+            return resultado, 404
+        except Exception as e:
+            HandleLogs.write_error(e)
+            return {"result": False, "message": str(e)}, 500
+
+    @valida_api_token
+    def delete(self, id):
+        """
+        ELIMINAR: Borrado lógico (estado = 0).
+        Fundamental para no romper la integridad con Locales y Usuarios.
+        """
+        try:
+            resultado = EmpresaService.eliminar_empresa(id)
+            # 200 si se desactivó correctamente
+            return resultado, 200 if resultado['result'] else 404
         except Exception as e:
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500

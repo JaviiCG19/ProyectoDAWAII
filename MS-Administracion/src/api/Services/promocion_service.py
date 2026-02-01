@@ -40,9 +40,26 @@ class PromocionService:
         return DataBaseHandle.ExecuteNonQuery(query, record)
 
     @staticmethod
+    def actualizar_promocion(id_promo, data):
+        """
+         Metodo para editar promociones.
+
+        """
+        query = """
+            UPDATE dawa.promociones 
+            SET nombre = %s, descripcion = %s, descuento = %s, fec_inicio = %s, fec_fin = %s, fecact = %s 
+            WHERE id = %s
+        """
+        record = (
+            data['nombre'], data.get('descripcion', ''), data['descuento'],
+            data['fec_inicio'], data['fec_fin'], datetime.now(), id_promo
+        )
+        return DataBaseHandle.ExecuteNonQuery(query, record)
+
+    @staticmethod
     def eliminar_promocion(id_promo):
         """
-        BORRADO LÓGICO: Estado 0.
+        BORRADO LOGICO: Estado 0.
         validacion de cada acción se mantine el registro como 'inactivo'
         permite auditoría y reportes para el Gerente.
         """

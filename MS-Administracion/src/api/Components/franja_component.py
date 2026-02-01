@@ -35,6 +35,7 @@ class FranjaComponent(Resource):
         """
         Solo el Admin de Sucursal puede crear nuevos horarios de reserva.
         """
+        # Manejo de la restauración (Ruta: /admin/franjas/restaurar/<id>)
         if id and "restaurar" in request.path:
             return FranjaService.restaurar_franja(id), 200
 
@@ -55,6 +56,10 @@ class FranjaComponent(Resource):
         """
         try:
             data = request.get_json()
+            # Es importante validar el esquema también en el PUT
+            errors = FranjaRequest().validate(data)
+            if errors: return {"result": False, "message": errors}, 400
+
             return FranjaService.actualizar_franja(id, data), 200
         except Exception as e:
             HandleLogs.write_error(e)

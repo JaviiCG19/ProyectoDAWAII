@@ -12,7 +12,7 @@ class MesaComponent(Resource):
     def get(self, id=None):
         """
         CORRECCIÓN : Aislamiento de datos.
-        Ya no listamos todas las mesas del sistema. Filtramos obligatoriamente por 'idlocal'
+        listamos todas las mesas del sistema. Filtramos obligatoriamente por 'idlocal'
         para que los datos de un restaurante sean PROPIOS y privados.
         """
         try:
@@ -51,14 +51,33 @@ class MesaComponent(Resource):
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
+    @valida_api_token  # Agregamos la edición que Kioz pidió
+    def put(self, id):
+        """
+        METODO PUT: Para editar los datos de la mesa (número o capacidad).
+        """
+        try:
+            data = request.get_json()
+            # Validamos que los cambios cumplan con el esquema
+            errors = MesaRequest().validate(data)
+            if errors:
+                return {"result": False, "message": errors}, 400
+
+            resultado = MesaService.actualizar_mesa(id, data)
+            return resultado, 200 if resultado['result'] else 500
+        except Exception as e:
+            HandleLogs.write_error(e)
+            return {"result": False, "message": str(e)}, 500
+
     @valida_api_token  # Seguridad para el borrado lógico realizado por el Admin de Sucursal
     def delete(self, id):
         """
         CORRECCIÓN: Roles y consistencia.
-        Esta acción la hace el Admin de Sucursal. Usamos borrado lógico (estado 9)
+        Esta acción la hace el Admin de Sucursal. Usamos borrado lógico (estado 0)
         para que el Gerente no pierda el historial de reportes.
         """
         try:
+            # Se ejecuta el cambio de estado a 0 definido en el Service
             return MesaService.eliminar_mesa(id), 200
         except Exception as e:
             HandleLogs.write_error(e)

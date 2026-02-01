@@ -5,60 +5,82 @@ from ..Model.Request.local_request import LocalRequest
 from ...utils.general.logs import HandleLogs
 from ..Services.middleware import valida_api_token
 
-
 class LocalComponent(Resource):
 
-    @valida_api_token  # El backend ahora valora el token para listar locales
+    @valida_api_token
     def get(self, id=None):
         """
-        CORRECCIÓN
-        1. Si hay ID, buscamos la sucursal específica.
-        2. Si no hay ID, listamos las sucursales PERO filtradas por 'idcia'.
+      Filtramos por idcia para que un Gerente
+        solo vea las sucursales de SU empresa.
         """
         try:
             if id:
                 resultado = LocalService.obtener_local_por_id(id)
+                # Si el ID no existe en DB, devolvemos 404
+                return resultado, 200 if resultado['result'] else 404
             else:
-                # Recuperamos el idcia que viene del localStorage/Token del Gerente.
                 id_cia = request.args.get('idcia')
                 if not id_cia:
-                    return {"result": False,
-                            "message": "Seguridad: ID de compañía requerido para listar sucursales"}, 400
+                    return {"result": False, "message": "Seguridad: ID de compañía requerido"}, 400
 
                 resultado = LocalService.listar_por_empresa(id_cia)
-
-            return resultado, 200 if resultado['result'] else 500
+                return resultado, 200 if resultado['result'] else 500
         except Exception as e:
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
-    @valida_api_token  # Seguridad para la creación o restauración de sucursales
+    @valida_api_token
     def post(self, id=None):
-        # Restauración lógica para no perder historial
+        """
+        CREACIÓN/RESTAURACIÓN:
+        Al crear un local, el Service dispara la creación automática de mesas (ms-X).
+        """
+        # Caso de Restauración (Estado 0 -> 1)
         if id and "restaurar" in request.path:
-            return LocalService.restaurar_local(id), 200
+            resultado = LocalService.restaurar_local(id)
+            return resultado, 200 if resultado['result'] else 404
 
         try:
             data = request.get_json()
-            # Validamos que idcia, detalle y dirección vengan definidos.
+            # Validación de LocalRequest (idcia, detalle, totmesas)
             errors = LocalRequest().validate(data)
             if errors:
                 return {"result": False, "message": errors}, 400
 
             resultado = LocalService.crear_local(data)
+            # 201: Recurso creado con éxito
             return resultado, 201 if resultado['result'] else 500
         except Exception as e:
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
-    @valida_api_token  # Seguridad para el borrado lógico
-    def delete(self, id):
+    @valida_api_token
+    def put(self, id):
         """
-        Borrado lógico:
-        Cambiamos estado a 0 para mantener integridad con las mesas vinculadas.
+       Actualiza datos y refresca FETAC.
+        Si cambia 'totmesas', el Service sincroniza las mesas automáticamente.
         """
         try:
-            return LocalService.eliminar_local(id), 200
+            data = request.get_json()
+            errors = LocalRequest().validate(data)
+            if errors:
+                return {"result": False, "message": errors}, 400
+
+            resultado = LocalService.actualizar_local(id, data)
+            return resultado, 200 if resultado['result'] else 404
+        except Exception as e:
+            HandleLogs.write_error(e)
+            return {"result": False, "message": str(e)}, 500
+
+    @valida_api_token
+    def delete(self, id):
+        """
+        BORRADO LOGICO: Estado 0.
+        Oculta el local y sus mesas sin borrar el historial.
+        """
+        try:
+            resultado = LocalService.eliminar_local(id)
+            return resultado, 200 if resultado['result'] else 404
         except Exception as e:
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500

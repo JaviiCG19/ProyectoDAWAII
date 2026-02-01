@@ -50,6 +50,24 @@ class PromocionComponent(Resource):
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
+    @valida_api_token
+    def put(self, id):
+        """
+        Metodo de Edicion.
+        Permite corregir descripciones o extender fechas de vigencia.
+        """
+        try:
+            data = request.get_json()
+            errors = PromocionRequest().validate(data)
+            if errors:
+                return {"result": False, "message": errors}, 400
+
+            resultado = PromocionService.actualizar_promocion(id, data)
+            return resultado, 200 if resultado['result'] else 500
+        except Exception as e:
+            HandleLogs.write_error(e)
+            return {"result": False, "message": str(e)}, 500
+
     @valida_api_token  # Seguridad para el borrado lógico
     def delete(self, id):
         """
