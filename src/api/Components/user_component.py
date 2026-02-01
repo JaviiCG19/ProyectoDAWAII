@@ -41,8 +41,8 @@ class UserComponent:
             pass_encriptada = generate_password_hash(user_data['usr_clave'], method='pbkdf2:sha256')
 
             sql = """
-                    INSERT INTO dawa.usuarios (nombre,clave,detalle,roles,rol_prioritario,respuesta,estado)
-                    VALUES (%s, %s, %s, %s, %s, %s, 0)
+                    INSERT INTO dawa.usuarios (nombre,clave,detalle,roles,rol_prioritario,respuesta,estado,id_local,id_res)
+                    VALUES (%s, %s, %s, %s, %s, %s, 0, %s, %s)
                     RETURNING id;
                 """
             # Tip: Recuerda encriptar la password antes de enviarla aquí en un entorno real
@@ -52,7 +52,9 @@ class UserComponent:
                 user_data.get('usr_detalle', ''),
                 user_data.get('usr_roles', '0;'),
                 user_data.get('usr_rolp','0'),
-                user_data.get('usr_respuesta', '')
+                user_data.get('usr_respuesta', ''),
+                user_data.get('usr_id_local', ''),
+                user_data.get('usr_id_res', '')
             )
 
             res = DataBaseHandle.ExecuteNonQuery(sql, record)  # Asumiendo que tienes este método
@@ -78,7 +80,11 @@ class UserComponent:
 
             sql = """
                     UPDATE dawa.usuarios
-                    SET detalle = %s, roles = %s, rol_prioritario = %s, respuesta = %s
+                    SET detalle = %s, roles = %s,
+                     rol_prioritario = %s,
+                     respuesta = %s,
+                     id_local = %s,
+                     id_res = %s
                     WHERE id = %s;
                 """
             record = (
@@ -86,6 +92,8 @@ class UserComponent:
                 user_data.get('usr_roles'),
                 user_data.get('usr_rolp'),
                 user_data.get('usr_respuesta'),
+                user_data.get('usr_id_local'),
+                user_data.get('usr_id_res'),
                 user_data['usr_id']
             )
 
