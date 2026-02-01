@@ -1,4 +1,6 @@
-# Importamos los COMPONENTES
+from ..Services.user_service import UserService
+from ..Services.login_service import LoginService
+from ..Services.tokenval_service import TokenValService
 from ..Components.local_component import LocalComponent
 from ..Components.mesa_component import MesaComponent
 from ..Components.franja_component import FranjaComponent
@@ -6,42 +8,51 @@ from ..Components.promocion_component import PromocionComponent
 from ..Components.dashboard_component import DashboardComponent
 from ..Components.empresa_component import EmpresaComponent
 
-
 def load_routes(api):
+    #agregar el metodo de obtener usuarios
+    api.add_resource(UserService, '/user/list')
+    api.add_resource(LoginService, '/security/login')
+    api.add_resource(TokenValService, '/security/validate')
 
-    # 1. RUTAS DE GERENCIA (Dueños de Restaurante / Cuentas Maestras)
+   # --- EMPRESAS (Restaurantes principales) ---
+    api.add_resource(
+        EmpresaComponent,
+        '/admin/empresas',
+        '/admin/empresas/<int:id>',
+        '/admin/empresas/restaurar/<int:id>'
+    )
 
-    # Dashboard y Reportes de la Empresa
-    api.add_resource(DashboardComponent, '/gerente/dashboard')
+    # --- LOCALES (Sucursales) ---
+    api.add_resource(
+        LocalComponent,
+        '/admin/locales',
+        '/admin/locales/<int:id>',
+        '/admin/locales/restaurar/<int:id>'
+    )
 
-    # Gestión de la Entidad Legal
-    api.add_resource(EmpresaComponent, '/gerente/empresa')
+    # --- MESAS ---
+    api.add_resource(
+        MesaComponent,
+        '/admin/mesas',
+        '/admin/mesas/<int:id>',
+        '/admin/mesas/restaurar/<int:id>'
+    )
 
-    # Gestión de Sucursales (Solo el Gerente crea/borra sucursales)
-    api.add_resource(LocalComponent,
-                     '/gerente/sucursales',
-                     '/gerente/sucursales/<int:id>',
-                     '/gerente/sucursales/restaurar/<int:id>')
+    # --- FRANJAS ---
+    api.add_resource(
+        FranjaComponent,
+        '/admin/franjas',
+        '/admin/franjas/<int:id>',
+        '/admin/franjas/restaurar/<int:id>'
+    )
 
-    # 2. RUTAS DE SUCURSAL (Administradores de Local)
-    # Horarios, promociones y mesas son manejados por el admin del local.
+    # --- PROMOCIONES ---
+    api.add_resource(
+        PromocionComponent,
+        '/admin/promociones',
+        '/admin/promociones/<int:id>',
+        '/admin/promociones/restaurar/<int:id>'
+    )
 
-    # Gestión de Mesas por Sucursal
-    api.add_resource(MesaComponent,
-                     '/sucursal/mesas',
-                     '/sucursal/mesas/<int:id>',
-                     '/sucursal/mesas/restaurar/<int:id>')
-
-    # Gestión de Franjas Horarias (Configuración de Reservas)
-    api.add_resource(FranjaComponent,
-                     '/sucursal/horarios',
-                     '/sucursal/horarios/<int:id>',
-                     '/sucursal/horarios/restaurar/<int:id>')
-
-    # Gestión de Promociones Vigentes
-    api.add_resource(PromocionComponent,
-                     '/sucursal/promociones',
-                     '/sucursal/promociones/<int:id>')
-
-    # Endpoint utilitario para selectores/combos en el Front
-    api.add_resource(LocalComponent, '/sucursal/listado-sucursales', endpoint='list_sucursales')
+    # --- DASHBOARD ---
+    api.add_resource(DashboardComponent, '/admin/dashboard')

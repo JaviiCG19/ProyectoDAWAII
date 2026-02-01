@@ -5,41 +5,44 @@ from ..Model.Request.promocion_request import PromocionRequest
 from ...utils.general.logs import HandleLogs
 from ..Services.middleware import valida_api_token
 
-
 class PromocionComponent(Resource):
 
-    @valida_api_token  # El backend ahora valora el token para listar promociones
+    @valida_api_token
     def get(self, id=None):
         """
-        CORRECCIÓN
-        Solo permitimos listar promociones vinculadas al 'idlocal' del administrador
-        que tiene la sesión activa.
+        Obtiene una promoción o lista las promociones de un local.
+        Soporta papelera con ?eliminados=true
         """
         try:
             if id:
                 resultado = PromocionService.obtener_por_id(id)
             else:
-                # El ID se recupera del localStorage del Front-end
                 id_local = request.args.get('idlocal')
-                if not id_local:
-                    return {"result": False,
-                            "message": "Seguridad: ID de local requerido para filtrar promociones"}, 400
-                resultado = PromocionService.listar_por_local(id_local)
+                ver_eliminados = request.args.get('eliminados') == 'true'
 
-            return resultado, 200 if resultado['result'] else 404
+                if not id_local:
+                    return {"result": False, "message": "ID de local requerido"}, 400
+
+                if ver_eliminados:
+                    resultado = PromocionService.listar_eliminados_por_local(id_local)
+                else:
+                    resultado = PromocionService.listar_por_local(id_local)
+
+            return resultado, 200 if resultado['result'] else 500
         except Exception as e:
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
-    @valida_api_token  # Seguridad para la creación de ofertas locales
-    def post(self):
+    @valida_api_token
+    def post(self, id=None):
         """
-       Aqui el Admin de Sucursal crea promociones locales.
-        Validamos integridad mediante PromocionRequest.
+        Crea una promoción o restaura una eliminada.
         """
+        if id and "restaurar" in request.path:
+            return PromocionService.restaurar_promocion(id), 200
+
         try:
             data = request.get_json()
-            # Validamos campos como fecha de vigencia y monto
             errors = PromocionRequest().validate(data)
             if errors:
                 return {"result": False, "message": errors}, 400
@@ -53,8 +56,7 @@ class PromocionComponent(Resource):
     @valida_api_token
     def put(self, id):
         """
-        Metodo de Edicion.
-        Permite corregir descripciones o extender fechas de vigencia.
+        Edita una promoción activa.
         """
         try:
             data = request.get_json()
@@ -68,10 +70,10 @@ class PromocionComponent(Resource):
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
-    @valida_api_token  # Seguridad para el borrado lógico
+    @valida_api_token
     def delete(self, id):
         """
-        Borrado lógico de promociones para mantener historial .
+        Borrado lógico de promociones.
         """
         try:
             resultado = PromocionService.eliminar_promocion(id)

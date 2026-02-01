@@ -4,46 +4,49 @@ from datetime import datetime
 class EmpresaService:
     @staticmethod
     def crear_empresa(data):
-        """
-        CORRECCIÓN: Se usa el estado para la lógica y fecact para el registro.
-        """
         query = """
                 INSERT INTO dawa.empresas (nomleg, nomfan, ruc, fecact, estado)
-                VALUES (%s, %s, %s, CURRENT_DATE, 1)
+                VALUES (%s, %s, %s, %s, 1) RETURNING id
                 """
-        # Ya no necesitamos pasar datetime desde Python si usamos CURRENT_DATE en el SQL
-        record = (data['nomleg'], data['nomfan'], data['ruc'])
+
+        record = (data['nomleg'], data['nomfan'], data['ruc'], datetime.now().date())
         return DataBaseHandle.ExecuteNonQuery(query, record)
 
     @staticmethod
     def listar_empresas():
-
-        query = "SELECT id, nomleg, nomfan, ruc, fecact FROM dawa.empresas WHERE estado = 1"
+        query = "SELECT id, nomleg, nomfan, ruc FROM dawa.empresas WHERE estado = 1 ORDER BY id DESC"
+        # Agregamos el 0 para indicar que devuelva todos los registros
         return DataBaseHandle.getRecords(query, 0)
 
     @staticmethod
-    def actualizar_empresa(id_cia, data):
+    def listar_eliminados():
 
+        query = "SELECT id, nomleg, nomfan, ruc FROM dawa.empresas WHERE estado = 0 ORDER BY id DESC"
+        return DataBaseHandle.getRecords(query, 0)
+
+    @staticmethod
+    def obtener_por_id(id_cia):
+        query = "SELECT id, nomleg, nomfan, ruc FROM dawa.empresas WHERE id = %s"
+        return DataBaseHandle.getRecords(query, 1, (id_cia,))
+
+    @staticmethod
+    def actualizar_empresa(id_cia, data):
         query = """
-                UPDATE dawa.empresas
-                SET nomleg = %s, nomfan = %s, ruc = %s, fecact = CURRENT_DATE
-                WHERE id = %s
+                UPDATE dawa.empresas 
+                SET nomleg = %s, nomfan = %s, ruc = %s, fecact = %s 
+                WHERE id = %s AND estado = 1
                 """
-        record = (data['nomleg'], data['nomfan'], data['ruc'], id_cia)
+        record = (data['nomleg'], data['nomfan'], data['ruc'], datetime.now().date(), id_cia)
         return DataBaseHandle.ExecuteNonQuery(query, record)
 
     @staticmethod
     def eliminar_empresa(id_cia):
-        """
-        BORRADO LÓGICO: Actualiza estado a 0 y registra la fecha de la baja en fecact.
-        """
-        try:
-            # 1. Desactivar la empresa principal
-            query_emp = "UPDATE dawa.empresas SET estado = 0, fecact = CURRENT_DATE WHERE id = %s"
-            DataBaseHandle.ExecuteNonQuery(query_emp, (id_cia,))
+        # Borrado lógico: Estado 0
+        query = "UPDATE dawa.empresas SET estado = 0, fecact = %s WHERE id = %s AND estado = 1"
+        return DataBaseHandle.ExecuteNonQuery(query, (datetime.now().date(), id_cia))
 
-            # 2. Desactivar todos los locales vinculados (Aislamiento de datos)
-            query_loc = "UPDATE dawa.locales SET estado = 0, fecact = CURRENT_DATE WHERE idcia = %s"
-            return DataBaseHandle.ExecuteNonQuery(query_loc, (id_cia,))
-        except Exception as e:
-            return {"result": False, "message": str(e)}
+    @staticmethod
+    def restaurar_empresa(id_cia):
+        # Restauración: Estado 1
+        query = "UPDATE dawa.empresas SET estado = 1, fecact = %s WHERE id = %s AND estado = 0"
+        return DataBaseHandle.ExecuteNonQuery(query, (datetime.now().date(), id_cia))

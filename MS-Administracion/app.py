@@ -7,32 +7,19 @@ from flask_swagger_ui import get_swaggerui_blueprint
 
 from src.api.Routes.routes import load_routes
 from src.utils.general.logs import HandleLogs
-# Definimos el origen
-FRONTEND_ORIGIN = os.environ.get('FRONTEND_URL', '*')
 
 app = Flask(__name__)
-CORS(app,
-     resources={r"/*": {
-         "origins": [FRONTEND_ORIGIN],
-         "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-         "allow_headers": [
-             "Content-Type",
-             "Authorization",
-             "tokenapp",
-             "X-Requested-With"
-         ],
-         "supports_credentials": False
-     }})
+CORS(app)
 api = Api(app)
 load_routes(api)
 
 #definiciones del swagger
-SWAGGER_URL = '/ws/ms-admin/'
+SWAGGER_URL = '/ws/ms-sec/'
 API_URL = '/static/swagger.json'
 
 SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(SWAGGER_URL, API_URL,
                                               config={
-                                                  'app_name': 'ms-admin-restfullapi'
+                                                  'app_name': 'ms-sec-restfullapi'
                                               })
 
 app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)

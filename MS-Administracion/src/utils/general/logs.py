@@ -2,6 +2,7 @@ import datetime
 import inspect
 import os
 
+
 class HandleLogs:
 
     @staticmethod
@@ -22,7 +23,7 @@ class HandleLogs:
         except Exception as e:
             print("Error al crear log" + str(e))
 
-    @staticmethod
+
     def write_error(*err):
         try:
             fun = inspect.currentframe().f_back.f_code.co_name

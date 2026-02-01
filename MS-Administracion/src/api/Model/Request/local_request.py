@@ -1,38 +1,35 @@
 from marshmallow import Schema, fields, validate
 
 class LocalRequest(Schema):
-    # El ID de la compañía vincula la sucursal al dueño (Gerente)
+    # Relación con la Empresa (idcia)
     idcia = fields.Int(
         required=True,
         error_messages={"required": "El ID de compañía es obligatorio."}
     )
 
-    # El detalle es el nombre de la sucursal
+    # Nombre de la sucursal
     detalle = fields.Str(
         required=True,
         validate=validate.Length(min=1, max=50),
-        error_messages={"required": "El nombre del local es obligatorio."}
+        error_messages={
+            "required": "El nombre del local es obligatorio.",
+            "validator_failed": "El detalle no puede exceder los 50 caracteres."
+        }
     )
 
-    # La dirección física del establecimiento
+    # Dirección física
     direccion = fields.Str(
         required=True,
         validate=validate.Length(min=1, max=150),
-        error_messages={"required": "La dirección es obligatoria."}
+        error_messages={
+            "required": "La dirección es obligatoria.",
+            "validator_failed": "La dirección no puede exceder los 150 caracteres."
+        }
     )
 
-    # CORRECCION: Ahora es requerido y validamos que sea al menos 1 mesa.
-    # Este campo activa el bucle en LocalService para crear desde ms-1 hasta ms-40.
+    # Cantidad de mesas: Esencial para el bucle automático del Service
     totmesas = fields.Int(
-        required=True,
-        validate=validate.Range(min=1, error="El local debe tener al menos 1 mesa."),
-        error_messages={"required": "El total de mesas es obligatorio para la gestión de aforo."}
-    )
-
-    # Campo para manejo de Borrado Lógico (1: Activo, 0: Inactivo/Papelera).
-    # Usamos load_default para que el Service siempre reciba un estado inicial.
-    estado = fields.Int(
         required=False,
-        validate=validate.OneOf([0, 1]),
-        load_default=1
+        load_default=1,
+        error_messages={"invalid": "El total de mesas debe ser un número entero."}
     )

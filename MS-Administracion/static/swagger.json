@@ -2,25 +2,19 @@
   "swagger": "2.0",
   "info": {
     "description": "Documentación de Servicios Web de Administración - DAWA .",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "title": "Documentación de Administración UG",
-    "contact": {
-      "email": "juan.cedenor@ug.edu.ec"
-    }
+    "contact": { "email": "juan.cedenor@ug.edu.ec" }
   },
   "securityDefinitions": {
     "TokenAuth": {
       "type": "apiKey",
       "name": "tokenapp",
       "in": "header",
-      "description": "Ingrese el token JWT recuperado del localStorage del Front-end."
+      "description": "Ingrese el token JWT recuperado del localStorage."
     }
   },
-  "security": [
-    {
-      "TokenAuth": []
-    }
-  ],
+  "security": [{ "TokenAuth": [] }],
   "tags": [
     { "name": "Empresas", "description": "Entidad principal de Restaurantes" },
     { "name": "Administración", "description": "Gestión de Locales, Mesas y Franjas Horarias" },
@@ -37,33 +31,70 @@
       "post": {
         "tags": ["Empresas"],
         "summary": "Registrar Empresa",
-        "parameters": [{
-          "in": "body", "name": "body", "required": true,
-          "schema": { "$ref": "#/definitions/EmpresaSaveDef" }
-        }],
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/EmpresaSaveDef" } }],
         "responses": { "201": { "description": "Creado" } }
+      }
+    },
+    "/admin/empresas/restaurar/{id}": {
+      "post": {
+        "tags": ["Empresas"],
+        "summary": "Restaurar Empresa eliminada",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }],
+        "responses": { "200": { "description": "Restaurado exitosamente" } }
+      }
+    },
+    "/admin/dashboard": {
+      "get": {
+        "tags": ["Reportes"],
+        "summary": "Resumen del Dashboard Gerencial",
+        "parameters": [{ "name": "idcia", "in": "query", "required": true, "type": "integer", "description": "ID de compañía para consolidar datos" }],
+        "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Response" } } }
       }
     },
     "/admin/locales": {
       "get": {
         "tags": ["Administración"],
         "summary": "Lista de Locales por Empresa",
-        "parameters": [{
-          "name": "idcia",
-          "in": "query",
-          "required": true,
-          "type": "integer",
-          "description": "ID de la compañía (desde localStorage)"
-        }],
+        "parameters": [
+          { "name": "idcia", "in": "query", "required": true, "type": "integer" },
+          { "name": "eliminados", "in": "query", "required": false, "type": "boolean", "description": "Set true para ver papelera" }
+        ],
+        "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Response" } } }
+      },
+      "post": {
+        "tags": ["Administración"],
+        "summary": "Registrar Local (Genera mesas automáticamente)",
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/LocalSaveDef" } }],
+        "responses": { "201": { "description": "Creado" } }
+      }
+    },
+    "/admin/locales/restaurar/{id}": {
+      "post": {
+        "tags": ["Administración"],
+        "summary": "Restaurar Local eliminado",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }],
+        "responses": { "200": { "description": "Restaurado exitosamente" } }
+      }
+    },
+    "/admin/mesas": {
+      "get": {
+        "tags": ["Administración"],
+        "summary": "Listar Mesas por Local",
+        "parameters": [{ "name": "idlocal", "in": "query", "required": true, "type": "integer" }],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/admin/franjas": {
+      "get": {
+        "tags": ["Administración"],
+        "summary": "Listar Franjas Horarias por Local",
+        "parameters": [{ "name": "idlocal", "in": "query", "required": true, "type": "integer" }],
         "responses": { "200": { "description": "OK" } }
       },
       "post": {
         "tags": ["Administración"],
-        "summary": "Registrar Local",
-        "parameters": [{
-          "in": "body", "name": "body", "required": true,
-          "schema": { "$ref": "#/definitions/LocalSaveDef" }
-        }],
+        "summary": "Crear Franja Horaria",
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/FranjaSaveDef" } }],
         "responses": { "201": { "description": "Creado" } }
       }
     },
@@ -71,37 +102,14 @@
       "get": {
         "tags": ["Marketing"],
         "summary": "Listar Promociones por Local",
-        "parameters": [{
-          "name": "idlocal",
-          "in": "query",
-          "required": true,
-          "type": "integer",
-          "description": "ID del local para filtrar promociones"
-        }],
-        "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Response" } } }
+        "parameters": [{ "name": "idlocal", "in": "query", "required": true, "type": "integer" }],
+        "responses": { "200": { "description": "OK" } }
       },
       "post": {
         "tags": ["Marketing"],
-        "summary": "Crear Promoción",
-        "parameters": [{
-          "in": "body", "name": "body", "required": true,
-          "schema": { "$ref": "#/definitions/PromoSaveDef" }
-        }],
+        "summary": "Crear Promoción con validación de fechas",
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/PromoSaveDef" } }],
         "responses": { "201": { "description": "Creado" } }
-      }
-    },
-    "/admin/dashboard": {
-      "get": {
-        "tags": ["Reportes"],
-        "summary": "Resumen del Dashboard Gerencial",
-        "parameters": [{
-          "name": "idcia",
-          "in": "query",
-          "required": true,
-          "type": "integer",
-          "description": "ID de compañía para consolidar datos"
-        }],
-        "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Response" } } }
       }
     }
   },
@@ -110,26 +118,40 @@
       "type": "object",
       "required": ["nomleg", "nomfan", "ruc"],
       "properties": {
-        "nomleg": { "type": "string" },
-        "nomfan": { "type": "string" },
-        "ruc": { "type": "string" }
+        "nomleg": { "type": "string", "description": "Nombre Legal / Razón Social" },
+        "nomfan": { "type": "string", "description": "Nombre Comercial" },
+        "ruc": { "type": "string", "minLength": 13, "maxLength": 13 }
       }
     },
     "LocalSaveDef": {
       "type": "object",
-      "required": ["idcia", "detalle", "direccion"],
+      "required": ["idcia", "detalle", "direccion", "totmesas"],
       "properties": {
         "idcia": { "type": "integer" },
         "detalle": { "type": "string" },
-        "direccion": { "type": "string" }
+        "direccion": { "type": "string" },
+        "totmesas": { "type": "integer", "description": "Número de mesas a autogenerar" }
+      }
+    },
+    "FranjaSaveDef": {
+      "type": "object",
+      "required": ["idlocal", "horini", "horfin", "diasem"],
+      "properties": {
+        "idlocal": { "type": "integer" },
+        "horini": { "type": "string", "example": "08:00" },
+        "horfin": { "type": "string", "example": "16:00" },
+        "diasem": { "type": "integer", "description": "0-6 (Dom-Sab)" },
+        "tipres": { "type": "integer", "default": 0 }
       }
     },
     "PromoSaveDef": {
       "type": "object",
-      "required": ["idlocal", "nombre", "descuento"],
+      "required": ["idlocal", "nombre", "fecini", "fecfin"],
       "properties": {
         "idlocal": { "type": "integer" },
         "nombre": { "type": "string" },
+        "fecini": { "type": "string", "format": "date" },
+        "fecfin": { "type": "string", "format": "date" },
         "descuento": { "type": "number" }
       }
     },
@@ -138,8 +160,7 @@
       "properties": {
         "result": { "type": "boolean" },
         "message": { "type": "string" },
-        "data": { "type": "object" },
-        "status": { "type": "integer" }
+        "data": { "type": "object" }
       }
     }
   }

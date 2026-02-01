@@ -8,21 +8,15 @@ from ..Services.middleware import valida_api_token
 
 class FranjaComponent(Resource):
 
-    @valida_api_token  # Valoramos el token para ver los horarios
+    @valida_api_token
     def get(self, id=None):
-        """
-        CORRECCIÓN: Gestión por sucursal.
-        Filtramos los horarios (franjas) por 'idlocal'. Esto cumple con que cada
-        administrador de sucursal maneje su propia disponibilidad.
-        """
         try:
             if id:
                 resultado = FranjaService.obtener_por_id(id)
             else:
-                # El ID viene del front de localstorage
                 id_local = request.args.get('idlocal')
                 if not id_local:
-                    return {"result": False, "message": "ID de local requerido para cargar horarios"}, 400
+                    return {"result": False, "message": "ID de local requerido"}, 400
                 resultado = FranjaService.listar_por_local(id_local)
 
             return resultado, 200 if resultado['result'] else 500
@@ -30,48 +24,36 @@ class FranjaComponent(Resource):
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
-    @valida_api_token  # Seguridad para crear nuevos horarios
+    @valida_api_token
     def post(self, id=None):
-        """
-        Solo el Admin de Sucursal puede crear nuevos horarios de reserva.
-        """
-        # Manejo de la restauración (Ruta: /admin/franjas/restaurar/<id>)
         if id and "restaurar" in request.path:
             return FranjaService.restaurar_franja(id), 200
 
         try:
             data = request.get_json()
-            # Validamos el formato de hora (HH:MM) y la vinculación al local
             errors = FranjaRequest().validate(data)
             if errors: return {"result": False, "message": errors}, 400
             return FranjaService.crear_franja(data), 201
         except Exception as e:
-            HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
-    @valida_api_token  # Seguridad para modificar horarios existentes
+    @valida_api_token
     def put(self, id):
-        """
-        Actualización de horarios de apertura/cierre de reservas.
-        """
         try:
             data = request.get_json()
-            # Es importante validar el esquema también en el PUT
             errors = FranjaRequest().validate(data)
-            if errors: return {"result": False, "message": errors}, 400
+            if errors:
+                return {"result": False, "message": errors}, 400
 
-            return FranjaService.actualizar_franja(id, data), 200
+            resultado = FranjaService.actualizar_franja(id, data)
+            return resultado, 200 if resultado['result'] else 500
         except Exception as e:
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
-    @valida_api_token  # Seguridad para eliminar disponibilidad
+    @valida_api_token
     def delete(self, id):
-        """
-        Borrado lógico de la franja horaria.
-        """
         try:
             return FranjaService.eliminar_franja(id), 200
         except Exception as e:
-            HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500

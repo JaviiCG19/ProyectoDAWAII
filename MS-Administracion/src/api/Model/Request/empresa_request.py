@@ -1,29 +1,37 @@
 from marshmallow import Schema, fields, validate
 
 class EmpresaRequest(Schema):
-    # El nombre legal es vital para facturación y reportes.
+
     nomleg = fields.Str(
         required=True,
         validate=validate.Length(min=3, max=50),
-        error_messages={"required": "El nombre legal es obligatorio."}
+        error_messages={
+            "required": "El nombre legal es obligatorio.",
+            "validator_failed": "El nombre legal debe tener entre 3 y 50 caracteres."
+        }
     )
 
-    # Nombre comercial para mostrar en el Dashboard del Gerente.
+    # Nombre Fantasía (Nombre comercial)
     nomfan = fields.Str(
         required=True,
         validate=validate.Length(min=3, max=50),
-        error_messages={"required": "El nombre comercial es obligatorio."}
+        error_messages={
+            "required": "El nombre comercial es obligatorio.",
+            "validator_failed": "El nombre comercial debe tener entre 3 y 50 caracteres."
+        }
     )
 
-    # El RUC es la clave única. Validamos 13 caracteres exactos.
+    # RUC - Validación estricta de 13 dígitos
     ruc = fields.Str(
         required=True,
         validate=validate.Length(equal=13),
-        error_messages={"required": "El RUC es obligatorio y debe tener 13 dígitos."}
+        error_messages={
+            "required": "El RUC es obligatorio.",
+            "validator_failed": "El RUC debe tener exactamente 13 dígitos."
+        }
     )
 
-    # Manejo de visibilidad (1: Activo, 0: Inactivo)
-
+    # Estado: 1 por defecto al crear, permite 0 para bajas
     estado = fields.Int(
         required=False,
         validate=validate.OneOf([0, 1]),

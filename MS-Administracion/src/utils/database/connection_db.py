@@ -14,13 +14,16 @@ def conn_db():
                             user=Parametros.db_user,
                             password=Parametros.db_pass,
                             database=Parametros.db_name,
+                            sslmode='require',
                             cursor_factory=RealDictCursor)
 
 class DataBaseHandle:
     #Nuestros Metodos para ejecutar sentencias.
     #ejecuta metodos de tipo select
     @staticmethod
-    def getRecords(query,  tamanio, record=()):
+    def getRecords(query, tamanio, record=()):
+        conn = None
+        cursor = None
         try:
             result = False
             message = None
@@ -28,11 +31,12 @@ class DataBaseHandle:
 
             conn = conn_db()
             cursor = conn.cursor()
+
             if len(record) == 0:
                 cursor.execute(query)
             else:
                 cursor.execute(query, record)
-            # tamanio es 0 todos, 1 solo uno, > 1 n registros
+
             if tamanio == 0:
                 res = cursor.fetchall()
             elif tamanio == 1:
@@ -42,42 +46,62 @@ class DataBaseHandle:
 
             data = res
             result = True
+
         except Exception as ex:
             HandleLogs.write_error(ex)
             message = ex.__str__()
+
         finally:
-            cursor.close()
-            conn.close()
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+
             return internal_response(result, data, message)
 
-    #ejecuta metodos de tipo INSERT-UPDATE-DELETE
     @staticmethod
     def ExecuteNonQuery(query, record):
+        conn = None
+        cursor = None
         try:
             result = False
             message = None
             data = None
+
             conn = conn_db()
             cursor = conn.cursor()
+
             if len(record) == 0:
                 cursor.execute(query)
             else:
                 cursor.execute(query, record)
 
-            if query.find('INSERT') > -1:
-                cursor.execute('SELECT LASTVAL()') ##obtiene el ID del registro insertado
-                ult_id = cursor.fetchone()['lastval'] # guardo el ID en ult_id
-                conn.commit()
-                data = ult_id
+            # 1. Obtenemos cuántas filas se vieron afectadas (útil para UPDATE/DELETE)
+            rows_affected = cursor.rowcount
+
+            if 'INSERT' in query.upper():
+                # Intentar obtener el ID si la query tiene RETURNING o usamos LASTVAL
+                try:
+                    cursor.execute('SELECT LASTVAL()')
+                    data = cursor.fetchone()['lastval']
+                except:
+                    data = rows_affected
             else:
-                data = 0
+                # Para UPDATE o DELETE, devolvemos el número de filas afectadas
+                data = rows_affected
+
+            # 2. ¡VITAL! Hacer commit para CUALQUIER operación de escritura
+            conn.commit()
             result = True
+
         except Exception as ex:
+            if conn:
+                conn.rollback()  # Opcional: deshace cambios si hay error
             HandleLogs.write_error(ex)
-            message = ex.__str__()
+            message = str(ex)
         finally:
-            cursor.close()
-            conn.close()
+            if cursor: cursor.close()
+            if conn: conn.close()
             return internal_response(result, data, message)
 
 

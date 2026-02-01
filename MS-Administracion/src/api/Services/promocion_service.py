@@ -4,13 +4,10 @@ from datetime import datetime
 class PromocionService:
     @staticmethod
     def listar_por_local(id_local):
-        """
-        CORRECCIÓN
-        Filtramos por 'idlocal' para que el Admin de Sucursal solo vea sus promociones.
-        Solo mostramos las activas (estado = 1).
-        """
+
         query = """
-            SELECT id, idlocal, nombre, descripcion, descuento, fec_inicio, fec_fin 
+            SELECT id, idlocal, TRIM(nombre) as nombre, TRIM(descripcion) as descripcion, 
+                   descuento, fec_inicio, fec_fin 
             FROM dawa.promociones 
             WHERE idlocal = %s AND estado = 1 
             ORDER BY fec_inicio DESC
@@ -19,16 +16,15 @@ class PromocionService:
 
     @staticmethod
     def obtener_por_id(id_promo):
-        """Busca una promoción específica para edición o detalle."""
-        query = "SELECT id, idlocal, nombre, descripcion, descuento, fec_inicio, fec_fin FROM dawa.promociones WHERE id = %s"
+        query = """
+            SELECT id, idlocal, TRIM(nombre) as nombre, TRIM(descripcion) as descripcion, 
+                   descuento, fec_inicio, fec_fin 
+            FROM dawa.promociones WHERE id = %s
+        """
         return DataBaseHandle.getRecords(query, 1, (id_promo,))
 
     @staticmethod
     def crear_promocion(data):
-        """
-        Aquí definimos todos los campos validados por el Request:
-        fechas de vigencia, descuento y el vínculo obligatorio al local.
-        """
         query = """
             INSERT INTO dawa.promociones (idlocal, nombre, descripcion, descuento, fec_inicio, fec_fin, estado, fecact)
             VALUES (%s, %s, %s, %s, %s, %s, 1, %s)
@@ -41,14 +37,12 @@ class PromocionService:
 
     @staticmethod
     def actualizar_promocion(id_promo, data):
-        """
-         Metodo para editar promociones.
-
-        """
+        """Permite editar la promo manteniendo la lógica de negocio."""
         query = """
             UPDATE dawa.promociones 
-            SET nombre = %s, descripcion = %s, descuento = %s, fec_inicio = %s, fec_fin = %s, fecact = %s 
-            WHERE id = %s
+            SET nombre = %s, descripcion = %s, descuento = %s, 
+                fec_inicio = %s, fec_fin = %s, fecact = %s
+            WHERE id = %s AND estado = 1
         """
         record = (
             data['nombre'], data.get('descripcion', ''), data['descuento'],
@@ -58,10 +52,23 @@ class PromocionService:
 
     @staticmethod
     def eliminar_promocion(id_promo):
-        """
-        BORRADO LOGICO: Estado 0.
-        validacion de cada acción se mantine el registro como 'inactivo'
-        permite auditoría y reportes para el Gerente.
-        """
+        # Borrado lógico: estado 0
         query = "UPDATE dawa.promociones SET estado = 0, fecact = %s WHERE id = %s"
+        return DataBaseHandle.ExecuteNonQuery(query, (datetime.now(), id_promo))
+
+    @staticmethod
+    def listar_eliminados_por_local(id_local):
+        """Para la papelera de promociones."""
+        query = """
+            SELECT id, TRIM(nombre) as nombre, descuento, fec_inicio, fec_fin 
+            FROM dawa.promociones 
+            WHERE idlocal = %s AND estado = 0 
+            ORDER BY id DESC
+        """
+        return DataBaseHandle.getRecords(query, 0, (id_local,))
+
+    @staticmethod
+    def restaurar_promocion(id_promo):
+        """Saca la promo de la papelera."""
+        query = "UPDATE dawa.promociones SET estado = 1, fecact = %s WHERE id = %s"
         return DataBaseHandle.ExecuteNonQuery(query, (datetime.now(), id_promo))
