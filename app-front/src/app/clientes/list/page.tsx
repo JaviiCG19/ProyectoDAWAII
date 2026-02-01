@@ -118,7 +118,7 @@ export default function ListadoClientesPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center gap-4">
-                        <Link href={`/editar/${cliente.id}`}>
+                        <Link href={`/clientes/${cliente.id}`}>
                           <button className="flex items-center gap-1 text-[#F2B847] hover:text-[#d89f3a] transition">
                             <Edit size={16} />
                             Editar

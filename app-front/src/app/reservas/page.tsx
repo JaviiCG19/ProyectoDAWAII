@@ -10,15 +10,16 @@ export default function CrearReservaPage() {
   const [paso, setPaso] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  const [mesasDisponibles, setMesasDisponibles] = useState<any[]>([]);
-  const [cargandoMesas, setCargandoMesas] = useState(false)
 
-  // Restaurantes simulados (temporal)
-  const [restaurantes, setRestaurantes] = useState([
+  // Mesas reales desde el backend
+  const [mesasDisponibles, setMesasDisponibles] = useState<any[]>([]);
+  const [cargandoMesas, setCargandoMesas] = useState(false);
+
+  // Restaurantes simulados (temporal, hasta que llegue el endpoint de locales)
+  const restaurantes = [
     { id: 1, nombre: 'La Parrilla Dorada', sucursales: ['Samborondón', 'Urdesa'] },
     { id: 2, nombre: 'El Sabor del Mar', sucursales: ['Urdesa', 'Alborada'] },
-  ]);
+  ];
 
   const horariosDisponibles = ['19:00', '19:30', '20:00', '20:30', '21:00'];
 
@@ -28,27 +29,29 @@ export default function CrearReservaPage() {
     fecha: '',
     hora: '',
     personas: 2,
-    mesa: '',
-    anticipo: false,
+    mesa: ''
   });
 
-  // Cargar mesas disponibles cuando se seleccione fecha (paso 3)
+  // Cargar mesas disponibles cuando se seleccione fecha y estemos en paso 3
   useEffect(() => {
-  if (paso === 3 && formData.fecha) {
-    setCargandoMesas(true);
-    api.get(`/mesas/disponibles/${formData.fecha}`)
-      .then(response => {
-        const data = response.data.data || response.data || [];
-        setMesasDisponibles(Array.isArray(data) ? data : []);
-      })
-      .catch(err => {
-        console.error('Error al cargar mesas:', err);
-        setMesasDisponibles([]);
-      })
-      .finally(() => setCargandoMesas(false));
-  }
-}, [paso, formData.fecha]);
-
+    if (paso === 3 && formData.fecha) {
+      setCargandoMesas(true);
+      setError(null);
+       
+      api.get(`/mesas/disponibles/${formData.fecha}?franja_id=1`)
+     // api.get(`/mesas/disponibles/${formData.fecha}`)
+        .then(response => {
+          const data = response.data.data || response.data || [];
+          setMesasDisponibles(Array.isArray(data) ? data : []);
+        })
+        .catch(err => {
+          console.error('Error al cargar mesas:', err);
+          setError('No se pudieron cargar las mesas disponibles para esta fecha');
+          setMesasDisponibles([]);
+        })
+        .finally(() => setCargandoMesas(false));
+    }
+  }, [paso, formData.fecha]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
@@ -57,12 +60,7 @@ export default function CrearReservaPage() {
     });
   };
 
-  const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      anticipo: e.target.checked,
-    });
-  };
+ 
 
   const siguientePaso = () => setPaso(paso + 1);
   const anteriorPaso = () => setPaso(paso - 1);
@@ -72,36 +70,78 @@ export default function CrearReservaPage() {
     setError(null);
     setLoading(true);
 
-    try {
-      const payload = {
-        idlocal: parseInt(formData.restauranteId),
-        idmesa: formData.mesa ? parseInt(formData.mesa) : 0,
-        idcliente: 9,  // ← CAMBIA POR ID REAL DEL CLIENTE LOGUEADO
-        fecha: formData.fecha,
-        franja_id: 1, // temporal
-        numper: formData.personas,
-      };
-
-      const response = await api.post('/reservas', payload);
-      const reservaId = response.data.data;
-
-      // Si anticipo está marcado, registrar anticipo real
-      if (formData.anticipo) {
-        await api.post('/anticipos', {
-          idreserva: reservaId,
-          monto: 20, // monto fijo o calculado
-        });
-      }
-
-      alert('Reserva creada con éxito! ID: ' + reservaId);
-      router.push('/reservas/list');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'No se pudo crear la reserva');
-      console.error(err);
-    } finally {
+    // Validación básica
+    if (!formData.restauranteId) {
+      setError('Selecciona un restaurante');
       setLoading(false);
+      return;
     }
-  };
+    if (!formData.sucursal) {
+      setError('Selecciona una sucursal');
+      setLoading(false);
+      return;
+    }
+    if (!formData.fecha) {
+      setError('Selecciona una fecha');
+      setLoading(false);
+      return;
+    }
+    if (!formData.hora) {
+      setError('Selecciona una hora');
+      setLoading(false);
+      return;
+    }
+    if (formData.personas < 1) {
+      setError('El número de personas debe ser al menos 1');
+      setLoading(false);
+      return;
+    }
+
+    try {
+    const payload = {
+      idlocal: Number(formData.restauranteId),
+      idmesa: formData.mesa ? Number(formData.mesa) : 0,
+      idcliente: 12,
+      fecha: formData.fecha,
+      franja_id: 1,
+      numper: Number(formData.personas),
+    };
+
+    console.log('📤 Enviando payload:', payload);
+
+    const response = await api.post('/reservas', payload);
+
+    console.log('✅ RESPUESTA BACKEND:', response.data);
+
+    // 🔑 EL BACK DEVUELVE SOLO UN NÚMERO
+    const reservaId = response.data?.data;
+
+    if (!reservaId || reservaId === 0) {
+      alert('Reserva creada, pero no se recibió el ID');
+      router.push('/reservas/list');
+      return;
+    }
+
+    alert('✅ Reserva creada correctamente');
+
+    // 👉 NUNCA registres anticipo aquí
+    // 👉 eso se hace en el DETALLE
+
+    router.push(`/reservas/${reservaId}`);
+
+  } catch (err: any) {
+    console.error(' Error completo:', err.response?.data || err);
+
+    if (err.response?.status === 409) {
+      setError(err.response.data.message);
+    } else {
+      setError('Error al crear la reserva');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -238,81 +278,73 @@ export default function CrearReservaPage() {
         </div>
       )}
 
-
-    {/* Paso 3: MESAS */}
+      {/* Paso 3: Mesa y anticipo - con mesas reales */}
       {paso === 3 && (
-  <div className="bg-white rounded-2xl shadow-lg p-6 space-y-6">
-    <h2 className="text-xl font-bold text-[#F2B847]">3. Mesa y anticipo</h2>
+        <div className="bg-white rounded-2xl shadow-lg p-6 space-y-6">
 
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700">Número de personas</label>
-        <input
-          type="number"
-          name="personas"
-          value={formData.personas}
-          onChange={handleChange}
-          min="1"
-          max="12"
-          className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F2B847]"
-        />
-      </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Número de personas</label>
+              <input
+                type="number"
+                name="personas"
+                value={formData.personas}
+                onChange={handleChange}
+                min="1"
+                max="12"
+                className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F2B847]"
+              />
+            </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700">Mesa preferida</label>
-        {cargandoMesas ? (
-          <p className="text-sm text-gray-600">Cargando mesas disponibles...</p>
-        ) : mesasDisponibles.length > 0 ? (
-          <select
-            name="mesa"
-            value={formData.mesa}
-            onChange={handleChange}
-            className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F2B847]"
-          >
-            <option value="">Automática (mejor disponible)</option>
-            {mesasDisponibles.map(mesa => (
-              <option key={mesa.id} value={mesa.id}>
-                {mesa.nombre || `Mesa ${mesa.id}`} ({mesa.capacidad} personas)
-              </option>
-            ))}
-          </select>
-        ) : (
-          <p className="text-sm text-orange-600">No hay mesas disponibles para esta fecha/hora</p>
-        )}
-      </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Mesa preferida</label>
 
-      {/* Anticipo */}
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          id="anticipo"
-          checked={formData.anticipo}
-          onChange={handleCheckbox}
-          className="w-5 h-5 text-[#F2B847] border-gray-300 rounded"
-        />
-        <label htmlFor="anticipo" className="text-sm font-medium text-gray-700">
-          Requiere anticipo (obligatorio en algunos casos)
-        </label>
-      </div>
-    </div>
+              {cargandoMesas ? (
+                <p className="text-sm text-gray-600">Cargando mesas disponibles...</p>
+              ) : mesasDisponibles.length > 0 ? (
+                <select
+                  name="mesa"
+                  value={formData.mesa}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F2B847]"
+                >
+                  <option value="">Automática (mejor disponible)</option>
+                  {mesasDisponibles.map(mesa => (
+                    <option key={mesa.id} value={mesa.id}>
+                      Mesa {mesa.numero} ({mesa.maxper} personas)
+                    </option>
+                  ))}
+                </select>
+              ) : formData.fecha ? (
+                <p className="text-sm text-orange-600">
+                  No hay mesas disponibles para {formData.fecha}. Prueba otra fecha.
+                </p>
+              ) : (
+                <p className="text-sm text-gray-600">Selecciona primero una fecha para ver mesas disponibles</p>
+              )}
+            </div>
 
-    <div className="flex justify-between">
-      <button
-        onClick={anteriorPaso}
-        className="px-6 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-100 transition"
-      >
-        Anterior
-      </button>
-      <button
-        onClick={siguientePaso}
-        disabled={cargandoMesas}
-        className="flex items-center gap-2 bg-[#F2B847] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50"
-      >
-        Siguiente
-      </button>
-         </div>
-      </div>
-     )}
+            
+          </div>
+
+          <div className="flex justify-between">
+            <button
+              onClick={anteriorPaso}
+              disabled={loading}
+              className="px-6 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-100 transition disabled:opacity-50"
+            >
+              Anterior
+            </button>
+            <button
+              onClick={siguientePaso}
+              disabled={cargandoMesas || loading}
+              className="flex items-center gap-2 bg-[#F2B847] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Paso 4: Confirmación */}
       {paso === 4 && (
@@ -322,11 +354,11 @@ export default function CrearReservaPage() {
           <div className="space-y-4">
             <div className="bg-gray-50 p-4 rounded-xl">
               <h3 className="font-semibold mb-2">Resumen</h3>
-              <p><strong>Restaurante:</strong> {restaurantes.find(r => r.id === parseInt(formData.restauranteId))?.nombre} ({formData.sucursal})</p>
+              <p><strong>Restaurante:</strong> {restaurantes.find(r => r.id === parseInt(formData.restauranteId))?.nombre || 'Local ' + formData.restauranteId} ({formData.sucursal})</p>
               <p><strong>Fecha y hora:</strong> {formData.fecha} {formData.hora}</p>
               <p><strong>Personas:</strong> {formData.personas}</p>
               <p><strong>Mesa:</strong> {formData.mesa ? `Mesa ${formData.mesa}` : 'Automática'}</p>
-              <p><strong>Anticipo:</strong> {formData.anticipo ? 'Sí' : 'No'}</p>
+              
             </div>
 
             <div className="flex justify-between">
