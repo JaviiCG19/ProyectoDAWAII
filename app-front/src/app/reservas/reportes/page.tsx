@@ -10,7 +10,7 @@ export default function ReportesPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Filtros comunes
+  // Filtros
   const [fechaInicio, setFechaInicio] = useState('');
   const [fechaFin, setFechaFin] = useState('');
   const [limitClientes, setLimitClientes] = useState(10);
@@ -25,9 +25,12 @@ export default function ReportesPage() {
 
       switch (reporteActivo) {
         case 'periodo':
-          if (!fechaInicio || !fechaFin) throw new Error('Selecciona rango de fechas');
-          response = await api.get('/reportes/periodo', {
-            params: { inicio: fechaInicio, fin: fechaFin }
+          if (!fechaInicio || !fechaFin) {
+            throw new Error('Selecciona un rango de fechas válido');
+          }
+          response = await api.post('/reportes/periodo', {
+            fecha_inicio: fechaInicio,
+            fecha_fin: fechaFin
           });
           break;
 
@@ -44,7 +47,9 @@ export default function ReportesPage() {
           break;
 
         case 'tasas':
-          if (!fechaInicio || !fechaFin) throw new Error('Selecciona rango de fechas');
+          if (!fechaInicio || !fechaFin) {
+            throw new Error('Selecciona un rango de fechas válido');
+          }
           response = await api.post('/reportes/tasas', {
             fecha_inicio: fechaInicio,
             fecha_fin: fechaFin
@@ -52,24 +57,22 @@ export default function ReportesPage() {
           break;
 
         default:
-          return;
+          throw new Error('Reporte no reconocido');
       }
 
       const data = response?.data?.data || [];
       setDatos(Array.isArray(data) ? data : [data]);
     } catch (err: any) {
-      setError(err.message || err.response?.data?.message || 'Error al cargar reporte');
+      const mensaje = err.response?.data?.message || err.message || 'Error al cargar el reporte';
+      setError(mensaje);
       console.error('Error completo:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Recargar al cambiar reporte o filtros clave
   useEffect(() => {
-    if (reporteActivo === 'tasas' || reporteActivo === 'periodo') {
-      // Espera a que el usuario seleccione fechas y presione botón
-    } else {
+    if (reporteActivo === 'top-clientes' || reporteActivo === 'uso-mesas') {
       cargarReporte();
     }
   }, [reporteActivo, limitClientes]);
@@ -80,7 +83,7 @@ export default function ReportesPage() {
         Reportes y Estadísticas
       </h1>
 
-      {/* Pestañas de reportes */}
+      {/* Pestañas */}
       <div className="flex flex-wrap gap-3 mb-8 justify-center">
         {[
           { id: 'periodo', label: 'Por Período', icon: Calendar },
@@ -103,7 +106,7 @@ export default function ReportesPage() {
         ))}
       </div>
 
-      {/* Filtros según reporte */}
+      {/* Filtros */}
       {(reporteActivo === 'periodo' || reporteActivo === 'tasas') && (
         <div className="bg-white rounded-xl shadow p-6 mb-8">
           <h2 className="text-xl font-bold text-[#F2B847] mb-4">Rango de fechas</h2>
@@ -160,15 +163,16 @@ export default function ReportesPage() {
         </div>
       )}
 
-      {/* Resultados */}
+      {/* Mensajes */}
       {loading && <p className="text-center py-10 text-gray-600">Cargando reporte...</p>}
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6 text-center">
           {error}
         </div>
       )}
 
+      {/* Tabla - Mapeo 100% alineado con Swagger */}
       {datos.length > 0 && !loading && (
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
@@ -208,28 +212,28 @@ export default function ReportesPage() {
                   <tr key={idx} className="hover:bg-gray-50">
                     {reporteActivo === 'periodo' && (
                       <>
-                        <td className="px-6 py-4 whitespace-nowrap">{item.fecha}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{item.total}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{item.pendientes}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{item.confirmadas}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{item.canceladas}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{item.no_show}</td>
+                        <td className="px-6 py-4 whitespace-nowrap font-medium">{item.fecha || 'Sin fecha'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap font-bold text-gray-900">{item.total || 0}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.pendientes || 0}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.confirmadas || 0}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.canceladas || 0}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.no_show || 0}</td>
                       </>
                     )}
                     {reporteActivo === 'top-clientes' && (
                       <>
-                        <td className="px-6 py-4 whitespace-nowrap">{item.nombre || 'Cliente ' + item.id}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{item.total_reservas}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{item.total_personas}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.nombre || `Cliente ${item.id}`}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.total_reservas || 0}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.total_personas || 0}</td>
                       </>
                     )}
                     {reporteActivo === 'uso-mesas' && (
                       <>
-                        <td className="px-6 py-4 whitespace-nowrap">Mesa {item.idmesa}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{item.total_reservas}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{item.confirmadas}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{item.canceladas}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{item.no_show}</td>
+                        <td className="px-6 py-4 whitespace-nowrap font-medium">Mesa {item.idmesa}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.total_reservas || 0}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.confirmadas || 0}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.canceladas || 0}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.no_show || 0}</td>
                       </>
                     )}
                   </tr>
