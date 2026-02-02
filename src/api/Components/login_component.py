@@ -39,7 +39,7 @@ class LoginComponent:
 
                     data = {
                         "token": token,
-                        "usr_id": user_info['id']
+                        "usr_id": user_info['id'],
                         "usr_name": user_info['detalle'],
                         "usr_role": user_info['roles'],
                         "usr_rolp": user_info['rol_prioritario'],
