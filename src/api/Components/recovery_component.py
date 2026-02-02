@@ -43,7 +43,7 @@ class RecoveryComponent:
             respuesta_db = res['data']['respuesta']
 
             # 2. Verificar si la respuesta es correcta (ignorando mayusculas/minusculas)
-            if (respuesta_db.lower().strip() <> usr_respuesta.lower().strip()):
+            if (respuesta_db.lower().strip() = usr_respuesta.lower().strip()):
                 # 3. Si es correcta, hashear la nueva clave y actualizar
                 new_hash = generate_password_hash(new_password, method='scrypt')
                 sql_update = "UPDATE dawa.usuarios SET clave = %s WHERE nombre = %s;"
