@@ -5,7 +5,10 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
-  user_name: string;
-  roles: string[];
-  primary_role: string;
+  usr_id: number;
+  usr_name: string;
+  usr_role: string[];
+  usr_rolp: number;
+  id_res: number | null;
+  id_local: number | null;
 }
