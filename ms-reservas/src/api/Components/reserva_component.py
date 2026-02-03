@@ -8,7 +8,6 @@ class ReservaComponent:
 
     @staticmethod
     def crear_reserva(idlocal, idmesa, idcliente, fecha, franja_id, numper):
-
         try:
             result = False
             data = None
@@ -20,7 +19,7 @@ class ReservaComponent:
                         WHERE idmesa = %s
                           AND fecha = %s
                           AND franja_id = %s
-                          AND estado = 0 \
+                          AND estado = 0
                         """
             check_record = (idmesa, fecha, franja_id)
             result_check = DataBaseHandle.getRecords(sql_check, 1, check_record)
@@ -32,7 +31,7 @@ class ReservaComponent:
             sql = """
                   INSERT INTO dawa.reservas
                       (idlocal, idmesa, idcliente, fecha, franja_id, numper, estado, fecact)
-                  VALUES (%s, %s, %s, %s, %s, %s, 0, %s) \
+                  VALUES (%s, %s, %s, %s, %s, %s, 0, %s)
                   """
             record = (idlocal, idmesa, idcliente, fecha, franja_id, numper, date.today())
             result_insert = DataBaseHandle.ExecuteNonQuery(sql, record)
@@ -51,25 +50,24 @@ class ReservaComponent:
 
     @staticmethod
     def listar_reservas_activas():
-
         try:
             result = False
             data = None
             message = None
 
             sql = """
-                  SELECT id, \
-                         idlocal, \
-                         idmesa, \
-                         idcliente, \
+                  SELECT id,
+                         idlocal,
+                         idmesa,
+                         idcliente,
                          fecha,
-                         franja_id, \
-                         numper, \
-                         estado, \
+                         franja_id,
+                         numper,
+                         estado,
                          fecact
                   FROM dawa.reservas
                   WHERE estado = 0
-                  ORDER BY fecha, franja_id \
+                  ORDER BY fecha, franja_id
                   """
             result_query = DataBaseHandle.getRecords(sql, 0)
 
@@ -87,24 +85,23 @@ class ReservaComponent:
 
     @staticmethod
     def obtener_reserva(reserva_id):
-
         try:
             result = False
             data = None
             message = None
 
             sql = """
-                  SELECT id, \
-                         idlocal, \
-                         idmesa, \
-                         idcliente, \
+                  SELECT id,
+                         idlocal,
+                         idmesa,
+                         idcliente,
                          fecha,
-                         franja_id, \
-                         numper, \
-                         estado, \
+                         franja_id,
+                         numper,
+                         estado,
                          fecact
                   FROM dawa.reservas
-                  WHERE id = %s \
+                  WHERE id = %s
                   """
             record = (reserva_id,)
             result_query = DataBaseHandle.getRecords(sql, 1, record)
@@ -123,17 +120,16 @@ class ReservaComponent:
 
     @staticmethod
     def confirmar_reserva(idreserva):
-
         try:
             result = False
             data = None
             message = None
 
             sql_check = """
-                        SELECT id \
+                        SELECT id
                         FROM dawa.reservas
-                        WHERE id = %s \
-                          AND estado = 0 \
+                        WHERE id = %s
+                          AND estado = 0
                         """
             check_result = DataBaseHandle.getRecords(sql_check, 1, (idreserva,))
 
@@ -142,10 +138,10 @@ class ReservaComponent:
                 return internal_response(False, None, message)
 
             sql_anticipo = """
-                           SELECT id \
+                           SELECT id
                            FROM dawa.anticipos
-                           WHERE idreserva = %s \
-                             AND estado = 0 \
+                           WHERE idreserva = %s
+                             AND estado = 0
                            """
             anticipo_result = DataBaseHandle.getRecords(sql_anticipo, 1, (idreserva,))
 
@@ -153,12 +149,12 @@ class ReservaComponent:
                 message = "La reserva no tiene anticipo registrado"
                 return internal_response(False, None, message)
 
-            # Actualizar estado
+            #1 = confirmada
             sql = """
                   UPDATE dawa.reservas
-                  SET estado = 2, \
+                  SET estado = 1,
                       fecact = %s
-                  WHERE id = %s \
+                  WHERE id = %s
                   """
             record = (date.today(), idreserva)
             result_update = DataBaseHandle.ExecuteNonQuery(sql, record)
@@ -174,10 +170,9 @@ class ReservaComponent:
             message = "Error al confirmar reserva -> " + err.__str__()
         finally:
             return internal_response(result, data, message)
-
+    #2=cancelada
     @staticmethod
     def cancelar_reserva(idreserva):
-
         try:
             result = False
             data = None
@@ -185,10 +180,10 @@ class ReservaComponent:
 
             sql = """
                   UPDATE dawa.reservas
-                  SET estado = 1, \
+                  SET estado = 2,
                       fecact = %s
-                  WHERE id = %s \
-                    AND estado = 0 \
+                  WHERE id = %s
+                    AND estado = 0
                   """
             record = (date.today(), idreserva)
             result_update = DataBaseHandle.ExecuteNonQuery(sql, record)
@@ -204,10 +199,9 @@ class ReservaComponent:
             message = "Error al cancelar reserva -> " + err.__str__()
         finally:
             return internal_response(result, data, message)
-
+    #3=checkin
     @staticmethod
     def checkin_reserva(reserva_id):
-
         try:
             result = False
             data = None
@@ -215,10 +209,10 @@ class ReservaComponent:
 
             sql = """
                   UPDATE dawa.reservas
-                  SET estado = 3, \
+                  SET estado = 3,
                       fecact = %s
-                  WHERE id = %s \
-                    AND estado = 2 \
+                  WHERE id = %s
+                    AND estado = 1          
                   """
             record = (date.today(), reserva_id)
             result_update = DataBaseHandle.ExecuteNonQuery(sql, record)
@@ -234,10 +228,9 @@ class ReservaComponent:
             message = "Error al hacer check-in -> " + err.__str__()
         finally:
             return internal_response(result, data, message)
-
+    #4=noshow
     @staticmethod
     def marcar_no_show(reserva_id):
-
         try:
             result = False
             data = None
@@ -245,10 +238,10 @@ class ReservaComponent:
 
             sql = """
                   UPDATE dawa.reservas
-                  SET estado = 4, \
+                  SET estado = 4,
                       fecact = %s
-                  WHERE id = %s \
-                    AND estado IN (0, 2) \
+                  WHERE id = %s
+                    AND estado IN (0, 1)      -- antes (0,2), ahora 0 y 1
                   """
             record = (date.today(), reserva_id)
             result_update = DataBaseHandle.ExecuteNonQuery(sql, record)
@@ -267,16 +260,15 @@ class ReservaComponent:
 
     @staticmethod
     def eliminar_reserva(reserva_id):
-
         try:
             result = False
             data = None
             message = None
 
             sql = """
-                  DELETE \
+                  DELETE
                   FROM dawa.reservas
-                  WHERE id = %s \
+                  WHERE id = %s
                   """
             record = (reserva_id,)
             result_delete = DataBaseHandle.ExecuteNonQuery(sql, record)

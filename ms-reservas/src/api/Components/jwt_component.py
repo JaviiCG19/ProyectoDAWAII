@@ -1,25 +1,23 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 import jwt
 import pytz
 
 from ...utils.general.config import Parametros
 from ...utils.general.logs import HandleLogs
 
-
 class JwtComponent:
-
+    # Metodo para crear o generar un token
     @staticmethod
     def token_generate(p_user):
-
         respuesta = None
         try:
-            now_utc = datetime.now(timezone.utc)  # o datetime.utcnow() (deprecated en Python 3.12+)
-
+            timezone = pytz.timezone('America/Guayaquil')
             payload = {
-                'iat': now_utc,
-                'exp': now_utc + timedelta(days=7),  # o hours=24 para pruebas
+                'iat': datetime.now(tz=timezone),
+                'exp': datetime.now(tz=timezone) + timedelta(minutes=15),
                 'username': p_user
             }
+            # llamo al metodo de jwt para generar el token
             respuesta = jwt.encode(payload, Parametros.secret_jwt, 'HS256')
             HandleLogs.write_log("Token Generado-> " + str(respuesta))
 
@@ -28,24 +26,16 @@ class JwtComponent:
         finally:
             return respuesta
 
+    # Metodo para validar token
     @staticmethod
     def token_validate(p_token):
+        respuesta = False
         try:
-            resp_jwt = jwt.decode(
-                p_token,
-                Parametros.secret_jwt,
-                algorithms=['HS256'],
-                options={"verify_signature": True, "verify_exp": True}
-            )
-            HandleLogs.write_log(f"Token válido para usuario: {resp_jwt.get('username')}")
-            return True
+            resp_jwt = jwt.decode(p_token, Parametros.secret_jwt, algorithms=['HS256'])
+            if resp_jwt is not None:
+                respuesta = True
 
-        except jwt.ExpiredSignatureError:
-            HandleLogs.write_error("Token expirado (ExpiredSignatureError)")
-            return False
-        except jwt.InvalidTokenError as err:
-            HandleLogs.write_error(f"Token inválido: {err}")
-            return False
         except Exception as err:
-            HandleLogs.write_error(f"Error inesperado al validar token: {err}")
-            return False
+            HandleLogs.write_error("Error al validar el token -> " + err.__str__())
+        finally:
+            return respuesta

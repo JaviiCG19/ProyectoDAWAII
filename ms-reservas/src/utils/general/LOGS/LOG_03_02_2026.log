@@ -1,0 +1,8 @@
+00:13:40 - INF - <module> - ('Microservicio de Reservas Iniciado',)
+00:15:36 - INF - <module> - ('Microservicio de Reservas Finalizado',)
+00:17:58 - INF - <module> - ('Microservicio de Reservas Iniciado',)
+00:18:08 - INF - get - ('Servicio para listar clientes ejecutado',)
+00:19:53 - INF - <module> - ('Microservicio de Reservas Finalizado',)
+00:20:32 - INF - <module> - ('Microservicio de Reservas Iniciado',)
+00:20:39 - INF - get - ('Servicio para listar reservas activas ejecutado',)
+00:22:24 - INF - <module> - ('Microservicio de Reservas Finalizado',)

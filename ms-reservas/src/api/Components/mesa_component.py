@@ -1,11 +1,12 @@
 from ...utils.database.connection_db import DataBaseHandle
 from ...utils.general.logs import HandleLogs
 from ...utils.general.response import internal_response
-
+from ..Services.middleware import valida_api_token
 
 class MesaComponent:
 
     @staticmethod
+    @valida_api_token
     def mesas_disponibles_por_fecha(fecha, franja_id=None):
 
         try:
@@ -54,6 +55,7 @@ class MesaComponent:
             return internal_response(result, data, message)
 
     @staticmethod
+    @valida_api_token
     def listar_todas_mesas():
 
         try:

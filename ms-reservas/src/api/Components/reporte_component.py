@@ -1,11 +1,13 @@
 from ...utils.database.connection_db import DataBaseHandle
 from ...utils.general.logs import HandleLogs
 from ...utils.general.response import internal_response
+from ..Services.middleware import valida_api_token
 
 
 class ReporteComponent:
 
     @staticmethod
+    @valida_api_token
     def reservas_por_periodo(fecha_inicio, fecha_fin):
 
         try:
@@ -41,6 +43,7 @@ class ReporteComponent:
             return internal_response(result, data, message)
 
     @staticmethod
+    @valida_api_token
     def top_clientes(limite=10):
 
         try:
@@ -81,6 +84,7 @@ class ReporteComponent:
             return internal_response(result, data, message)
 
     @staticmethod
+    @valida_api_token
     def uso_mesas():
 
         try:
@@ -127,6 +131,7 @@ class ReporteComponent:
             return internal_response(result, data, message)
 
     @staticmethod
+    @valida_api_token
     def tasa_noshow_cancelaciones(fecha_inicio, fecha_fin):
 
         try:
@@ -171,6 +176,7 @@ class ReporteComponent:
             return internal_response(result, data, message)
 
     @staticmethod
+    @valida_api_token
     def reservas_por_franja():
 
         try:

@@ -1,11 +1,11 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "Documentación del Microservicio de Reservas - DAWA\n\n**Nota:** La autenticación está temporalmente desactivada para pruebas. No es necesario enviar el header 'tokenapp'.",
+    "description": "Documentación del Microservicio de Reservas - DAWA",
     "version": "1.0.0",
     "title": "API de Reservas - DAWA",
     "contact": {
-      "email": "reservas@dawa.com"
+      "email": "suarezvalarezojorge@gmail.com"
     },
     "license": {
       "name": "MIT",
@@ -45,8 +45,8 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "description": "Token de autenticación (temporalmente opcional)",
-            "required": false,
+            "description": "Token de autenticación",
+            "required": true,
             "type": "string"
           },
           {
@@ -81,7 +81,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -125,7 +125,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -153,7 +153,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -184,7 +184,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -210,7 +210,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -247,7 +247,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           }
         ],
@@ -266,7 +266,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -294,7 +294,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -319,7 +319,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -344,7 +344,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -369,7 +369,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -394,7 +394,7 @@
         {
           "in": "header",
           "name": "tokenapp",
-          "required": false,
+          "required": true,
           "type": "string"
         },
         {
@@ -430,7 +430,7 @@
         {
           "in": "header",
           "name": "tokenapp",
-          "required": false,
+          "required": true,
           "type": "string"
         }
       ],
@@ -450,7 +450,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -477,7 +477,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -505,7 +505,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -561,7 +561,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -608,7 +608,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {
@@ -655,8 +655,8 @@
       {
         "in": "header",
         "name": "tokenapp",
-        "description": "Token de autenticación (temporalmente opcional)",
-        "required": false,
+        "description": "Token de autenticación",
+        "required": true,
         "type": "string"
       },
       {
@@ -720,7 +720,7 @@
           {
             "in": "header",
             "name": "tokenapp",
-            "required": false,
+            "required": true,
             "type": "string"
           },
           {

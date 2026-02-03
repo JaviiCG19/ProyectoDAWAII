@@ -5,13 +5,11 @@ from ..Components.reporte_component import ReporteComponent
 from ...utils.general.logs import HandleLogs
 from ...utils.general.response import response_error, response_success, response_not_found
 from ..Model.Request.reporte_request import ReportePeriodoRequest, ReporteTopClientesRequest
-from .middleware import valida_api_token
 
 
 class ReportePeriodoService(Resource):
 
     @staticmethod
-    @valida_api_token
     def post():
 
         try:
@@ -43,7 +41,6 @@ class ReportePeriodoService(Resource):
 class ReporteTopClientesService(Resource):
 
     @staticmethod
-    @valida_api_token
     def get():
 
         try:
@@ -66,7 +63,6 @@ class ReporteTopClientesService(Resource):
 class ReporteUsoMesasService(Resource):
 
     @staticmethod
-    @valida_api_token
     def get():
 
         try:
@@ -87,7 +83,6 @@ class ReporteUsoMesasService(Resource):
 class ReporteTasasService(Resource):
 
     @staticmethod
-    @valida_api_token
     def post():
 
         try:
@@ -119,7 +114,6 @@ class ReporteTasasService(Resource):
 class ReporteFranjasService(Resource):
 
     @staticmethod
-    @valida_api_token
     def get():
 
         try:
