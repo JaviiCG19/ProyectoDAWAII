@@ -1,223 +1,153 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Calendar, Clock, Users, DollarSign, Check, Store, MapPin } from 'lucide-react';
-import api from '@/lib/api';
+import { useEffect, useState } from 'react';
+import { Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
+import { getSucursalesByEmpresa } from '@/services/local.service';
+import { getMesasByLocal } from '@/services/mesa.service';
+import api from '@/lib/api';
 
 export default function CrearReservaPage() {
   const router = useRouter();
+
+  // ⚠️ luego esto vendrá del login
+  const ID_EMPRESA = 1;
+  const ID_CLIENTE = 12;
+
   const [paso, setPaso] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Mesas reales desde el backend
-  const [mesasDisponibles, setMesasDisponibles] = useState<any[]>([]);
+  // ============================
+  // DATA REAL
+  // ============================
+  const [sucursales, setSucursales] = useState<any[]>([]);
+  const [mesas, setMesas] = useState<any[]>([]);
   const [cargandoMesas, setCargandoMesas] = useState(false);
 
-  // Restaurantes simulados (temporal, hasta que llegue el endpoint de locales)
-  const restaurantes = [
-    { id: 1, nombre: 'La Parrilla Dorada', sucursales: ['Samborondón', 'Urdesa'] },
-    { id: 2, nombre: 'El Sabor del Mar', sucursales: ['Urdesa', 'Alborada'] },
-  ];
-
-  const horariosDisponibles = ['19:00', '19:30', '20:00', '20:30', '21:00'];
-
   const [formData, setFormData] = useState({
-    restauranteId: '',
-    sucursal: '',
+    idlocal: '',
     fecha: '',
     hora: '',
     personas: 2,
-    mesa: ''
+    idmesa: ''
   });
 
-  // Cargar mesas disponibles cuando se seleccione fecha y estemos en paso 3
+  // ============================
+  // CARGAR SUCURSALES
+  // ============================
   useEffect(() => {
-    if (paso === 3 && formData.fecha) {
-      setCargandoMesas(true);
-      setError(null);
-       
-      api.get(`/mesas/disponibles/${formData.fecha}?franja_id=1`)
-     // api.get(`/mesas/disponibles/${formData.fecha}`)
-        .then(response => {
-          const data = response.data.data || response.data || [];
-          setMesasDisponibles(Array.isArray(data) ? data : []);
-        })
-        .catch(err => {
-          console.error('Error al cargar mesas:', err);
-          setError('No se pudieron cargar las mesas disponibles para esta fecha');
-          setMesasDisponibles([]);
-        })
-        .finally(() => setCargandoMesas(false));
-    }
-  }, [paso, formData.fecha]);
+    getSucursalesByEmpresa(ID_EMPRESA)
+      .then(setSucursales)
+      .catch(() => setError('Error cargando sucursales'));
+  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // ============================
+  // CARGAR MESAS POR LOCAL
+  // ============================
+  useEffect(() => {
+    if (!formData.idlocal) return;
+
+    setCargandoMesas(true);
+    getMesasByLocal(formData.idlocal)
+      .then(setMesas)
+      .catch(() => setMesas([]))
+      .finally(() => setCargandoMesas(false));
+  }, [formData.idlocal]);
+
+  // ============================
+  // HANDLERS
+  // ============================
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value
     });
   };
 
- 
+  const siguiente = () => setPaso(paso + 1);
+  const anterior = () => setPaso(paso - 1);
 
-  const siguientePaso = () => setPaso(paso + 1);
-  const anteriorPaso = () => setPaso(paso - 1);
-
-  const confirmarReserva = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  // ============================
+  // CREAR RESERVA
+  // ============================
+  const confirmarReserva = async () => {
     setLoading(true);
-
-    // Validación básica
-    if (!formData.restauranteId) {
-      setError('Selecciona un restaurante');
-      setLoading(false);
-      return;
-    }
-    if (!formData.sucursal) {
-      setError('Selecciona una sucursal');
-      setLoading(false);
-      return;
-    }
-    if (!formData.fecha) {
-      setError('Selecciona una fecha');
-      setLoading(false);
-      return;
-    }
-    if (!formData.hora) {
-      setError('Selecciona una hora');
-      setLoading(false);
-      return;
-    }
-    if (formData.personas < 1) {
-      setError('El número de personas debe ser al menos 1');
-      setLoading(false);
-      return;
-    }
+    setError(null);
 
     try {
-    const payload = {
-      idlocal: Number(formData.restauranteId),
-      idmesa: formData.mesa ? Number(formData.mesa) : 0,
-      idcliente: 12,
-      fecha: formData.fecha,
-      franja_id: 1,
-      numper: Number(formData.personas),
-    };
+      const payload = {
+        idlocal: Number(formData.idlocal),
+        idmesa: formData.idmesa ? Number(formData.idmesa) : null,
+        idcliente: ID_CLIENTE,
+        fecha: formData.fecha,
+        franja_id: 1, // luego dinámico
+        numper: Number(formData.personas)
+      };
 
-    console.log('📤 Enviando payload:', payload);
+      console.log('📤 Payload reserva:', payload);
 
-    const response = await api.post('/reservas', payload);
+      const res = await api.post('/reservas', payload);
 
-    console.log('✅ RESPUESTA BACKEND:', response.data);
+      const reservaId = res.data?.data;
 
-    // 🔑 EL BACK DEVUELVE SOLO UN NÚMERO
-    const reservaId = response.data?.data;
+      if (!reservaId) {
+        throw new Error('No se recibió ID de reserva');
+      }
 
-    if (!reservaId || reservaId === 0) {
-      alert('Reserva creada, pero no se recibió el ID');
-      router.push('/reservas/list');
-      return;
-    }
+      alert('✅ Reserva creada correctamente');
+      router.push(`/reservas/${reservaId}`);
 
-    alert('✅ Reserva creada correctamente');
-
-    // 👉 NUNCA registres anticipo aquí
-    // 👉 eso se hace en el DETALLE
-
-    router.push(`/reservas/${reservaId}`);
-
-  } catch (err: any) {
-    console.error(' Error completo:', err.response?.data || err);
-
-    if (err.response?.status === 409) {
-      setError(err.response.data.message);
-    } else {
+    } catch (err: any) {
+      console.error(err);
       setError('Error al crear la reserva');
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-
+  // ============================
+  // UI
+  // ============================
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-extrabold text-[#F2B847] text-center mb-8">
+    <div className="max-w-3xl mx-auto p-6 space-y-6">
+      <h1 className="text-3xl font-bold text-center text-[#F2B847]">
         Nueva Reserva
       </h1>
 
-      {/* Barra de progreso */}
-      <div className="flex justify-between mb-8">
-        {['Restaurante', 'Fecha y Hora', 'Mesa y Anticipo', 'Confirmar'].map((etapa, index) => (
-          <div key={index} className="flex-1 text-center">
-            <div className={`w-10 h-10 mx-auto rounded-full flex items-center justify-center text-white font-bold ${
-              paso > index + 1 ? 'bg-green-500' :
-              paso === index + 1 ? 'bg-[#F2B847]' :
-              'bg-gray-300'
-            }`}>
-              {paso > index + 1 ? '✓' : index + 1}
-            </div>
-            <p className="text-sm mt-2">{etapa}</p>
-          </div>
-        ))}
-      </div>
-
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
+        <div className="bg-red-100 text-red-700 p-3 rounded-xl">
           {error}
         </div>
       )}
 
-      {/* Paso 1: Restaurante y sucursal */}
+      {/* PASO 1 - SUCURSAL */}
       {paso === 1 && (
-        <div className="bg-white rounded-2xl shadow-lg p-6 space-y-6">
-          <h2 className="text-xl font-bold text-[#F2B847]">1. Selecciona el restaurante y sucursal</h2>
+        <div className="bg-white p-6 rounded-2xl shadow space-y-4">
+          <h2 className="font-bold text-lg">1. Selecciona la sucursal</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {restaurantes.map(rest => (
-              <div
-                key={rest.id}
-                onClick={() => setFormData({ ...formData, restauranteId: rest.id.toString() })}
-                className={`p-4 border rounded-xl cursor-pointer transition ${
-                  formData.restauranteId === rest.id.toString() ? 'border-[#F2B847] bg-[#FDF3D8]' : 'hover:border-[#F2B847]'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Store size={24} className="text-[#F2B847]" />
-                  <div>
-                    <h3 className="font-semibold">{rest.nombre}</h3>
-                    <p className="text-sm text-gray-600">Sucursales: {rest.sucursales.join(', ')}</p>
-                  </div>
-                </div>
-              </div>
+          <select
+            name="idlocal"
+            value={formData.idlocal}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          >
+            <option value="">Seleccione una sucursal</option>
+            {sucursales.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.detalle}
+              </option>
             ))}
-          </div>
-
-          {formData.restauranteId && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Sucursal</label>
-              <select
-                name="sucursal"
-                value={formData.sucursal}
-                onChange={handleChange}
-                className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F2B847]"
-              >
-                <option value="">Selecciona sucursal</option>
-                {restaurantes.find(r => r.id === parseInt(formData.restauranteId))?.sucursales.map(suc => (
-                  <option key={suc} value={suc}>{suc}</option>
-                ))}
-              </select>
-            </div>
-          )}
+          </select>
 
           <div className="flex justify-end">
             <button
-              onClick={siguientePaso}
-              disabled={!formData.restauranteId || !formData.sucursal || loading}
-              className={`flex items-center gap-2 bg-[#F2B847] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed`}
+              disabled={!formData.idlocal}
+              onClick={siguiente}
+              className="bg-[#F2B847] text-white px-6 py-2 rounded-xl disabled:opacity-50"
             >
               Siguiente
             </button>
@@ -225,52 +155,26 @@ export default function CrearReservaPage() {
         </div>
       )}
 
-      {/* Paso 2: Fecha y hora */}
+      {/* PASO 2 - FECHA */}
       {paso === 2 && (
-        <div className="bg-white rounded-2xl shadow-lg p-6 space-y-6">
-          <h2 className="text-xl font-bold text-[#F2B847]">2. Selecciona fecha y hora</h2>
+        <div className="bg-white p-6 rounded-2xl shadow space-y-4">
+          <h2 className="font-bold text-lg">2. Fecha</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Fecha</label>
-              <input
-                type="date"
-                name="fecha"
-                value={formData.fecha}
-                onChange={handleChange}
-                className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F2B847]"
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Hora</label>
-              <select
-                name="hora"
-                value={formData.hora}
-                onChange={handleChange}
-                className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F2B847]"
-              >
-                <option value="">Selecciona hora</option>
-                {horariosDisponibles.map(hora => (
-                  <option key={hora} value={hora}>{hora}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+          <input
+            type="date"
+            name="fecha"
+            value={formData.fecha}
+            min={new Date().toISOString().split('T')[0]}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          />
 
           <div className="flex justify-between">
+            <button onClick={anterior}>Anterior</button>
             <button
-              onClick={anteriorPaso}
-              disabled={loading}
-              className="px-6 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-100 transition disabled:opacity-50"
-            >
-              Anterior
-            </button>
-            <button
-              onClick={siguientePaso}
-              disabled={!formData.fecha || !formData.hora || loading}
-              className="flex items-center gap-2 bg-[#F2B847] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!formData.fecha}
+              onClick={siguiente}
+              className="bg-[#F2B847] text-white px-6 py-2 rounded-xl"
             >
               Siguiente
             </button>
@@ -278,109 +182,60 @@ export default function CrearReservaPage() {
         </div>
       )}
 
-      {/* Paso 3: Mesa y anticipo - con mesas reales */}
+      {/* PASO 3 - PERSONAS Y MESA */}
       {paso === 3 && (
-        <div className="bg-white rounded-2xl shadow-lg p-6 space-y-6">
+        <div className="bg-white p-6 rounded-2xl shadow space-y-4">
+          <h2 className="font-bold text-lg">3. Personas y mesa</h2>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Número de personas</label>
-              <input
-                type="number"
-                name="personas"
-                value={formData.personas}
-                onChange={handleChange}
-                min="1"
-                max="12"
-                className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F2B847]"
-              />
-            </div>
+          <input
+            type="number"
+            name="personas"
+            min={1}
+            value={formData.personas}
+            onChange={handleChange}
+            className="w-full border p-3 rounded-xl"
+          />
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Mesa preferida</label>
-
-              {cargandoMesas ? (
-                <p className="text-sm text-gray-600">Cargando mesas disponibles...</p>
-              ) : mesasDisponibles.length > 0 ? (
-                <select
-                  name="mesa"
-                  value={formData.mesa}
-                  onChange={handleChange}
-                  className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F2B847]"
-                >
-                  <option value="">Automática (mejor disponible)</option>
-                  {mesasDisponibles.map(mesa => (
-                    <option key={mesa.id} value={mesa.id}>
-                      Mesa {mesa.numero} ({mesa.maxper} personas)
-                    </option>
-                  ))}
-                </select>
-              ) : formData.fecha ? (
-                <p className="text-sm text-orange-600">
-                  No hay mesas disponibles para {formData.fecha}. Prueba otra fecha.
-                </p>
-              ) : (
-                <p className="text-sm text-gray-600">Selecciona primero una fecha para ver mesas disponibles</p>
-              )}
-            </div>
-
-            
-          </div>
+          {cargandoMesas ? (
+            <p>Cargando mesas...</p>
+          ) : (
+            <select
+              name="idmesa"
+              value={formData.idmesa}
+              onChange={handleChange}
+              className="w-full border p-3 rounded-xl"
+            >
+              <option value="">Mesa automática</option>
+              {mesas.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.numero} ({m.maxper} personas)
+                </option>
+              ))}
+            </select>
+          )}
 
           <div className="flex justify-between">
-            <button
-              onClick={anteriorPaso}
-              disabled={loading}
-              className="px-6 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-100 transition disabled:opacity-50"
-            >
-              Anterior
-            </button>
-            <button
-              onClick={siguientePaso}
-              disabled={cargandoMesas || loading}
-              className="flex items-center gap-2 bg-[#F2B847] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition disabled:opacity-50"
-            >
+            <button onClick={anterior}>Anterior</button>
+            <button onClick={siguiente} className="bg-[#F2B847] text-white px-6 py-2 rounded-xl">
               Siguiente
             </button>
           </div>
         </div>
       )}
 
-      {/* Paso 4: Confirmación */}
+      {/* PASO 4 - CONFIRMAR */}
       {paso === 4 && (
-        <div className="bg-white rounded-2xl shadow-lg p-6 space-y-6">
-          <h2 className="text-xl font-bold text-[#F2B847]">4. Confirmar Reserva</h2>
+        <div className="bg-white p-6 rounded-2xl shadow space-y-4">
+          <h2 className="font-bold text-lg">4. Confirmar</h2>
 
-          <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-xl">
-              <h3 className="font-semibold mb-2">Resumen</h3>
-              <p><strong>Restaurante:</strong> {restaurantes.find(r => r.id === parseInt(formData.restauranteId))?.nombre || 'Local ' + formData.restauranteId} ({formData.sucursal})</p>
-              <p><strong>Fecha y hora:</strong> {formData.fecha} {formData.hora}</p>
-              <p><strong>Personas:</strong> {formData.personas}</p>
-              <p><strong>Mesa:</strong> {formData.mesa ? `Mesa ${formData.mesa}` : 'Automática'}</p>
-              
-            </div>
-
-            <div className="flex justify-between">
-              <button
-                onClick={anteriorPaso}
-                disabled={loading}
-                className="px-6 py-3 border border-gray-300 rounded-xl font-semibold hover:bg-gray-100 transition disabled:opacity-50"
-              >
-                Anterior
-              </button>
-              <button
-                onClick={confirmarReserva}
-                disabled={loading}
-                className={`flex items-center gap-2 bg-[#F2B847] text-white px-6 py-3 rounded-xl font-semibold transition ${
-                  loading ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90'
-                }`}
-              >
-                <Check size={18} />
-                {loading ? 'Creando...' : 'Confirmar Reserva'}
-              </button>
-            </div>
-          </div>
+          <button
+            onClick={confirmarReserva}
+            disabled={loading}
+            className="w-full bg-[#F2B847] text-white py-3 rounded-xl font-bold"
+          >
+            <Check className="inline mr-2" />
+            {loading ? 'Creando...' : 'Confirmar Reserva'}
+          </button>
         </div>
       )}
     </div>
