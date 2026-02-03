@@ -26,22 +26,16 @@ export default function LoginPage() {
         login_password: pass,
       });
 
-      const margin = 30 * 1000;
-      const expiresAt = Date.now() + 15 * 60 * 1000 - margin;
-
+      
       localStorage.setItem("token", data.token);
-      localStorage.setItem("token_exp", String(expiresAt));
-
- 
+      localStorage.setItem("token_exp", String(data.token_exp)); 
+      
       localStorage.setItem("usr_id", String(data.usr_id));
       localStorage.setItem("user_name", data.usr_name);
-
-    
       localStorage.setItem("roles", JSON.stringify(data.usr_role));
       localStorage.setItem("primary_role", String(data.usr_rolp));
       localStorage.setItem("current_role", String(data.usr_rolp));
 
-     
       if (data.id_res !== null) {
         localStorage.setItem("id_res", String(data.id_res));
       }
@@ -50,14 +44,14 @@ export default function LoginPage() {
         localStorage.setItem("id_local", String(data.id_local));
       }
 
-      router.replace(getRedirectPathByRole(String(data.usr_rolp)));
+      router.replace(getRedirectPathByRole(String(data.usr_rolp), data.id_local, data.id_res));
+      
     } catch (err) {
       alert("Credenciales inválidas");
     } finally {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -71,35 +65,16 @@ export default function LoginPage() {
   return (
     <div className="flex justify-center items-center min-h-[70vh] px-4">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6 space-y-6">
-
- 
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-extrabold text-[#F2B847]">
-            Iniciar Sesión
-          </h1>
-          <p className="text-sm text-gray-600">
-            Accede al sistema de gestión de reservas
-          </p>
+          <h1 className="text-2xl font-extrabold text-[#F2B847]">Iniciar Sesión</h1>
+          <p className="text-sm text-gray-600">Accede al sistema de gestión de reservas</p>
         </div>
 
-
-        <form
-          className="space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleLogin();
-          }}
-        >
- 
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
           <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">
-              Usuario
-            </label>
+            <label className="text-sm font-medium text-gray-700">Usuario</label>
             <div className="relative">
-              <User
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
+              <User size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Ingrese su usuario"
@@ -111,14 +86,9 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">
-              Contraseña
-            </label>
+            <label className="text-sm font-medium text-gray-700">Contraseña</label>
             <div className="relative">
-              <Lock
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
+              <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="password"
                 placeholder="••••••••••••••••"
@@ -140,20 +110,13 @@ export default function LoginPage() {
         </form>
 
         <div className="text-center">
-          <button
-            type="button"
-            onClick={() => setIsResetModalOpen(true)}
-            className="text-sm text-[#F2B847] hover:underline"
-          >
+          <button type="button" onClick={() => setIsResetModalOpen(true)} className="text-sm text-[#F2B847] hover:underline">
             ¿Olvidaste tu contraseña?
           </button>
         </div>
       </div>
 
-      <ModalResetPassword
-        isOpen={isResetModalOpen}
-        onClose={() => setIsResetModalOpen(false)}
-      />
+      <ModalResetPassword isOpen={isResetModalOpen} onClose={() => setIsResetModalOpen(false)} />
     </div>
   );
 }

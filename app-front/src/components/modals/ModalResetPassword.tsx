@@ -53,7 +53,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-100 flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-200">
         <div className="p-6 border-b flex justify-between items-center bg-gray-50/50 rounded-t-[2.5rem]">
           <h2 className="text-lg font-black text-gray-800 uppercase tracking-tighter">Recuperar Acceso</h2>

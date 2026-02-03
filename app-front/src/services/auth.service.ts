@@ -1,7 +1,7 @@
 import api from "./api";
 import { LoginRequest, LoginResponse } from "@/interface/auth.interface";
 
-// LOGIN
+//LOGIN
 export async function loginService(
   data: LoginRequest
 ): Promise<LoginResponse> {
@@ -15,6 +15,7 @@ export async function loginService(
 
   return {
     token: d.token,
+    token_exp: d.token_exp,
     usr_id: d.usr_id,
     usr_name: d.usr_name,
     usr_role: d.usr_role,

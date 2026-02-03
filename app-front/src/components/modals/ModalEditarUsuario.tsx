@@ -39,10 +39,10 @@ export default function ModalEditarUsuario({
           <form onSubmit={onSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-          
+      
               <div className="space-y-4">
-                <h3 className="font-bold text-orange-600 border-b pb-2 text-sm uppercase">
-                  Datos de Acceso
+                <h3 className="font-bold text-yellow-600 border-b pb-2 text-sm uppercase mb-3">
+                  Datos de Acceso e Identidad
                 </h3>
 
                 <div>
@@ -54,32 +54,6 @@ export default function ModalEditarUsuario({
                     value={formData.usr_nombre}
                     disabled
                   />
-                </div>
-
-          
-                <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-2xl shadow-inner">
-                  <label className="text-[10px] font-bold text-yellow-700 uppercase flex items-center gap-2 mb-2">
-                    <ShieldAlert size={14} />
-                    Nueva Respuesta (Opcional)
-                  </label>
-
-                  <input
-                    placeholder="Llenar solo si desea cambiarla"
-                    className="w-full p-3 bg-white border border-yellow-200 rounded-xl outline-none focus:ring-2 focus:ring-yellow-400"
-                    value={formData.usr_respuesta ?? ""}
-                    onChange={e =>
-                      setFormData({
-                        ...formData,
-                        usr_respuesta: e.target.value
-                          .toLowerCase()
-                          .trim()
-                      })
-                    }
-                  />
-
-                  <p className="text-[9px] text-yellow-600 mt-2 italic font-medium">
-                    Si se deja vacío, la respuesta actual no se modifica.
-                  </p>
                 </div>
 
                 <div>
@@ -97,12 +71,43 @@ export default function ModalEditarUsuario({
                     }
                   />
                 </div>
+
+       
+                <div className="pt-2">
+                  <h3 className="font-bold text-yellow-600 border-b pb-2 text-sm uppercase mb-3">
+                    Seguridad de Cuenta
+                  </h3>
+                  <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-2xl shadow-inner">
+                    <label className="text-[10px] font-bold text-yellow-700 uppercase flex items-center gap-2 mb-2">
+                      <ShieldAlert size={14} />
+                      Nueva Respuesta (Opcional)
+                    </label>
+
+                    <input
+                      placeholder="Llenar solo si desea cambiarla"
+                      className="w-full p-3 bg-white border border-yellow-200 rounded-xl outline-none focus:ring-2 focus:ring-yellow-400"
+                      value={formData.usr_respuesta ?? ""}
+                      onChange={e =>
+                        setFormData({
+                          ...formData,
+                          usr_respuesta: e.target.value
+                            .toLowerCase()
+                            .trim()
+                        })
+                      }
+                    />
+
+                    <p className="text-[9px] text-yellow-600 mt-2 italic font-medium">
+                      Si se deja vacío, la respuesta actual no se modifica.
+                    </p>
+                  </div>
+                </div>
               </div>
 
-            
+         
               <div className="space-y-4">
-                <h3 className="font-bold text-orange-600 border-b pb-2 text-sm uppercase">
-                  Ubicación Asignada
+                <h3 className="font-bold text-yellow-600 border-b pb-2 text-sm uppercase mb-3">
+                  Asignación de Sede
                 </h3>
 
                 <div>
@@ -140,7 +145,7 @@ export default function ModalEditarUsuario({
                 </div>
               </div>
 
-           
+            
               <div className="md:col-span-2 space-y-4 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
                 <h3 className="font-bold text-gray-700 text-sm uppercase">
                   Permisos y Roles
@@ -174,14 +179,9 @@ export default function ModalEditarUsuario({
                     Rol Principal
                   </label>
                   <select
-                    className="w-full p-3 bg-white border border-orange-200 rounded-xl outline-none"
+                    className="w-full p-3 bg-gray-100 border border-orange-200 rounded-xl outline-none opacity-60 cursor-not-allowed"
                     value={formData.usr_rolp}
-                    onChange={e =>
-                      setFormData({
-                        ...formData,
-                        usr_rolp: e.target.value
-                      })
-                    }
+                    disabled
                     required
                   >
                     {rolesDisponibles
@@ -198,7 +198,6 @@ export default function ModalEditarUsuario({
               </div>
             </div>
 
-         
             <div className="flex justify-end gap-3 pt-6 border-t mt-4">
               <button
                 type="button"

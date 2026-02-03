@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { 
   ArrowLeft, MapPin, Utensils, Loader2, 
-  Plus, Users, Edit3, Trash2, Search 
+  Plus, Edit3, Trash2, Search 
 } from "lucide-react";
 import { getSucursalesByEmpresa, eliminarSucursal } from "@/services/local.service";
 import { Sucursal } from "@/interface/Sucursal";
@@ -164,7 +164,7 @@ export default function SucursalesPage() {
                     <p className="text-sm">{s.direccion}</p>
                   </div>
                 </div>
-                <div className="bg-gray-50 px-4 py-2 rounded-xl text-center min-w-[80px]">
+                <div className="bg-gray-50 px-4 py-2 rounded-xl text-center min-w-20">
                   <span className="block text-[10px] font-bold text-gray-400 uppercase">Mesas</span>
                   <span className="text-2xl font-black text-[#dc902b]">{s.totmesas}</span>
                 </div>
@@ -184,12 +184,6 @@ export default function SucursalesPage() {
                     <Trash2 size={16} /> Eliminar
                   </button>
                 </div>
-                <button
-                  onClick={() => router.push(`/admin/locales/${s.id}/personal`)}
-                  className="flex items-center gap-1 text-[#dc902b] text-xs font-bold uppercase hover:bg-orange-50 px-2 py-1 rounded-md transition-colors"
-                >
-                  <Users size={16} /> Personal
-                </button>
               </div>
             </div>
           ))}

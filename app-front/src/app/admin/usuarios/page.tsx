@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/services/useAuth";
-
-// Iconos e Interfaces
 import {
   Trash2, Edit, Plus, ArrowLeft, Loader2, 
   UserCircle, Building2, MapPin
@@ -12,8 +10,6 @@ import {
 import { Sucursal } from "@/interface/Sucursal";
 import { Restaurante } from "@/interface/Restaurante";
 import { Usuario } from "@/interface/Usuario";
-
-// Servicios
 import { 
   getUsuarios, crearUsuario, actualizarUsuario, eliminarUsuario 
 } from "@/services/user.service";
@@ -28,7 +24,7 @@ export default function UsuariosPage() {
   const router = useRouter();
   const checkingAuth = useAuth(["1"]);
 
-  //Estados de Datos 
+  //Estados de Datos
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [empresas, setEmpresas] = useState<Restaurante[]>([]);
   const [locales, setLocales] = useState<Sucursal[]>([]);
@@ -68,18 +64,14 @@ export default function UsuariosPage() {
 
   //Carga de Sucursales cuando cambia la Empresa
   useEffect(() => {
-    //Convertimos a número para validar
     const empresaId = Number(formData.usr_id_res);
-
-    //Solo disparamos la petición si el ID es un número válido y mayor a 0
     if (empresaId && empresaId > 0) {
       setLoadingLocales(true);
       getSucursalesByEmpresa(empresaId)
         .then(setLocales)
-        .catch(err => console.error("Error al cargar locales:", err)) //Evita que el error rompa la app
+        .catch(err => console.error("Error al cargar locales:", err)) 
         .finally(() => setLoadingLocales(false));
     } else {
-      //Si no hay empresa seleccionada, limpiamos la lista de locales
       setLocales([]);
     }
   }, [formData.usr_id_res]);
@@ -111,14 +103,10 @@ export default function UsuariosPage() {
     if (e) e.preventDefault();
 
     try {
-      // Limpiamos y preparamos los datos
       const payload = {
         ...formData,
-        // Convertimos el ID a número explícitamente
         usr_id: Number(formData.usr_id), 
-        // Quitamos el ";" del final si es que el backend solo quiere "1;2"
         usr_roles: formData.usr_roles.join(";"), 
-        // Convertimos IDs de empresa/local a números
         usr_id_res: Number(formData.usr_id_res),
         usr_id_local: Number(formData.usr_id_local),
       };
@@ -173,7 +161,7 @@ export default function UsuariosPage() {
     setIsEditing(false);
   };
 
-  //Renderizado Condicional de Seguridad
+
   if (checkingAuth) return null;
 
   return (
@@ -215,7 +203,7 @@ export default function UsuariosPage() {
             return (
               <div 
                 key={u.id} 
-                className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm group hover:shadow-md transition-all relative overflow-hidden"
+                className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm group hover:shadow-md transition-all relative overflow-hidden"
               >
     
                 <div className="flex justify-between items-start mb-4">

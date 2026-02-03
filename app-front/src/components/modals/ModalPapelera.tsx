@@ -40,9 +40,7 @@ export default function ModalPapelera({ isOpen, onClose, idEmpresa, onRestored }
     try {
       const response = await restaurarSucursal(id);
       if (response.result) {
-        // Quitamos de la lista local
         setEliminados((prev) => prev.filter((s) => s.id !== id));
-        // Avisamos a la página principal que refresque
         onRestored();
       }
     } catch (error) {
@@ -55,7 +53,7 @@ export default function ModalPapelera({ isOpen, onClose, idEmpresa, onRestored }
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-70 flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
    
         <div className="bg-gray-50 p-6 border-b flex justify-between items-center">
@@ -74,7 +72,7 @@ export default function ModalPapelera({ isOpen, onClose, idEmpresa, onRestored }
         </div>
 
       
-        <div className="p-4 max-h-[400px] overflow-y-auto">
+        <div className="p-4 max-h-100 overflow-y-auto">
           {loading ? (
             <div className="flex flex-col items-center py-10 gap-3">
               <Loader2 className="animate-spin text-[#dc902b]" size={32} />

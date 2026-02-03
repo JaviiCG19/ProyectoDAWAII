@@ -5,6 +5,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
+  token_exp: number;
   usr_id: number;
   usr_name: string;
   usr_role: string[];

@@ -82,6 +82,13 @@ export default function AdminPage() {
         </div>
 
         <div className="flex gap-2">
+
+          <button
+            onClick={() => setIsTrashOpen(true)}
+            className="px-3 py-2 border rounded-lg text-gray-500 hover:bg-gray-100"
+          >
+            <Trash2 size={18} />
+          </button>
       
           <button
             onClick={() => router.push("/admin/usuarios")}
@@ -90,12 +97,6 @@ export default function AdminPage() {
             <Users size={18} /> Personal
           </button>
 
-          <button
-            onClick={() => setIsTrashOpen(true)}
-            className="px-3 py-2 border rounded-lg text-gray-500 hover:bg-gray-100"
-          >
-            <Trash2 size={18} />
-          </button>
 
           <button
             onClick={() => {
@@ -142,7 +143,7 @@ export default function AdminPage() {
                   <h3 className="font-bold text-lg text-gray-800 leading-tight">
                     {e.nomfan}
                   </h3>
-                  <p className="text-sm text-gray-500 italic truncate max-w-[180px]">
+                  <p className="text-sm text-gray-500 italic truncate max-w-45">
                     {e.nomleg}
                   </p>
                   <div className="mt-2 inline-block bg-gray-100 px-2 py-1 rounded text-[11px] font-mono text-gray-600">
