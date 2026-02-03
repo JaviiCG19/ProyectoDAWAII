@@ -15,7 +15,6 @@ class LocalService:
 
     @staticmethod
     def crear_local(data):
-
         query = """
                 INSERT INTO dawa.locales (idcia, detalle, direccion, totmesas, fecact, estado)
                 VALUES (%s, %s, %s, %s, %s, 1) RETURNING id
@@ -23,9 +22,10 @@ class LocalService:
         record = (data['idcia'], data['detalle'], data['direccion'], data.get('totmesas', 0), datetime.now())
         res = DataBaseHandle.ExecuteNonQuery(query, record)
 
-        if res.get('result') and res.get('id'):
-            # Sincronizamos mesas (esto las creará por primera vez)
-            LocalService._sincronizar_mesas(res['id'], int(data.get('totmesas', 0)))
+        # CORRECCIÓN: Usamos res.get('data') porque ahí viaja el ID del RETURNING
+        if res.get('result') and res.get('data'):
+            id_generado = res.get('data')
+            LocalService._sincronizar_mesas(id_generado, int(data.get('totmesas', 0)))
 
         return res
 

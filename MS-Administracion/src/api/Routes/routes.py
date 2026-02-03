@@ -43,6 +43,7 @@ def load_routes(api):
         FranjaComponent,
         '/admin/franjas',
         '/admin/franjas/<int:id>',
+        '/admin/franjas/eliminadas',
         '/admin/franjas/restaurar/<int:id>'
     )
 
@@ -51,6 +52,7 @@ def load_routes(api):
         PromocionComponent,
         '/admin/promociones',
         '/admin/promociones/<int:id>',
+        '/admin/promociones/eliminadas',
         '/admin/promociones/restaurar/<int:id>'
     )
 

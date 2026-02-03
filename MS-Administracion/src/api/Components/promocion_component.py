@@ -9,16 +9,13 @@ class PromocionComponent(Resource):
 
     @valida_api_token
     def get(self, id=None):
-        """
-        Obtiene una promoción o lista las promociones de un local.
-        Soporta papelera con ?eliminados=true
-        """
         try:
             if id:
                 resultado = PromocionService.obtener_por_id(id)
             else:
                 id_local = request.args.get('idlocal')
-                ver_eliminados = request.args.get('eliminados') == 'true'
+                # Acepta ?eliminados=true o la ruta /eliminadas
+                ver_eliminados = request.args.get('eliminados') == 'true' or "eliminadas" in request.path
 
                 if not id_local:
                     return {"result": False, "message": "ID de local requerido"}, 400
@@ -28,19 +25,19 @@ class PromocionComponent(Resource):
                 else:
                     resultado = PromocionService.listar_por_local(id_local)
 
-            return resultado, 200 if resultado['result'] else 500
+            return resultado, 200
         except Exception as e:
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
     @valida_api_token
     def post(self, id=None):
-        """
-        Crea una promoción o restaura una eliminada.
-        """
-        if id and "restaurar" in request.path:
-            return PromocionService.restaurar_promocion(id), 200
+        # Lógica de Restauración
+        if id is not None and "restaurar" in request.path:
+            resultado = PromocionService.restaurar_promocion(id)
+            return resultado, 200
 
+        # Lógica de Creación
         try:
             data = request.get_json()
             errors = PromocionRequest().validate(data)
@@ -48,16 +45,13 @@ class PromocionComponent(Resource):
                 return {"result": False, "message": errors}, 400
 
             resultado = PromocionService.crear_promocion(data)
-            return resultado, 201 if resultado['result'] else 500
+            return resultado, 201
         except Exception as e:
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
     @valida_api_token
     def put(self, id):
-        """
-        Edita una promoción activa.
-        """
         try:
             data = request.get_json()
             errors = PromocionRequest().validate(data)
@@ -65,19 +59,17 @@ class PromocionComponent(Resource):
                 return {"result": False, "message": errors}, 400
 
             resultado = PromocionService.actualizar_promocion(id, data)
-            return resultado, 200 if resultado['result'] else 500
+            return resultado, 200
         except Exception as e:
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500
 
     @valida_api_token
     def delete(self, id):
-        """
-        Borrado lógico de promociones.
-        """
         try:
+            # Capturamos el resultado del borrado lógico
             resultado = PromocionService.eliminar_promocion(id)
-            return resultado, 200 if resultado['result'] else 500
+            return resultado, 200
         except Exception as e:
             HandleLogs.write_error(e)
             return {"result": False, "message": str(e)}, 500

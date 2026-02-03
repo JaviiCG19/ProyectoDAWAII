@@ -55,6 +55,16 @@ class FranjaService:
         query = "UPDATE dawa.franjas SET estado = 0, fecact = %s WHERE id = %s"
         return DataBaseHandle.ExecuteNonQuery(query, (datetime.now().date(), id_franja))
 
+    def listar_eliminados_por_local(id_local):
+        query = """
+            SELECT id, idlocal, diasem, TRIM(horini) as horini, 
+                   TRIM(horfin) as horfin, tipres, estado 
+            FROM dawa.franjas 
+            WHERE idlocal = %s AND estado = 0
+            ORDER BY diasem ASC, horini ASC
+        """
+        return DataBaseHandle.getRecords(query, 0, (id_local,))
+
     @staticmethod
     def restaurar_franja(id_franja):
         query = "UPDATE dawa.franjas SET estado = 1, fecact = %s WHERE id = %s"

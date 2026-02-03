@@ -15,9 +15,16 @@ class FranjaComponent(Resource):
                 resultado = FranjaService.obtener_por_id(id)
             else:
                 id_local = request.args.get('idlocal')
+                # AGREGAMOS detección de papelera
+                ver_eliminados = request.args.get('eliminados') == 'true' or "eliminadas" in request.path
+
                 if not id_local:
                     return {"result": False, "message": "ID de local requerido"}, 400
-                resultado = FranjaService.listar_por_local(id_local)
+
+                if ver_eliminados:
+                    resultado = FranjaService.listar_eliminados_por_local(id_local)
+                else:
+                    resultado = FranjaService.listar_por_local(id_local)
 
             return resultado, 200 if resultado['result'] else 500
         except Exception as e:
@@ -26,14 +33,17 @@ class FranjaComponent(Resource):
 
     @valida_api_token
     def post(self, id=None):
-        if id and "restaurar" in request.path:
-            return FranjaService.restaurar_franja(id), 200
+        if id is not None and "restaurar" in request.path:
+            resultado = FranjaService.restaurar_franja(id)
+            return resultado, 200 if resultado['result'] else 500
 
         try:
             data = request.get_json()
             errors = FranjaRequest().validate(data)
             if errors: return {"result": False, "message": errors}, 400
-            return FranjaService.crear_franja(data), 201
+
+            resultado = FranjaService.crear_franja(data)
+            return resultado, 201 if resultado['result'] else 500
         except Exception as e:
             return {"result": False, "message": str(e)}, 500
 

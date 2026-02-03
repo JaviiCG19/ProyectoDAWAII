@@ -1,8 +1,8 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "Documentación de Servicios Web de Administración - DAWA .",
-    "version": "1.2.0",
+    "description": "Documentación de Servicios Web de Administración - DAWA.",
+    "version": "1.3.0",
     "title": "Documentación de Administración UG",
     "contact": { "email": "juan.cedenor@ug.edu.ec" }
   },
@@ -56,8 +56,7 @@
         "tags": ["Administración"],
         "summary": "Lista de Locales por Empresa",
         "parameters": [
-          { "name": "idcia", "in": "query", "required": true, "type": "integer" },
-          { "name": "eliminados", "in": "query", "required": false, "type": "boolean", "description": "Set true para ver papelera" }
+          { "name": "idcia", "in": "query", "required": true, "type": "integer" }
         ],
         "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Response" } } }
       },
@@ -98,6 +97,22 @@
         "responses": { "201": { "description": "Creado" } }
       }
     },
+    "/admin/franjas/eliminadas": {
+      "get": {
+        "tags": ["Administración"],
+        "summary": "Listar Franjas eliminadas (Papelera)",
+        "parameters": [{ "name": "idlocal", "in": "query", "required": true, "type": "integer" }],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/admin/franjas/restaurar/{id}": {
+      "post": {
+        "tags": ["Administración"],
+        "summary": "Restaurar Franja eliminada",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }],
+        "responses": { "200": { "description": "Restaurado" } }
+      }
+    },
     "/admin/promociones": {
       "get": {
         "tags": ["Marketing"],
@@ -110,6 +125,22 @@
         "summary": "Crear Promoción con validación de fechas",
         "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/PromoSaveDef" } }],
         "responses": { "201": { "description": "Creado" } }
+      }
+    },
+    "/admin/promociones/eliminadas": {
+      "get": {
+        "tags": ["Marketing"],
+        "summary": "Listar Promociones eliminadas (Papelera)",
+        "parameters": [{ "name": "idlocal", "in": "query", "required": true, "type": "integer" }],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/admin/promociones/restaurar/{id}": {
+      "post": {
+        "tags": ["Marketing"],
+        "summary": "Restaurar Promoción eliminada",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }],
+        "responses": { "200": { "description": "Restaurado" } }
       }
     }
   },
@@ -146,12 +177,12 @@
     },
     "PromoSaveDef": {
       "type": "object",
-      "required": ["idlocal", "nombre", "fecini", "fecfin"],
+      "required": ["idlocal", "nombre", "fec_inicio", "fec_fin"],
       "properties": {
         "idlocal": { "type": "integer" },
         "nombre": { "type": "string" },
-        "fecini": { "type": "string", "format": "date" },
-        "fecfin": { "type": "string", "format": "date" },
+        "fec_inicio": { "type": "string", "format": "date", "example": "2026-02-01" },
+        "fec_fin": { "type": "string", "format": "date", "example": "2026-02-28" },
         "descuento": { "type": "number" }
       }
     },

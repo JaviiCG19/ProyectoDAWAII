@@ -1,13 +1,16 @@
 from marshmallow import Schema, fields, validate, validates_schema, ValidationError
 
 class PromocionRequest(Schema):
+    # ID opcional para actualizaciones (PUT)
+    id = fields.Int(required=False)
+
     # Relación obligatoria con el local
     idlocal = fields.Int(
         required=True,
         error_messages={"required": "El ID del local es obligatorio."}
     )
 
-    # Nombre: min 3 caracteres para evitar nombres vacíos o sin sentido
+    # Nombre: min 3 caracteres
     nombre = fields.Str(
         required=True,
         validate=validate.Length(min=3, max=50),
@@ -22,7 +25,7 @@ class PromocionRequest(Schema):
         error_messages={"validator_failed": "La descripción no puede exceder los 150 caracteres."}
     )
 
-    # Descuento: numeric(5,2) en SQL permite precisión decimal
+    # Descuento: numeric(5,2)
     descuento = fields.Float(
         required=True,
         validate=validate.Range(min=0.01, max=100.0),
@@ -32,7 +35,7 @@ class PromocionRequest(Schema):
         }
     )
 
-    # Fechas: Marshmallow las convierte automáticamente de String a objeto Date
+    # Fechas
     fec_inicio = fields.Date(
         required=True,
         error_messages={"required": "La fecha de inicio es requerida."}
@@ -51,12 +54,8 @@ class PromocionRequest(Schema):
 
     @validates_schema
     def validar_fechas(self, data, **kwargs):
-        """
-        Validación cruzada de fechas para evitar promociones imposibles.
-        """
         if 'fec_inicio' in data and 'fec_fin' in data:
             if data['fec_inicio'] > data['fec_fin']:
-                # Lanzamos el error específicamente en el campo 'fec_fin'
                 raise ValidationError(
                     "La fecha de finalización no puede ser anterior a la de inicio.",
                     field_name="fec_fin"

@@ -1,6 +1,9 @@
 from marshmallow import Schema, fields, validate, validates_schema, ValidationError
 
 class FranjaRequest(Schema):
+    # ID opcional para actualizaciones (PUT)
+    id = fields.Int(required=False)
+
     # Relación con la sucursal
     idlocal = fields.Int(
         required=True,
@@ -36,15 +39,18 @@ class FranjaRequest(Schema):
         }
     )
 
+    # Tipo de reserva (0 por defecto)
+    tipres = fields.Int(
+        required=False,
+        load_default=0,
+        error_messages={"validator_failed": "El tipo de reserva debe ser un número entero."}
+    )
+
     estado = fields.Int(required=False, load_default=1)
 
     @validates_schema
     def validar_rango_horas(self, data, **kwargs):
-        """
-        Evita que la franja horaria sea incoherente.
-        """
         if 'horini' in data and 'horfin' in data:
-            # Comparación simple de strings (funciona bien en formato HH:MM)
             if data['horini'] >= data['horfin']:
                 raise ValidationError(
                     "La hora de fin debe ser mayor a la hora de inicio.",
