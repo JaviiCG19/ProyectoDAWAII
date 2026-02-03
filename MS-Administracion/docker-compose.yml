@@ -1,0 +1,17 @@
+
+services:
+  ms-administracion:
+    container_name: ms-administracion
+    image: engineermerchan/ms-administracion:latest
+    restart: always
+    ports:
+      - '10100:10100'
+    volumes:
+
+      - ./logs-admin:/app/MS-Administracion/src/utils/general/LOGS
+    networks:
+      - proyecto-network
+
+networks:
+  proyecto-network:
+    driver: bridge
