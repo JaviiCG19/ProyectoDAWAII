@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.env
+venv/
+.venv
+db_data/
+.vscode/
+/src/utils/general/LOGS
+/src/utils/general/LOGS
