@@ -2,13 +2,11 @@ from datetime import date
 from ...utils.database.connection_db import DataBaseHandle
 from ...utils.general.logs import HandleLogs
 from ...utils.general.response import internal_response
-from ..Services.middleware import valida_api_token
 
 
 class ClienteComponent:
 
     @staticmethod
-    @valida_api_token
     def crear_cliente(nombre, ruc_cc, telefono):
 
         try:
@@ -36,7 +34,6 @@ class ClienteComponent:
             return internal_response(result, data, message)
 
     @staticmethod
-    @valida_api_token
     def listar_clientes(skip=0, limit=10):
 
         try:
@@ -66,7 +63,6 @@ class ClienteComponent:
             return internal_response(result, data, message)
 
     @staticmethod
-    @valida_api_token
     def obtener_cliente(cliente_id):
 
         try:
@@ -95,7 +91,6 @@ class ClienteComponent:
             return internal_response(result, data, message)
 
     @staticmethod
-    @valida_api_token
     def actualizar_cliente(cliente_id, nombre=None, ruc_cc=None, telefono=None):
 
         try:
@@ -143,7 +138,6 @@ class ClienteComponent:
             return internal_response(result, data, message)
 
     @staticmethod
-    @valida_api_token
     def eliminar_cliente(cliente_id):
 
         try:

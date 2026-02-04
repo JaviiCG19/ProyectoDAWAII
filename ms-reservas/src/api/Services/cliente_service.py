@@ -5,11 +5,14 @@ from ...utils.general.logs import HandleLogs
 from ...utils.general.response import (response_error, response_success,
                                        response_not_found, response_inserted)
 from ..Model.Request.cliente_request import ClienteCreateRequest, ClienteUpdateRequest
+from ..Services.middleware import valida_api_token
+
 
 
 class ClienteCreateService(Resource):
 
     @staticmethod
+    @valida_api_token
     def post():
 
         try:
@@ -43,6 +46,7 @@ class ClienteCreateService(Resource):
 class ClienteListService(Resource):
 
     @staticmethod
+    @valida_api_token
     def get():
 
         try:
@@ -66,6 +70,7 @@ class ClienteListService(Resource):
 class ClienteDetailService(Resource):
 
     @staticmethod
+    @valida_api_token
     def get(cliente_id):
 
         try:
@@ -83,6 +88,7 @@ class ClienteDetailService(Resource):
             return response_error(err.__str__())
 
     @staticmethod
+    @valida_api_token
     def put(cliente_id):
 
         try:
@@ -114,6 +120,7 @@ class ClienteDetailService(Resource):
             return response_error(err.__str__())
 
     @staticmethod
+    @valida_api_token
     def delete(cliente_id):
 
         try:

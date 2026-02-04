@@ -411,6 +411,13 @@
           "required": false,
           "type": "integer",
           "description": "ID de la franja horaria (opcional)"
+        },
+        {
+          "in": "query",
+          "name": "idlocal",
+          "required": false,
+          "type": "integer",
+          "description": "ID del local (opcional)"
         }
       ],
       "responses": {
@@ -754,7 +761,88 @@
           }
         }
       }
+    },
+    "/franjas/local/{idlocal}": {
+  "get": {
+    "tags": ["Franjas"],
+    "summary": "Listar franjas horarias de un local específico",
+    "description": "Obtiene todas las franjas horarias activas (estado = 0) asociadas a un local determinado por su ID.",
+    "operationId": "listarFranjasPorLocal",
+    "parameters": [
+      {
+        "in": "header",
+        "name": "tokenapp",
+        "description": "Token de autenticación JWT (obligatorio)",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "in": "path",
+        "name": "idlocal",
+        "description": "ID del local para el cual se consultan las franjas horarias",
+        "required": true,
+        "type": "integer",
+        "format": "int64",
+        "example": 1
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Lista de franjas horarias del local",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "result": {
+              "type": "boolean",
+              "example": true
+            },
+            "message": {
+              "type": "string",
+              "example": "OK"
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "idlocal": {
+                    "type": "integer",
+                    "example": 5
+                  },
+                  "hora_inicio": {
+                    "type": "string",
+                    "example": "08:00"
+                  },
+                  "hora_fin": {
+                    "type": "string",
+                    "example": "11:00"
+                  },
+                  "estado": {
+                    "type": "integer",
+                    "example": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "No autorizado - Token faltante, inválido o expirado"
+      },
+      "404": {
+        "description": "No se encontraron franjas para este local o el local no existe"
+      },
+      "500": {
+        "description": "Error interno del servidor"
+      }
     }
+  }
+}
   },
   "definitions": {
     "ClienteCreate": {

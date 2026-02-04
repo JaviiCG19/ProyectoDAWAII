@@ -9,7 +9,7 @@ from ..Services.anticipo_service import AnticipoCreateService, AnticipoReservaSe
 from ..Services.reporte_service import (ReportePeriodoService, ReporteTopClientesService,
                                        ReporteUsoMesasService, ReporteTasasService,
                                        ReporteFranjasService)
-
+from ..Services.franja_service import FranjaListService
 
 def load_routes(api):
 
@@ -41,3 +41,6 @@ def load_routes(api):
     api.add_resource(ReporteUsoMesasService, '/reportes/uso-mesas')
     api.add_resource(ReporteTasasService, '/reportes/tasas')
     api.add_resource(ReporteFranjasService, '/reportes/franjas')
+
+    # Rutas de franjas horarias
+    api.add_resource(FranjaListService, '/franjas/local/<int:idlocal>')

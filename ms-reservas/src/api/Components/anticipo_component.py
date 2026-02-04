@@ -2,12 +2,10 @@ from datetime import date
 from ...utils.database.connection_db import DataBaseHandle
 from ...utils.general.logs import HandleLogs
 from ...utils.general.response import internal_response
-from ..Services.middleware import valida_api_token
 
 class AnticipoComponent:
 
     @staticmethod
-    @valida_api_token
     def crear_anticipo(idreserva, monto):
 
         try:
@@ -48,7 +46,6 @@ class AnticipoComponent:
             return internal_response(result, data, message)
 
     @staticmethod
-    @valida_api_token
     def obtener_anticipo_por_reserva(idreserva):
 
         try:

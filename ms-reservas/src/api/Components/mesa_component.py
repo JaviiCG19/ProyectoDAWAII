@@ -1,22 +1,54 @@
 from ...utils.database.connection_db import DataBaseHandle
 from ...utils.general.logs import HandleLogs
 from ...utils.general.response import internal_response
-from ..Services.middleware import valida_api_token
 
 class MesaComponent:
 
     @staticmethod
-    @valida_api_token
-    def mesas_disponibles_por_fecha(fecha, franja_id=None):
-
+    def mesas_disponibles_por_fecha(fecha, franja_id=None, idlocal=None):
+        """
+        Obtiene mesas disponibles para una fecha específica
+        Si se proporciona franja_id, filtra también por franja horaria
+        Si se proporciona idlocal, filtra por local
+        """
         try:
             result = False
             data = None
             message = None
 
-            if franja_id:
+            if franja_id and idlocal:
+                # Filtrar por fecha, franja horaria Y local
                 sql = """
-                      SELECT m.id, m.numero, m.maxper
+                      SELECT m.id, m.numero, m.maxper, m.idlocal
+                      FROM dawa.mesas m
+                      WHERE m.idlocal = %s
+                        AND m.id NOT IN (SELECT idmesa \
+                                         FROM dawa.reservas \
+                                         WHERE fecha = %s \
+                                           AND franja_id = %s \
+                                           AND estado IN (0, 2))
+                        AND m.estado = 0
+                      ORDER BY m.numero \
+                      """
+                record = (idlocal, fecha, franja_id)
+            elif idlocal:
+                # Filtrar por fecha Y local
+                sql = """
+                      SELECT m.id, m.numero, m.maxper, m.idlocal
+                      FROM dawa.mesas m
+                      WHERE m.idlocal = %s
+                        AND m.id NOT IN (SELECT DISTINCT idmesa \
+                                         FROM dawa.reservas \
+                                         WHERE fecha = %s \
+                                           AND estado IN (0, 2))
+                        AND m.estado = 0
+                      ORDER BY m.numero \
+                      """
+                record = (idlocal, fecha)
+            elif franja_id:
+                # Filtrar por fecha Y franja horaria (sin local específico)
+                sql = """
+                      SELECT m.id, m.numero, m.maxper, m.idlocal
                       FROM dawa.mesas m
                       WHERE m.id NOT IN (SELECT idmesa \
                                          FROM dawa.reservas \
@@ -28,8 +60,9 @@ class MesaComponent:
                       """
                 record = (fecha, franja_id)
             else:
+                # Filtrar solo por fecha
                 sql = """
-                      SELECT m.id, m.numero, m.maxper
+                      SELECT m.id, m.numero, m.maxper, m.idlocal
                       FROM dawa.mesas m
                       WHERE m.id NOT IN (SELECT DISTINCT idmesa \
                                          FROM dawa.reservas \
@@ -55,7 +88,6 @@ class MesaComponent:
             return internal_response(result, data, message)
 
     @staticmethod
-    @valida_api_token
     def listar_todas_mesas():
 
         try:

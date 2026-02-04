@@ -5,11 +5,14 @@ from ...utils.general.logs import HandleLogs
 from ...utils.general.response import (response_error, response_success,
                                        response_not_found, response_inserted)
 from ..Model.Request.anticipo_request import AnticipoCreateRequest
+from ..Services.middleware import valida_api_token
+
 
 
 class AnticipoCreateService(Resource):
 
     @staticmethod
+    @valida_api_token
     def post():
 
         try:
@@ -42,6 +45,7 @@ class AnticipoCreateService(Resource):
 class AnticipoReservaService(Resource):
 
     @staticmethod
+    @valida_api_token
     def get(idreserva):
 
         try:

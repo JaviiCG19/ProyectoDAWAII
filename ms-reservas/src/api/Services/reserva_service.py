@@ -6,11 +6,13 @@ from ...utils.general.response import (response_error, response_success,
                                        response_not_found, response_inserted,
                                        response_conflict)
 from ..Model.Request.reserva_request import ReservaCreateRequest
+from ..Services.middleware import valida_api_token
 
 
 class ReservaCreateService(Resource):
 
     @staticmethod
+    @valida_api_token
     def post():
 
         try:
@@ -46,6 +48,7 @@ class ReservaCreateService(Resource):
 class ReservaListService(Resource):
 
     @staticmethod
+    @valida_api_token
     def get():
 
         try:
@@ -66,6 +69,7 @@ class ReservaListService(Resource):
 class ReservaDetailService(Resource):
 
     @staticmethod
+    @valida_api_token
     def get(reserva_id):
 
         try:
@@ -83,6 +87,7 @@ class ReservaDetailService(Resource):
             return response_error(err.__str__())
 
     @staticmethod
+    @valida_api_token
     def delete(reserva_id):
 
         try:
@@ -103,6 +108,7 @@ class ReservaDetailService(Resource):
 class ReservaConfirmarService(Resource):
 
     @staticmethod
+    @valida_api_token
     def put(reserva_id):
 
         try:
@@ -123,6 +129,7 @@ class ReservaConfirmarService(Resource):
 class ReservaCancelarService(Resource):
 
     @staticmethod
+    @valida_api_token
     def put(reserva_id):
 
         try:
@@ -143,6 +150,7 @@ class ReservaCancelarService(Resource):
 class ReservaCheckinService(Resource):
 
     @staticmethod
+    @valida_api_token
     def put(reserva_id):
 
         try:
@@ -163,6 +171,7 @@ class ReservaCheckinService(Resource):
 class ReservaNoShowService(Resource):
 
     @staticmethod
+    @valida_api_token
     def put(reserva_id):
 
         try:
