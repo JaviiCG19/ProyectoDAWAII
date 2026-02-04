@@ -23,7 +23,7 @@ export default function RecepcionPage() {
   const router = useRouter();
 
   const localId = Number(params?.id);
-  const checking = useAuth(["4"]);
+  const checking = useAuth(["4"]); // Rol recepción
 
   const [loading, setLoading] = useState(true);
 
@@ -38,10 +38,13 @@ export default function RecepcionPage() {
       if (!checking && localId) {
         setLoading(true);
         try {
-          setMesas(await getMesasByLocal(localId));
-          setClientes(await getClientes(0, 50));
+          const mesasData = await getMesasByLocal(localId);
+          const clientesData = await getClientes(0, 50);
+
+          setMesas(mesasData);
+          setClientes(clientesData);
         } catch (error) {
-          console.error("Error cargando datos:", error);
+          console.error("❌ Error cargando datos:", error);
         } finally {
           setLoading(false);
         }
@@ -69,7 +72,9 @@ export default function RecepcionPage() {
           <ConciergeBell className="text-blue-500" size={28} />
           Panel de Recepción
         </h1>
-        <p className="text-slate-500 text-sm">Sucursal ID: {localId}</p>
+        <p className="text-slate-500 text-sm">
+          Sucursal ID: {localId}
+        </p>
       </header>
 
       {/* TARJETAS */}
@@ -85,19 +90,21 @@ export default function RecepcionPage() {
 
         <div
           onClick={() => router.push("/recepcion/clientes")}
-          className="bg-white p-6 rounded-2xl shadow-sm border cursor-pointer hover:shadow-md"
+          className="bg-white p-6 rounded-2xl shadow-sm border cursor-pointer hover:shadow-md transition"
         >
-          <h3 className="text-slate-400 text-sm font-bold uppercase flex gap-2">
-            <UserPlus size={16} /> Registrar Cliente
+          <h3 className="text-slate-400 text-sm font-bold uppercase flex gap-2 items-center">
+            <UserPlus size={16} />
+            Registrar Cliente
           </h3>
         </div>
 
         <div
           onClick={() => router.push("/recepcion/clientes/list")}
-          className="bg-white p-6 rounded-2xl shadow-sm border cursor-pointer hover:shadow-md"
+          className="bg-white p-6 rounded-2xl shadow-sm border cursor-pointer hover:shadow-md transition"
         >
-          <h3 className="text-slate-400 text-sm font-bold uppercase flex gap-2">
-            <Users size={16} /> Listado Clientes
+          <h3 className="text-slate-400 text-sm font-bold uppercase flex gap-2 items-center">
+            <Users size={16} />
+            Listado Clientes
           </h3>
         </div>
       </div>
@@ -106,11 +113,17 @@ export default function RecepcionPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* CLIENTE */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border">
-          <h3 className="font-bold text-lg mb-4">Seleccionar Cliente</h3>
+          <h3 className="font-bold text-lg mb-4">
+            Seleccionar Cliente
+          </h3>
 
           <select
             value={clienteSeleccionado ?? ""}
-            onChange={(e) => setClienteSeleccionado(Number(e.target.value))}
+            onChange={(e) =>
+              setClienteSeleccionado(
+                e.target.value ? Number(e.target.value) : null
+              )
+            }
             className="w-full px-4 py-3 border rounded-xl"
           >
             <option value="">Seleccione un cliente</option>
@@ -123,9 +136,10 @@ export default function RecepcionPage() {
         </div>
 
         {/* RESERVA */}
-        <ReservaForm 
-           idlocal={localId} 
-           idcliente={clienteSeleccionado} />
+        <ReservaForm
+          idlocal={localId}
+          idcliente={clienteSeleccionado}
+        />
       </div>
     </div>
   );

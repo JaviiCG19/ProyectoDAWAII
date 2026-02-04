@@ -11,9 +11,9 @@ const api = axios.create({
 
 // Interceptor para pegar el token automáticamente
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token'); // O donde guardes tu JWT
+  const token = localStorage.getItem('token'); 
   if (token) {
-    // AQUÍ ESTÁ EL TRUCO: Usar 'tokenapp' en lugar de 'Authorization'
+   
     config.headers['tokenapp'] = token; 
   }
   return config;

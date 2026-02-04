@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { getMesasByLocal } from "@/services/mesa.service";
 import { getFranjasByLocal } from "@/services/sucursal.service";
-import api from "@/lib/api";
+import { crearReserva as crearReservaService } from "@/services/reserva.service";
 import { Franja } from "@/interface/admin.interface";
 
 interface Props {
@@ -57,12 +57,14 @@ export default function ReservaForm({ idlocal, idcliente }: Props) {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    console.log("LOCAL ACTUAL:", idlocal);
+    console.log("FRANJAS:", franjas);
+
   };
 
-  // ======================
+
   // CREAR RESERVA
-  // ======================
-  const crearReserva = async () => {
+  const handleCrearReserva = async () => {
     if (!idcliente) {
       setError("Debe seleccionar un cliente");
       return;
@@ -81,11 +83,11 @@ export default function ReservaForm({ idlocal, idcliente }: Props) {
         numper: Number(formData.personas),
       };
 
-      console.log("📤 Payload reserva:", payload);
+      console.log(" Payload reserva:", payload);
 
-      await api.post("/reservas", payload);
+      await crearReservaService(payload);
 
-      alert("✅ Reserva creada correctamente");
+      alert(" Reserva creada correctamente");
 
       setFormData({
         fecha: "",
@@ -93,9 +95,8 @@ export default function ReservaForm({ idlocal, idcliente }: Props) {
         idmesa: "",
       });
       setFranjaId("");
-    } catch (err) {
-      console.error(err);
-      setError("Error al crear la reserva");
+    } catch (err: any) {
+      setError(err.message || "Error al crear la reserva");
     } finally {
       setLoading(false);
     }
@@ -179,7 +180,7 @@ export default function ReservaForm({ idlocal, idcliente }: Props) {
       </div>
 
       <button
-        onClick={crearReserva}
+        onClick={handleCrearReserva}
         disabled={loading || !formData.fecha || !franjaId || !idcliente}
         className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
       >
