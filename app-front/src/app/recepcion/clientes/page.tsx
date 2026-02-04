@@ -3,14 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User, Phone, UserPlus, CreditCard } from "lucide-react";
-
-// Tu instancia de API personalizada
 import api from "@/lib/api";
+
 
 export default function NuevoClientePage() {
   const router = useRouter();
 
-  // Estados para controlar el formulario
+
   const [form, setForm] = useState({
     nombre: "",
     ruc_cc: "",
@@ -20,7 +19,7 @@ export default function NuevoClientePage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Manejador de cambios en inputs
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
       ...form,
@@ -28,13 +27,13 @@ export default function NuevoClientePage() {
     });
   };
 
-  // Función para guardar (Lógica original con diseño nuevo)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    // Validaciones básicas de tu nuevo diseño
+    
     if (!form.nombre.trim()) {
       setError("El nombre es obligatorio");
       setLoading(false);
@@ -54,7 +53,7 @@ export default function NuevoClientePage() {
     try {
       await api.post("/clientes", form);
       alert(" Cliente registrado");
-      router.push("/recepcion/clientes");
+      router.back();
     } catch (err: any) {
       setError("Error al registrar cliente");
       console.error(err);

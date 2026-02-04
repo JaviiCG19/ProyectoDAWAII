@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { User, Phone, CreditCard, Edit, Trash2, Search } from "lucide-react";
 import api from "@/lib/api";
+import { getClientes } from "@/services/cliente.service"
 
 export default function ListadoClientesPage() {
   const [clientes, setClientes] = useState<any[]>([]);
@@ -12,8 +13,7 @@ export default function ListadoClientesPage() {
   const cargar = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/clientes/list");
-      const data = res.data?.data || [];
+      const data = await getClientes(0, 100); 
       setClientes(data);
     } catch (error) {
       console.error("Error al cargar clientes", error);
@@ -50,7 +50,7 @@ export default function ListadoClientesPage() {
     }
   };
 
-  // Lógica de filtrado
+  // Filtrado
   const clientesFiltrados = clientes.filter(
     (c) =>
       c.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -76,7 +76,7 @@ export default function ListadoClientesPage() {
         </div>
       </div>
 
-      {/* Tabla con Estilo "Mis Reservas" */}
+      {/* Tabla */}
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">

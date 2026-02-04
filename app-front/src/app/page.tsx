@@ -1,6 +1,5 @@
 import Image from "next/image";
-import Link from "next/link"; // ← Importante: esto faltaba
-
+import Link from "next/link"; 
 import {
   Store,
   LayoutGrid,
