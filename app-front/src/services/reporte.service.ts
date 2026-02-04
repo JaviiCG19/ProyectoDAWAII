@@ -85,3 +85,4 @@ export const getReservasPorFranja = async (): Promise<ReporteFranja[]> => {
     throw new Error(msg);
   }
 };
+

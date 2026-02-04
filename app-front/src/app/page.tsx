@@ -68,30 +68,7 @@ export default function HomePage() {
         {features.map((feature, index) => {
           const Icon = feature.icon;
 
-          // Tarjeta de Dashboard ya tiene enlace
-          if (feature.title === "Dashboard de Ocupación") {
-            return (
-              <Link key={index} href="/reservas/dashboard">
-                <div className="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition cursor-pointer">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="p-3 rounded-xl bg-[#FDF3D8] text-[#F2B847]">
-                      <Icon size={28} />
-                    </div>
 
-                    <h3 className="text-xl font-semibold text-[#F2B847]">
-                      {feature.title}
-                    </h3>
-                  </div>
-
-                  <p className="text-gray-600">
-                    {feature.description}
-                  </p>
-                </div>
-              </Link>
-            );
-          }
-
-          // Las demás tarjetas sin enlace 
           return (
             <div
               key={index}
