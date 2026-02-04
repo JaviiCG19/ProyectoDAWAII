@@ -20,3 +20,15 @@ export interface Reserva {
   estado: number;
   fecact: string;
 }
+
+
+export interface ReservaDetalle {
+  id: number;
+  idcliente: number | string;
+  fecha: string;
+  franja_id: number;
+  numper: number;
+  idmesa?: number | string;
+  estado: number;
+  nombreCliente?: string;
+}

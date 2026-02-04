@@ -1,7 +1,6 @@
-// interface/reporte.interface.ts
+
 
 export interface ReportePorPeriodo {
-  // Cambia estos nombres para que coincidan con los AS del SQL de tu ReporteComponent
   total_reservas: number; 
   pendientes: number;
   confirmadas: number;
@@ -9,7 +8,7 @@ export interface ReportePorPeriodo {
   checkin: number;
   noshow: number;
   total_personas: number;
-  fecha?: string; // Solo si decides agrupar por fecha en el SQL después
+  fecha?: string; 
 }
 
 export interface TopCliente {

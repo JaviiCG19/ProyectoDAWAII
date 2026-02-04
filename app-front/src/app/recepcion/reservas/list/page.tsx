@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle, XCircle, LogIn, AlertTriangle } from "lucide-react";
-import { listarReservasActivas, confirmarReserva, cancelarReserva, checkInReserva, marcarNoShow} from "@/services/reserva.service";
-import {Reserva} from "@/interface/reserva.interface";
+import { CheckCircle, XCircle, LogIn, AlertTriangle, Search } from "lucide-react";
+import {
+  listarReservasActivas,
+  confirmarReserva,
+  cancelarReserva
+} from "@/services/reserva.service";
+import { Reserva } from "@/interface/reserva.interface";
 
-
+import { agregarAnticipo } from "@/services/anticipo.service"; 
 
 export default function ReservasListPage() {
   const router = useRouter();
@@ -31,17 +35,64 @@ export default function ReservasListPage() {
 
   const handleConfirmar = async (id: number) => {
     if (!confirm("¿Confirmar esta reserva?")) return;
+
     try {
       await confirmarReserva(id);
-      alert("Reserva confirmada correctamente");
-      cargarReservas(); 
+      alert("¡Reserva confirmada correctamente!");
+      cargarReservas();
     } catch (err: any) {
-      alert(err.message || "Error al confirmar");
+      const mensaje = err.message?.toLowerCase() || "";
+
+      if (
+        mensaje.includes("anticipo")
+      ) {
+        const deseaAgregar = confirm(
+          "La reserva no tiene anticipo registrado.\n\n" +
+          "¿Desea agregar un anticipo ahora para poder confirmar?"
+        );
+
+        if (deseaAgregar) {
+          const montoStr = prompt(
+            "Ingresa el monto del anticipo (ej. 20.00):",
+            "0.00"
+          );
+
+          if (!montoStr || isNaN(Number(montoStr)) || Number(montoStr) <= 0) {
+            alert("Monto inválido. La reserva sigue pendiente.");
+            return;
+          }
+
+          const monto = Number(montoStr);
+
+          try {
+            await agregarAnticipo({
+              reservaId: id,
+              monto,
+            });
+
+            alert("¡Anticipo agregado correctamente!");
+
+            await confirmarReserva(id);
+            alert("Reserva confirmada con éxito tras agregar anticipo.");
+            cargarReservas();
+          } catch (anticipoErr: any) {
+            alert(
+              "Error al agregar anticipo: " +
+              (anticipoErr.message || "Intenta de nuevo.")
+            );
+          }
+        } else {
+          alert("La reserva sigue pendiente. Agrega anticipo cuando desees.");
+        }
+      } else {
+        alert("Error al confirmar: " + (err.message || "Intenta de nuevo."));
+      }
     }
   };
 
   const handleCancelar = async (id: number) => {
     if (!confirm("¿Cancelar esta reserva?")) return;
+
     try {
       await cancelarReserva(id);
       alert("Reserva cancelada correctamente");
@@ -51,47 +102,39 @@ export default function ReservasListPage() {
     }
   };
 
-  const handleCheckIn = async (id: number) => {
-    if (!confirm("¿Realizar check-in del cliente?")) return;
-    try {
-      await checkInReserva(id);
-      alert("Check-in realizado correctamente");
-      cargarReservas();
-    } catch (err: any) {
-      alert(err.message || "Error al hacer check-in");
-    }
-  };
-
-  const handleNoShow = async (id: number) => {
-    if (!confirm("¿Marcar como no-show? Esta acción es irreversible.")) return;
-    try {
-      await marcarNoShow(id);
-      alert("Reserva marcada como no-show");
-      cargarReservas();
-    } catch (err: any) {
-      alert(err.message || "Error al marcar no-show");
-    }
-  };
 
   if (loading) return <div className="p-6">Cargando reservas...</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-2xl font-bold text-slate-800">
-          Listado de Reservas pen
+          Listado de Reservas pendientes
         </h1>
-        <button
-          onClick={() => router.back()}
-          className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-        >
-          Volver
-        </button>
+
+        <div className="flex flex-col sm:flex-row gap-4">
+          <button
+            onClick={() => router.push("/recepcion/reservas/check-no-show")}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium shadow-md transition-all min-w-[240px]"
+          >
+            <Search size={20} />
+            Buscar por ID (Check-in / No-show)
+          </button>
+
+          <button
+            onClick={() => router.back()}
+            className="px-6 py-3 bg-gray-200 text-slate-700 rounded-xl hover:bg-gray-300 font-medium shadow-sm transition-all"
+          >
+            Volver
+          </button>
+        </div>
       </div>
 
       {reservas.length === 0 ? (
-        <p className="text-slate-500">No hay reservas activas en este momento.</p>
+        <p className="text-slate-500 text-center py-10">
+          No hay reservas activas en este momento.
+        </p>
       ) : (
         <div className="overflow-x-auto bg-white rounded-xl shadow-sm border">
           <table className="min-w-full divide-y divide-slate-200">
@@ -125,7 +168,7 @@ export default function ReservasListPage() {
             </thead>
             <tbody className="divide-y divide-slate-200">
               {reservas.map((reserva) => (
-                <tr key={reserva.id}>
+                <tr key={reserva.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 whitespace-nowrap font-medium">{reserva.id}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{reserva.idcliente}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{reserva.fecha}</td>
@@ -152,15 +195,11 @@ export default function ReservasListPage() {
                         ? "Confirmada"
                         : reserva.estado === 2
                         ? "Cancelada"
-                        : reserva.estado === 3
-                        ? "Check-in"
-                        : reserva.estado === 4
-                        ? "No-show"
                         : "Desconocido"}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 flex-wrap">
                       {reserva.estado === 0 && (
                         <>
                           <button
@@ -177,23 +216,7 @@ export default function ReservasListPage() {
                           </button>
                         </>
                       )}
-
-                      {reserva.estado === 1 && (
-                        <>
-                          <button
-                            onClick={() => handleCheckIn(reserva.id)}
-                            className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                          >
-                            <LogIn size={16} /> Check-in
-                          </button>
-                          <button
-                            onClick={() => handleNoShow(reserva.id)}
-                            className="text-orange-600 hover:text-orange-800 flex items-center gap-1"
-                          >
-                            <AlertTriangle size={16} /> No-show
-                          </button>
-                        </>
-                      )}
+                      
                     </div>
                   </td>
                 </tr>

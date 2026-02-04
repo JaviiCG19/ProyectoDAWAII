@@ -17,6 +17,27 @@ export const registrarAnticipo = async (data: AnticipoCreateRequest) => {
   }
 };
 
+
+export const agregarAnticipo = async ({
+  reservaId,
+  monto,
+}: {
+  reservaId: number;
+  monto: number;
+}) => {
+  try {
+    const res = await api.post("/anticipos", {
+      idreserva: reservaId,
+      monto
+    });
+    return res.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Error al agregar anticipo");
+  }
+};
+
+
+
 export const getAnticipoByReserva = async (idreserva: number) => {
   try {
     const res = await api.get(`/anticipos/reserva/${idreserva}`);

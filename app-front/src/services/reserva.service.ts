@@ -90,6 +90,12 @@ export const cancelarReserva = async (reservaId: number) => {
 };
 
 
+
+
+
+
+
+
 export const checkInReserva = async (reservaId: number) => {
   try {
     const res = await api.put(`/reservas/${reservaId}/checkin`);
