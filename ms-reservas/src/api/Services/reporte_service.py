@@ -12,22 +12,32 @@ class ReportePeriodoService(Resource):
 
     @staticmethod
     @valida_api_token
-    def post():
-
+    def get():
+        """
+        Obtener reporte de reservas por período
+        Query params: inicio (YYYY-MM-DD), fin (YYYY-MM-DD)
+        """
         try:
             HandleLogs.write_log("Servicio de reporte por período ejecutado")
-            rq_json = request.get_json()
 
-            # Validar request
-            new_request = ReportePeriodoRequest()
-            error_en_validacion = new_request.validate(rq_json)
+            # Obtener parámetros de query
+            fecha_inicio = request.args.get('inicio')
+            fecha_fin = request.args.get('fin')
 
-            if error_en_validacion:
-                return response_error("Error al validar el request -> " + str(error_en_validacion))
+            # Validar parámetros requeridos
+            if not fecha_inicio or not fecha_fin:
+                return response_error("Parámetros 'inicio' y 'fin' son requeridos")
+
+            # Validar formato de fechas
+            try:
+                fecha_inicio_obj = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
+                fecha_fin_obj = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
+            except ValueError:
+                return response_error("Formato de fecha inválido. Use YYYY-MM-DD")
 
             resultado = ReporteComponent.reservas_por_periodo(
-                rq_json['fecha_inicio'],
-                rq_json['fecha_fin']
+                fecha_inicio_obj,
+                fecha_fin_obj
             )
 
             if resultado['result']:
