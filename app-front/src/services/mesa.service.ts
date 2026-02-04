@@ -1,5 +1,7 @@
 import api from "./api";
-import { Mesa } from "@/interface/Mesa.interface";
+
+import { Mesa } from "@/interface/mesa.interface";
+
 
 export const getMesasByLocal = async (idLocal: string | number | undefined): Promise<Mesa[]> => {
   if (!idLocal || idLocal === "undefined") return [];

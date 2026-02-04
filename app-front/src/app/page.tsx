@@ -42,7 +42,7 @@ const features = [
 export default function HomePage() {
   return (
     <section className="space-y-16">
-      {/* HERO */}
+
       <div className="text-center space-y-8">
         <h2 className="text-4xl md:text-5xl font-extrabold text-[#F2B847]">
           Sistema de Gestión de Reservas para Restaurantes
@@ -54,7 +54,6 @@ export default function HomePage() {
           operativa de restaurantes.
         </p>
 
-        {/* IMAGEN GRANDE */}
         <div className="flex justify-center">
           <Image
             src={gestionImg}
@@ -65,7 +64,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* FEATURES */}
+  
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {features.map((feature, index) => {
           const Icon = feature.icon;
