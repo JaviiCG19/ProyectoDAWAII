@@ -1,35 +1,145 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { useAuth } from "@/services/useAuth";
-import { useState } from "react";
-import { 
-  Users, 
-  Store, 
-  TrendingUp, 
-  FileText, 
-  ChevronRight,
-  ArrowUpRight,
-  Calendar,
-  Layers,
-  Settings
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, Store,  TrendingUp, FileText,  ChevronRight, Calendar,  Layers,
+         Settings,  AlertCircle, X} from "lucide-react";
+         
 import Link from "next/link";
 
+import api from "@/services/api"; // Ruta del segundo backend 10100
+
+import { getClientes } from "@/services/cliente.service";
+
+const contarNuevosClientesHoy = (clientes: any[]): number => {
+  if (!clientes?.length) return 0;
+  const hoy = new Date().toISOString().split("T")[0];
+  return clientes.filter((c) => c.fecing?.split("T")?.[0] === hoy).length;
+};
+
 export default function GerenteDashboardPage() {
-  const params = useParams();
-  const idRes = params?.id as string;
-  
   const checking = useAuth(["2"]);
 
-  const [stats, setStats] = useState({
-    totalVentas: "$12,450.00",
-    reservasHoy: 45,
-    clientesNuevos: 12,
-    ocupacionPromedio: "78%"
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [locales, setLocales] = useState<any[]>([]);
+  const [nuevosClientesHoy, setNuevosClientesHoy] = useState(0);
 
-  if (checking) {
+  const [empresas, setEmpresas] = useState<any[]>([]);
+  const [selectedIdCia, setSelectedIdCia] = useState<number | null>(null);
+
+  // Estados para el modal de mesas
+  const [selectedLocal, setSelectedLocal] = useState<any>(null);
+  const [mesas, setMesas] = useState<any[]>([]);
+  const [mesasLoading, setMesasLoading] = useState(false);
+  const [mesasError, setMesasError] = useState<string | null>(null);
+
+  // Cargar empresas al montar el componente
+  useEffect(() => {
+    const fetchEmpresas = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const resEmpresas = await api.get("/admin/empresas");
+        if (resEmpresas.data?.result && Array.isArray(resEmpresas.data.data)) {
+          const empresasList = resEmpresas.data.data;
+          setEmpresas(empresasList);
+
+          if (empresasList.length > 0) {
+            setSelectedIdCia(empresasList[0].id);
+          } else {
+            setError("No hay empresas registradas");
+          }
+        } else {
+          throw new Error("Error al cargar lista de empresas");
+        }
+      } catch (err: any) {
+        console.error("Error cargando empresas:", err);
+        setError(err.message || "No se pudieron cargar las empresas");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmpresas();
+  }, []);
+
+  // Cargar dashboard y locales cuando cambie la empresa
+  useEffect(() => {
+    if (!selectedIdCia) return;
+
+    const fetchDashboardAndLocales = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Dashboard
+        const resDashboard = await api.get("/admin/dashboard", {
+          params: { idcia: selectedIdCia },
+        });
+
+        if (!resDashboard.data?.result) {
+          throw new Error(resDashboard.data?.message || "Error en dashboard");
+        }
+        setDashboardData(resDashboard.data.data || {});
+
+        // Sucursales
+        const resLocales = await api.get("/admin/locales", {
+          params: { idcia: selectedIdCia },
+        });
+
+        if (!resLocales.data?.result) {
+          throw new Error(resLocales.data?.message || "Error al cargar locales");
+        }
+        setLocales(resLocales.data.data || []);
+
+        const clientes = await getClientes(0, 500);
+        setNuevosClientesHoy(contarNuevosClientesHoy(clientes));
+      } catch (err: any) {
+        console.error("Error:", err);
+        setError(err.message || "No se pudieron cargar los datos");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardAndLocales();
+  }, [selectedIdCia]);
+
+
+    const openMesasModal = async (local: any) => {
+      setSelectedLocal(local);
+      setMesas([]);
+      setMesasError(null);
+      setMesasLoading(true);
+
+    try {
+      const resMesas = await api.get("/admin/mesas", {
+        params: { idlocal: local.id },
+      });
+
+      if (resMesas.data?.result && Array.isArray(resMesas.data.data)) {
+        setMesas(resMesas.data.data);
+      } else {
+        setMesasError("No se pudieron cargar las mesas");
+      }
+    } catch (err: any) {
+      console.error("Error cargando mesas:", err);
+      setMesasError(err.message || "Error al cargar mesas");
+    } finally {
+      setMesasLoading(false);
+    }
+  };
+
+     const closeMesasModal = () => {
+       setSelectedLocal(null);
+       setMesas([]);
+       setMesasError(null);
+    };
+
+  if (checking || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-4">
@@ -40,14 +150,39 @@ export default function GerenteDashboardPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8 flex items-center justify-center">
+        <div className="bg-white p-10 rounded-3xl shadow-lg text-center max-w-md">
+          <AlertCircle size={64} className="mx-auto text-red-500 mb-6" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-3">Error</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700"
+          >
+            Intentar de nuevo
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const reservasHoy = dashboardData?.reservas_hoy ?? 0;
+  const localesCount = locales.length;
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <span className="text-blue-600 font-bold text-xs uppercase tracking-widest">Administración Corporativa</span>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Panel de Gerencia</h1>
+          <span className="text-blue-600 font-bold text-xs uppercase tracking-widest">
+            Administración Corporativa
+          </span>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">
+            Panel de Gerencia Corporativo
+          </h1>
           <p className="text-gray-500 flex items-center gap-2 mt-1">
-            <Calendar size={16} /> Restaurante ID: <span className="font-bold text-gray-700">#{idRes}</span>
+            <Calendar size={16} /> Vista Corporativa
           </p>
         </div>
         <div className="flex gap-3">
@@ -61,14 +196,38 @@ export default function GerenteDashboardPage() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+     
+      <div className="mb-8 max-w-xs">
+        <label className="block text-sm font-bold text-gray-700 mb-2">
+          Seleccionar empresa:
+        </label>
+        <select
+          value={selectedIdCia ?? ""}
+          onChange={(e) => setSelectedIdCia(Number(e.target.value))}
+          className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="" disabled>
+            Selecciona una empresa
+          </option>
+          {empresas.map((emp) => (
+            <option key={emp.id} value={emp.id}>
+              {emp.nomfan || `Empresa ${emp.id}`}
+            </option>
+          ))}
+        </select>
+      </div>
+
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
         {[
-          { label: "Ventas Totales", val: stats.totalVentas, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Reservas Totales", val: stats.reservasHoy, icon: Store, color: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Nuevos Clientes", val: stats.clientesNuevos, icon: Users, color: "text-indigo-600", bg: "bg-indigo-50" },
-          { label: "Ocupación Global", val: stats.ocupacionPromedio, icon: ArrowUpRight, color: "text-amber-600", bg: "bg-amber-50" },
+          { label: "Ventas Totales", val: "$0.00", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Reservas Hoy", val: reservasHoy.toString(), icon: Store, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Nuevos Clientes", val: nuevosClientesHoy.toString(), icon: Users, color: "text-indigo-600", bg: "bg-indigo-50" },
         ].map((item, i) => (
-          <div key={i} className="bg-white p-6 rounded-4xl shadow-sm border border-gray-100 group hover:scale-[1.02] transition-transform">
+          <div
+            key={i}
+            className="bg-white p-6 rounded-4xl shadow-sm border border-gray-100 group hover:scale-[1.02] transition-transform"
+          >
             <div className={`${item.bg} ${item.color} w-12 h-12 rounded-2xl flex items-center justify-center mb-4`}>
               <item.icon size={24} />
             </div>
@@ -78,75 +237,146 @@ export default function GerenteDashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <div className="lg:col-span-2 bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8">
+      {/* Sucursales */}
+      <div className="grid grid-cols-1 gap-8">
+        <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gray-100 rounded-2xl">
                 <Layers size={22} className="text-gray-600" />
               </div>
-              <h2 className="text-xl font-black text-gray-800">Rendimiento por Sucursal</h2>
+              <h2 className="text-xl font-black text-gray-800">
+                Sucursales ({localesCount})
+              </h2>
             </div>
-            <Link href={`/gerente/${idRes}/locales`} className="text-sm font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-xl hover:bg-blue-100 transition-colors">
+            <Link
+              href="/gerente/locales"
+              className="text-sm font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-xl hover:bg-blue-100 transition-colors"
+            >
               Gestionar Locales
             </Link>
           </div>
-          
+
           <div className="grid gap-4">
-            {[1, 2, 3].map((local) => (
-              <div key={local} className="flex items-center justify-between p-6 bg-gray-50/50 rounded-3xl border border-gray-100 group hover:bg-white hover:shadow-xl hover:shadow-gray-200/40 transition-all cursor-pointer">
-                <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-gray-50 group-hover:border-blue-100 transition-colors">
-                    <span className="font-black text-gray-300 group-hover:text-blue-500 text-lg">0{local}</span>
+            {locales.length === 0 ? (
+              <p className="text-center text-gray-500 py-10">
+                No hay sucursales para esta empresa
+              </p>
+            ) : (
+              locales.map((loc: any) => (
+                <div
+                  key={loc.id}
+                  onClick={() => openMesasModal(loc)}
+                  className="flex items-center justify-between p-6 bg-gray-50/50 rounded-3xl border border-gray-100 group hover:bg-white hover:shadow-xl hover:shadow-gray-200/40 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-gray-50 group-hover:border-blue-100 transition-colors">
+                      <span className="font-black text-gray-300 group-hover:text-blue-500 text-lg">
+                        {String(loc.id).padStart(2, "0")}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-800 text-lg">
+                        {loc.detalle || "Sin nombre"}
+                      </h4>
+                      <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                        Activo
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-gray-800 text-lg">Sucursal {local === 1 ? 'Norte' : local === 2 ? 'Centro' : 'Sur'}</h4>
-                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Activo</span>
+                  <div className="flex items-center gap-10">
+                    <div className="text-right hidden md:block">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        Ingresos Hoy
+                      </p>
+                      <p className="font-black text-gray-900 text-xl">$0.00</p>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-100 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                      <ChevronRight size={20} />
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-10">
-                  <div className="text-right hidden md:block">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Ingresos Hoy</p>
-                    <p className="font-black text-gray-900 text-xl">$1,450.00</p>
-                  </div>
-                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-100 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                    <ChevronRight size={20} />
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
-
-
-        <div className="space-y-6">
-          <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm">
-            <h3 className="text-lg font-black text-gray-800 mb-6 flex items-center gap-2">
-              <span className="w-2 h-6 bg-blue-600 rounded-full"></span>
-              Promociones de Red
-            </h3>
-            <div className="space-y-5">
-              {[
-                { name: "Global Happy Hour", status: "Activa", color: "bg-green-500" },
-                { name: "Descuento Corporativo", status: "Programada", color: "bg-blue-500" },
-                { name: "Campaña Fiestas", status: "En pausa", color: "bg-gray-300" }
-              ].map((promo, idx) => (
-                <div key={idx} className="flex items-center justify-between border-b border-gray-50 pb-4 last:border-0 last:pb-0">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-2.5 h-2.5 ${promo.color} rounded-full`}></div>
-                    <span className="text-sm font-bold text-gray-700">{promo.name}</span>
-                  </div>
-                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">{promo.status}</span>
-                </div>
-              ))}
-            </div>
-            <button className="w-full mt-8 py-4 bg-gray-50 text-gray-600 rounded-2xl font-bold text-sm hover:bg-blue-600 hover:text-white transition-all">
-              Configurar Campaña Global
-            </button>
-          </div>  
-        </div>
       </div>
+
+      {/* Modal de mesas (sencillo, solo mesas) */}
+      {selectedLocal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex justify-between items-center p-5 md:p-6 border-b">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+                Mesas - {selectedLocal.detalle || "Sin nombre"}
+              </h2>
+              <button
+                onClick={closeMesasModal}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <X size={28} className="text-gray-600" />
+              </button>
+            </div>
+
+            {/* Contenido */}
+            <div className="p-5 md:p-6">
+              {mesasLoading ? (
+                <div className="flex justify-center py-12">
+                  <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : mesasError ? (
+                <p className="text-center text-red-600 py-10">{mesasError}</p>
+              ) : mesas.length === 0 ? (
+                <p className="text-center text-gray-600 py-10 text-lg">
+                  No hay mesas registradas en esta sucursal
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+                  {mesas.map((mesa: any) => (
+                    <div
+                      key={mesa.id}
+                      className={`p-4 rounded-2xl border text-center ${
+                        mesa.estado === 1
+                          ? "bg-green-50 border-green-200"
+                          : "bg-red-50 border-red-200"
+                      }`}
+                    >
+                      <div className="font-bold text-lg">
+                        {mesa.numero || `Mesa ${mesa.id}`}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        Capacidad: {mesa.maxper || "?"} pers.
+                      </div>
+                      <div className="mt-3">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-bold ${
+                            mesa.estado === 1
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {mesa.estado === 1 ? "Disponible" : "No disponible"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Botón cerrar */}
+            <div className="p-5 md:p-6 border-t flex justify-end">
+              <button
+                onClick={closeMesasModal}
+                className="bg-gray-200 text-gray-800 px-6 py-3 rounded-xl font-bold hover:bg-gray-300 transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
