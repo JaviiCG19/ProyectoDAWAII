@@ -15,7 +15,7 @@ class UserComponent:
             message = None
             # Logica
             sql = """
-                SELECT nombre,detalle,roles,rol_prioritario,estado FROM dawa.usuarios WHERE estado = 0;
+                SELECT nombre,detalle,roles,rol_prioritario,estado,id_res, id_local FROM dawa.usuarios WHERE estado = 0;
             """
             result_user = DataBaseHandle.getRecords(sql, 0)
             if result_user['result']:
