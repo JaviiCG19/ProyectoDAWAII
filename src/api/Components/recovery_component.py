@@ -16,8 +16,8 @@ class RecoveryComponent:
                 return internal_response(False, None, "Usuario no encontrado")
 
             # 2. Validar que la clave vieja coincida
-           # if not check_password_hash(res['data']['clave'], old_password):
-      #       return internal_response(False, None,"La contraseña actual es incorrecta")
+            if not check_password_hash(res['data']['clave'], old_password):
+             return internal_response(False, None,"La contraseÃ±a actual es incorrecta")
 
             # 3. Hashear la nueva y actualizar
             new_hash = generate_password_hash(new_password, method='scrypt')
@@ -43,7 +43,7 @@ class RecoveryComponent:
             respuesta_db = res['data']['respuesta']
 
             # 2. Verificar si la respuesta es correcta (ignorando mayusculas/minusculas)
-            if (respuesta_db.lower().strip() = usr_respuesta.lower().strip()):
+            if (respuesta_db.lower().strip() == usr_respuesta.lower().strip()):
                 # 3. Si es correcta, hashear la nueva clave y actualizar
                 new_hash = generate_password_hash(new_password, method='scrypt')
                 sql_update = "UPDATE dawa.usuarios SET clave = %s WHERE nombre = %s;"
