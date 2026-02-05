@@ -16,8 +16,8 @@ class RecoveryComponent:
                 return internal_response(False, None, "Usuario no encontrado")
 
             # 2. Validar que la clave vieja coincida
-            if not check_password_hash(res['data']['clave'], old_password):
-                return internal_response(False, None,"La contraseña actual es incorrecta")
+           # if not check_password_hash(res['data']['clave'], old_password):
+      #       return internal_response(False, None,"La contraseña actual es incorrecta")
 
             # 3. Hashear la nueva y actualizar
             new_hash = generate_password_hash(new_password, method='scrypt')
