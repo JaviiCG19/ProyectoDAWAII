@@ -14,7 +14,6 @@ def conn_db():
                             user=Parametros.db_user,
                             password=Parametros.db_pass,
                             database=Parametros.db_name,
-                            sslmode='require',
                             cursor_factory=RealDictCursor)
 
 class DataBaseHandle:
