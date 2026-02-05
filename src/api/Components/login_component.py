@@ -17,7 +17,7 @@ class LoginComponent:
             # Crear el código SQL para validar
 
             sql = """
-                SELECT clave, roles, detalle, rol_prioritario
+                SELECT id, clave, roles, detalle, rol_prioritario, idres, idlocal
                 FROM dawa.usuarios
                 WHERE nombre = %s
                 AND estado = 0;
@@ -39,9 +39,12 @@ class LoginComponent:
 
                     data = {
                         "token": token,
+                        "usr_id": user_info['id'],
                         "usr_name": user_info['detalle'],
                         "usr_role": user_info['roles'],
-                        "usr_rolp": user_info['rol_prioritario']
+                        "usr_rolp": user_info['rol_prioritario'],
+                        "usr_idlocal": user_info['idlocal'],
+                        "usr_idres": user_info['idres']
                     }
                     result = True
                     message = "Login Exitoso"

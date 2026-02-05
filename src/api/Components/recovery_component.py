@@ -40,10 +40,10 @@ class RecoveryComponent:
             if not res['result'] or not res['data']:
                 return internal_response(False, None,"Usuario no encontrado o inactivo")
 
-            hash_respuesta_db = res['data']['respuesta']
+            respuesta_db = res['data']['respuesta']
 
-            # 2. Verificar si la respuesta es correcta (ignorando mayúsculas/minúsculas)
-            if check_password_hash(hash_respuesta_db, usr_respuesta.lower().strip()):
+            # 2. Verificar si la respuesta es correcta (ignorando mayusculas/minusculas)
+            if (respuesta_db.lower().strip() = usr_respuesta.lower().strip()):
                 # 3. Si es correcta, hashear la nueva clave y actualizar
                 new_hash = generate_password_hash(new_password, method='scrypt')
                 sql_update = "UPDATE dawa.usuarios SET clave = %s WHERE nombre = %s;"
