@@ -5,7 +5,7 @@ services:
     image: engineermerchan/ms-administracion:latest
     restart: always
     ports:
-      - '10100:10100'
+      - '10103:10103'
     volumes:
 
       - ./logs-admin:/app/MS-Administracion/src/utils/general/LOGS

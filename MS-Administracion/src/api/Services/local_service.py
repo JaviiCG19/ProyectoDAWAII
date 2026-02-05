@@ -24,10 +24,13 @@ class LocalService:
 
         # CORRECCIÓN: Usamos res.get('data') porque ahí viaja el ID del RETURNING
         if res.get('result') and res.get('data'):
-            id_generado = res.get('data')
+            # A veces RETURNING devuelve una lista o un valor directo
+            # Forzamos a que sea el valor simple
+            raw_id = res.get('data')
+            id_generado = raw_id[0] if isinstance(raw_id, (list, tuple)) else raw_id
+
             LocalService._sincronizar_mesas(id_generado, int(data.get('totmesas', 0)))
 
-        return res
 
     @staticmethod
     def actualizar_local(id_local, data):
@@ -54,47 +57,35 @@ class LocalService:
 
     @staticmethod
     def _sincronizar_mesas(id_local, nuevo_total):
-        """
-        GESTIÓN INTELIGENTE: Crea si faltan, restaura si estaban borradas,
-        y oculta (estado 0) si sobran.
-        """
         try:
-            # 1. Ver cuántas existen ya (activas o inactivas)
+            # 1. Traer las mesas actuales (activas e inactivas)
             query_check = "SELECT id, estado FROM dawa.mesas WHERE idlocal = %s ORDER BY id ASC"
             mesas_db = DataBaseHandle.getRecords(query_check, 0, (id_local,))['data']
-            total_db = len(mesas_db)
+            total_actual = len(mesas_db)  # Cuántas hay físicamente en la DB
 
-            # CASO A: Se incrementó el total
-            if nuevo_total > total_db:
-                # Primero restauramos las que estén en estado 0
-                for m in mesas_db:
-                    if m['estado'] == 0:
-                        DataBaseHandle.ExecuteNonQuery("UPDATE dawa.mesas SET estado = 1 WHERE id = %s", (m['id'],))
+            # --- CASO A: Necesitamos más mesas de las que tenemos en total ---
+            if nuevo_total > total_actual:
+                # 1. Primero activamos TODAS las que ya existen (por si estaban en estado 0)
+                query_upd = "UPDATE dawa.mesas SET estado = 1 WHERE idlocal = %s"
+                DataBaseHandle.ExecuteNonQuery(query_upd, (id_local,))
 
-                # Si aún faltan (mesas nuevas), las creamos
-                for i in range(total_db + 1, nuevo_total + 1):
-                    nro_mesa = f"ms-{i}"
+                # 2. Creamos SOLO las que realmente faltan para llegar al nuevo_total
+                faltantes = nuevo_total - total_actual
+                for i in range(1, faltantes + 1):
+                    nro_mesa = f"ms-{total_actual + i}"  # El número sigue la secuencia
                     query_ins = "INSERT INTO dawa.mesas (idlocal, numero, maxper, estado, fecact) VALUES (%s, %s, 2, 1, %s)"
                     DataBaseHandle.ExecuteNonQuery(query_ins, (id_local, nro_mesa, datetime.now().date()))
 
-            # CASO B: Se disminuyó el total (Borrado Lógico)
-            elif nuevo_total < total_db:
-                # Desactivamos las mesas que sobran (las últimas creadas)
-                query_des = """
-                            UPDATE dawa.mesas \
-                            SET estado = 0
-                            WHERE idlocal = %s \
-                              AND id IN (SELECT id \
-                                         FROM dawa.mesas \
-                                         WHERE idlocal = %s \
-                                           AND estado = 1 \
-                                         ORDER BY id DESC \
-                                LIMIT %s
-                                ) \
-                            """
-                diferencia = total_db - nuevo_total
-                if diferencia > 0:
-                    DataBaseHandle.ExecuteNonQuery(query_des, (id_local, id_local, diferencia))
+            # --- CASO B: Queremos menos mesas de las que hay (Borrado Lógico) ---
+            elif nuevo_total < total_actual:
+                # Ponemos en estado 1 solo las que queremos ver
+                # Y el resto las mandamos a estado 0
+                # (Este enfoque es más seguro que el LIMIT en el UPDATE)
+                for index, mesa in enumerate(mesas_db):
+                    nuevo_estado = 1 if index < nuevo_total else 0
+                    query_estado = "UPDATE dawa.mesas SET estado = %s WHERE id = %s"
+                    DataBaseHandle.ExecuteNonQuery(query_estado, (nuevo_estado, mesa['id']))
+
         except Exception as e:
             print(f"Error sincronizando mesas: {e}")
 

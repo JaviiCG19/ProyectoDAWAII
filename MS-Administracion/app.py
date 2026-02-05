@@ -39,8 +39,8 @@ app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 
 if __name__ == '__main__':
     try:
-        HandleLogs.write_log("Servicio Iniciado puerto 10100")
-        port_os = int(os.environ.get('PORT', 10100))
+        HandleLogs.write_log("Servicio Iniciado puerto 10103")
+        port_os = int(os.environ.get('PORT', 10103))
         #Ejecutar el servidor escuchando metodos http
         app.run(debug=True, host='0.0.0.0', port=port_os, threaded=True)
 
