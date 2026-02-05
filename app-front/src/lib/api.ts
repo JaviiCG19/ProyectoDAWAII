@@ -1,22 +1,22 @@
-
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
-    'accept': 'application/json'
+    'Accept': 'application/json'
   }
 });
 
-// Interceptor para pegar el token automáticamente
+
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token'); 
-  if (token) {
-   
-    config.headers['tokenapp'] = token; 
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['tokenapp'] = token;
+    }
   }
   return config;
-});
+}, (error) => Promise.reject(error));
 
 export default api;
