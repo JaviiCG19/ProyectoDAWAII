@@ -1,6 +1,3 @@
-from ..Services.user_service import UserService
-from ..Services.login_service import LoginService
-from ..Services.tokenval_service import TokenValService
 from ..Components.local_component import LocalComponent
 from ..Components.mesa_component import MesaComponent
 from ..Components.franja_component import FranjaComponent
@@ -9,12 +6,9 @@ from ..Components.dashboard_component import DashboardComponent
 from ..Components.empresa_component import EmpresaComponent
 
 def load_routes(api):
-    #agregar el metodo de obtener usuarios
-    api.add_resource(UserService, '/user/list')
-    api.add_resource(LoginService, '/security/login')
-    api.add_resource(TokenValService, '/security/validate')
+    # --- MÓDULO DE ADMINISTRACIÓN ---
 
-   # --- EMPRESAS (Restaurantes principales) ---
+    # --- EMPRESAS (Restaurantes principales) ---
     api.add_resource(
         EmpresaComponent,
         '/admin/empresas',

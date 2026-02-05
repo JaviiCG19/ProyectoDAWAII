@@ -8,8 +8,21 @@ from flask_swagger_ui import get_swaggerui_blueprint
 from src.api.Routes.routes import load_routes
 from src.utils.general.logs import HandleLogs
 
+FRONTEND_ORIGIN = os.environ.get('FRONTEND_URL', '*')
+
 app = Flask(__name__)
-CORS(app)
+CORS(app,
+     resources={r"/*": {
+         "origins": [FRONTEND_ORIGIN],
+         "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+         "allow_headers": [
+             "Content-Type",
+             "Authorization",
+             "tokenapp",
+             "X-Requested-With"
+         ],
+         "supports_credentials": False
+     }})
 api = Api(app)
 load_routes(api)
 

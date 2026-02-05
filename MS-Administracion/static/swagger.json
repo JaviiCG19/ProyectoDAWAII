@@ -1,198 +1,117 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "Documentación de Servicios Web de Administración - DAWA.",
-    "version": "1.3.0",
-    "title": "Documentación de Administración UG",
-    "contact": { "email": "juan.cedenor@ug.edu.ec" }
+    "description": "Documentación Micro servicio Administracion.",
+    "version": "1.5.0",
+    "title": "Microservicio ms-administracion",
+    "termsOfService": "Leer wwww.ug.edu.ec",
+    "contact": { "email": "anthony.merchana@ug.edu.ec" }
   },
+  "host": "localhost:10100",
+  "basePath": "/",
+  "schemes": ["http"],
   "securityDefinitions": {
     "TokenAuth": {
       "type": "apiKey",
       "name": "tokenapp",
       "in": "header",
-      "description": "Ingrese el token JWT recuperado del localStorage."
+      "description": "Ingrese el JWT. El API valida permisos por Rol internamente."
     }
   },
   "security": [{ "TokenAuth": [] }],
   "tags": [
-    { "name": "Empresas", "description": "Entidad principal de Restaurantes" },
-    { "name": "Administración", "description": "Gestión de Locales, Mesas y Franjas Horarias" },
-    { "name": "Marketing", "description": "Gestión de Promociones" },
-    { "name": "Reportes", "description": "Dashboard de control" }
+    { "name": "Dashboard", "description": "Resumen adaptativo Global o por Compañía" },
+    { "name": "Empresas", "description": "CRUD de Marcas y Entidades Legales" },
+    { "name": "Locales", "description": "Gestión de Sucursales y generación de inventario" },
+    { "name": "Operaciones", "description": "Mesas y Franjas Horarias de atención" },
+    { "name": "Marketing", "description": "Campaña de Promociones y Soft-Delete" }
   ],
   "paths": {
-    "/admin/empresas": {
+    "/admin/dashboard": {
       "get": {
-        "tags": ["Empresas"],
-        "summary": "Lista de Empresas (Global)",
-        "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Response" } } }
-      },
+        "tags": ["Dashboard"],
+        "summary": "KPIs Adaptativos",
+        "parameters": [{ "name": "idcia", "in": "query", "required": false, "type": "string" }],
+        "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/DashboardData" } } }
+      }
+    },
+    "/admin/empresas": {
+      "get": { "tags": ["Empresas"], "summary": "Listar Empresas activas", "responses": { "200": { "description": "OK" } } },
       "post": {
-        "tags": ["Empresas"],
-        "summary": "Registrar Empresa",
-        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/EmpresaSaveDef" } }],
+        "tags": ["Empresas"], "summary": "Crear Empresa",
+        "parameters": [{ "in": "body", "name": "body", "schema": { "$ref": "#/definitions/EmpresaSave" } }],
         "responses": { "201": { "description": "Creado" } }
       }
     },
-    "/admin/empresas/restaurar/{id}": {
-      "post": {
-        "tags": ["Empresas"],
-        "summary": "Restaurar Empresa eliminada",
-        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }],
-        "responses": { "200": { "description": "Restaurado exitosamente" } }
-      }
-    },
-    "/admin/dashboard": {
-      "get": {
-        "tags": ["Reportes"],
-        "summary": "Resumen del Dashboard Gerencial",
-        "parameters": [{ "name": "idcia", "in": "query", "required": true, "type": "integer", "description": "ID de compañía para consolidar datos" }],
-        "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Response" } } }
-      }
+    "/admin/empresas/{id}": {
+      "put": { "tags": ["Empresas"], "summary": "Actualizar Empresa", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }, { "in": "body", "name": "body", "schema": { "$ref": "#/definitions/EmpresaSave" } }], "responses": { "200": { "description": "Actualizado" } } },
+      "delete": { "tags": ["Empresas"], "summary": "Desactivar Empresa", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }], "responses": { "200": { "description": "Eliminado" } } }
     },
     "/admin/locales": {
-      "get": {
-        "tags": ["Administración"],
-        "summary": "Lista de Locales por Empresa",
-        "parameters": [
-          { "name": "idcia", "in": "query", "required": true, "type": "integer" }
-        ],
-        "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Response" } } }
-      },
+      "get": { "tags": ["Locales"], "summary": "Listar Sucursales", "parameters": [{ "name": "idcia", "in": "query", "type": "integer", "required": true }], "responses": { "200": { "description": "OK" } } },
       "post": {
-        "tags": ["Administración"],
-        "summary": "Registrar Local (Genera mesas automáticamente)",
-        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/LocalSaveDef" } }],
+        "tags": ["Locales"], "summary": "Crear Sucursal y Mesas",
+        "parameters": [{ "in": "body", "name": "body", "schema": { "$ref": "#/definitions/LocalSave" } }],
         "responses": { "201": { "description": "Creado" } }
       }
     },
     "/admin/locales/restaurar/{id}": {
-      "post": {
-        "tags": ["Administración"],
-        "summary": "Restaurar Local eliminado",
-        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }],
-        "responses": { "200": { "description": "Restaurado exitosamente" } }
-      }
-    },
-    "/admin/mesas": {
-      "get": {
-        "tags": ["Administración"],
-        "summary": "Listar Mesas por Local",
-        "parameters": [{ "name": "idlocal", "in": "query", "required": true, "type": "integer" }],
-        "responses": { "200": { "description": "OK" } }
-      }
+      "post": { "tags": ["Locales"], "summary": "Restaurar Sucursal", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }], "responses": { "200": { "description": "Restaurado" } } }
     },
     "/admin/franjas": {
-      "get": {
-        "tags": ["Administración"],
-        "summary": "Listar Franjas Horarias por Local",
-        "parameters": [{ "name": "idlocal", "in": "query", "required": true, "type": "integer" }],
-        "responses": { "200": { "description": "OK" } }
-      },
-      "post": {
-        "tags": ["Administración"],
-        "summary": "Crear Franja Horaria",
-        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/FranjaSaveDef" } }],
-        "responses": { "201": { "description": "Creado" } }
-      }
+      "get": { "tags": ["Operaciones"], "summary": "Ver horarios", "parameters": [{ "name": "idlocal", "in": "query", "type": "integer" }], "responses": { "200": { "description": "OK" } } },
+      "post": { "tags": ["Operaciones"], "summary": "Crear horario", "parameters": [{ "in": "body", "name": "body", "schema": { "$ref": "#/definitions/FranjaSave" } }], "responses": { "201": { "description": "Creado" } } }
     },
     "/admin/franjas/eliminadas": {
-      "get": {
-        "tags": ["Administración"],
-        "summary": "Listar Franjas eliminadas (Papelera)",
-        "parameters": [{ "name": "idlocal", "in": "query", "required": true, "type": "integer" }],
-        "responses": { "200": { "description": "OK" } }
-      }
-    },
-    "/admin/franjas/restaurar/{id}": {
-      "post": {
-        "tags": ["Administración"],
-        "summary": "Restaurar Franja eliminada",
-        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }],
-        "responses": { "200": { "description": "Restaurado" } }
-      }
+      "get": { "tags": ["Operaciones"], "summary": "Papelera de horarios", "parameters": [{ "name": "idlocal", "in": "query", "type": "integer" }], "responses": { "200": { "description": "OK" } } }
     },
     "/admin/promociones": {
-      "get": {
-        "tags": ["Marketing"],
-        "summary": "Listar Promociones por Local",
-        "parameters": [{ "name": "idlocal", "in": "query", "required": true, "type": "integer" }],
-        "responses": { "200": { "description": "OK" } }
-      },
+      "get": { "tags": ["Marketing"], "summary": "Listar Promociones", "parameters": [{ "name": "idlocal", "in": "query", "type": "integer" }], "responses": { "200": { "description": "OK" } } },
       "post": {
-        "tags": ["Marketing"],
-        "summary": "Crear Promoción con validación de fechas",
-        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/PromoSaveDef" } }],
+        "tags": ["Marketing"], "summary": "Crear Promo",
+        "parameters": [{ "in": "body", "name": "body", "schema": { "$ref": "#/definitions/PromoSave" } }],
         "responses": { "201": { "description": "Creado" } }
       }
     },
-    "/admin/promociones/eliminadas": {
-      "get": {
-        "tags": ["Marketing"],
-        "summary": "Listar Promociones eliminadas (Papelera)",
-        "parameters": [{ "name": "idlocal", "in": "query", "required": true, "type": "integer" }],
-        "responses": { "200": { "description": "OK" } }
-      }
-    },
-    "/admin/promociones/restaurar/{id}": {
-      "post": {
-        "tags": ["Marketing"],
-        "summary": "Restaurar Promoción eliminada",
-        "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }],
-        "responses": { "200": { "description": "Restaurado" } }
-      }
+    "/admin/promociones/{id}": {
+      "delete": { "tags": ["Marketing"], "summary": "Baja de Promoción", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }], "responses": { "200": { "description": "Desactivado" } } }
     }
   },
   "definitions": {
-    "EmpresaSaveDef": {
-      "type": "object",
-      "required": ["nomleg", "nomfan", "ruc"],
-      "properties": {
-        "nomleg": { "type": "string", "description": "Nombre Legal / Razón Social" },
-        "nomfan": { "type": "string", "description": "Nombre Comercial" },
-        "ruc": { "type": "string", "minLength": 13, "maxLength": 13 }
-      }
-    },
-    "LocalSaveDef": {
-      "type": "object",
-      "required": ["idcia", "detalle", "direccion", "totmesas"],
-      "properties": {
-        "idcia": { "type": "integer" },
-        "detalle": { "type": "string" },
-        "direccion": { "type": "string" },
-        "totmesas": { "type": "integer", "description": "Número de mesas a autogenerar" }
-      }
-    },
-    "FranjaSaveDef": {
-      "type": "object",
-      "required": ["idlocal", "horini", "horfin", "diasem"],
-      "properties": {
-        "idlocal": { "type": "integer" },
-        "horini": { "type": "string", "example": "08:00" },
-        "horfin": { "type": "string", "example": "16:00" },
-        "diasem": { "type": "integer", "description": "0-6 (Dom-Sab)" },
-        "tipres": { "type": "integer", "default": 0 }
-      }
-    },
-    "PromoSaveDef": {
-      "type": "object",
-      "required": ["idlocal", "nombre", "fec_inicio", "fec_fin"],
-      "properties": {
-        "idlocal": { "type": "integer" },
-        "nombre": { "type": "string" },
-        "fec_inicio": { "type": "string", "format": "date", "example": "2026-02-01" },
-        "fec_fin": { "type": "string", "format": "date", "example": "2026-02-28" },
-        "descuento": { "type": "number" }
-      }
-    },
-    "Response": {
+    "DashboardData": {
       "type": "object",
       "properties": {
         "result": { "type": "boolean" },
-        "message": { "type": "string" },
-        "data": { "type": "object" }
+        "data": {
+          "type": "object",
+          "properties": {
+            "locales": { "type": "integer" },
+            "mesas_disponibles": { "type": "integer" },
+            "promos_activas": { "type": "integer" },
+            "reservas_hoy": { "type": "integer" }
+          }
+        }
       }
+    },
+    "EmpresaSave": {
+      "type": "object",
+      "required": ["nomleg", "ruc"],
+      "properties": { "nomleg": { "type": "string" }, "nomfan": { "type": "string" }, "ruc": { "type": "string" } }
+    },
+    "LocalSave": {
+      "type": "object",
+      "required": ["idcia", "detalle", "totmesas"],
+      "properties": { "idcia": { "type": "integer" }, "detalle": { "type": "string" }, "direccion": { "type": "string" }, "totmesas": { "type": "integer" } }
+    },
+    "FranjaSave": {
+      "type": "object",
+      "required": ["idlocal", "horini", "horfin", "diasem"],
+      "properties": { "idlocal": { "type": "integer" }, "horini": { "type": "string", "example": "09:00" }, "horfin": { "type": "string", "example": "18:00" }, "diasem": { "type": "integer", "description": "0-6" } }
+    },
+    "PromoSave": {
+      "type": "object",
+      "required": ["idlocal", "nombre", "fec_inicio"],
+      "properties": { "idlocal": { "type": "integer" }, "nombre": { "type": "string" }, "fec_inicio": { "type": "string", "format": "date" }, "fec_fin": { "type": "string", "format": "date" }, "descuento": { "type": "number" } }
     }
   }
 }
