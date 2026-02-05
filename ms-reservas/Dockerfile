@@ -15,6 +15,6 @@ COPY . /app/reservas
 
 RUN pip3 --no-cache-dir install -r requirements.txt
 
-EXPOSE 5000
+EXPOSE 10102
 
 CMD ["python3", "app.py"]
