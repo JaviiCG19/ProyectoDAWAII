@@ -19,9 +19,11 @@ def conn_db():
 
 class DataBaseHandle:
 
-
     @staticmethod
     def getRecords(query, tamanio, record=()):
+
+        conn = None
+        cursor = None
 
         try:
             result = False
@@ -31,58 +33,70 @@ class DataBaseHandle:
             conn = conn_db()
             cursor = conn.cursor()
 
-            if len(record) == 0:
-                cursor.execute(query)
-            else:
+            if record:
                 cursor.execute(query, record)
+            else:
+                cursor.execute(query)
 
             if tamanio == 0:
-                res = cursor.fetchall()
+                data = cursor.fetchall()
             elif tamanio == 1:
-                res = cursor.fetchone()
+                data = cursor.fetchone()
             else:
-                res = cursor.fetchmany(tamanio)
+                data = cursor.fetchmany(tamanio)
 
-            data = res
             result = True
+
         except Exception as ex:
             HandleLogs.write_error(ex)
-            message = ex.__str__()
+            message = str(ex)
+
         finally:
-            cursor.close()
-            conn.close()
+            if cursor is not None:
+                cursor.close()
+            if conn is not None:
+                conn.close()
+
             return internal_response(result, data, message)
 
     @staticmethod
     def ExecuteNonQuery(query, record):
 
+        conn = None
+        cursor = None
+
         try:
             result = False
             message = None
             data = None
+
             conn = conn_db()
             cursor = conn.cursor()
 
-            if len(record) == 0:
-                cursor.execute(query)
-            else:
+            if record:
                 cursor.execute(query, record)
-
-            if query.upper().find('INSERT') > -1:
-                cursor.execute('SELECT LASTVAL()')
-                ult_id = cursor.fetchone()['lastval']
-                conn.commit()
-                data = ult_id
             else:
-                conn.commit()
+                cursor.execute(query)
+
+            if 'INSERT' in query.upper():
+                cursor.execute('SELECT LASTVAL()')
+                data = cursor.fetchone()['lastval']
+            else:
                 data = cursor.rowcount
 
+            conn.commit()
             result = True
+
         except Exception as ex:
-            conn.rollback()
+            if conn is not None:
+                conn.rollback()
             HandleLogs.write_error(ex)
-            message = ex.__str__()
+            message = str(ex)
+
         finally:
-            cursor.close()
-            conn.close()
+            if cursor is not None:
+                cursor.close()
+            if conn is not None:
+                conn.close()
+
             return internal_response(result, data, message)

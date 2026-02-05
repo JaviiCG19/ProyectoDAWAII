@@ -5,8 +5,25 @@ from flask_restful import Api
 from flask_swagger_ui import get_swaggerui_blueprint
 from src.api.Routes.routes import load_routes
 from src.utils.general.logs import HandleLogs
+
 app = Flask(__name__)
-CORS(app)
+
+# Configuración de CORS segura
+FRONTEND_ORIGIN = os.environ.get('FRONTEND_URL', '*')
+
+CORS(app,
+     resources={r"/*": {
+         "origins": [FRONTEND_ORIGIN],
+         "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+         "allow_headers": [
+             "Content-Type",
+             "Authorization",
+             "tokenapp",
+             "X-Requested-With"
+         ],
+         "supports_credentials": False
+     }})
+
 api = Api(app)
 
 # Cargar rutas
@@ -19,13 +36,10 @@ API_URL = '/static/swagger.json'
 SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
-    config={
-        'app_name': 'ms-reservas-api'
-    }
+    config={'app_name': 'ms-reservas-api'}
 )
 
 app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
-
 
 # Ruta de health check
 @app.route('/')
@@ -36,13 +50,11 @@ def health_check():
         'version': '1.0.0'
     }
 
-
 if __name__ == '__main__':
     try:
         HandleLogs.write_log("Microservicio de Reservas Iniciado")
         port_os = int(os.environ.get('PORT', 5000))
         app.run(debug=False, host='0.0.0.0', port=port_os, threaded=True)
-
     except Exception as err:
         HandleLogs.write_error(err)
     finally:

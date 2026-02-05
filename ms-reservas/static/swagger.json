@@ -35,7 +35,7 @@
     }
   ],
   "paths": {
-    "/clientes": {
+    "/reservas/clientes": {
       "post": {
         "tags": ["Clientes"],
         "summary": "Crear un nuevo cliente",
@@ -73,7 +73,7 @@
         }
       }
     },
-    "/clientes/list": {
+    "/reservas/clientes/list": {
       "get": {
         "tags": ["Clientes"],
         "summary": "Listar clientes con paginación",
@@ -117,7 +117,7 @@
         }
       }
     },
-    "/clientes/{cliente_id}": {
+    "/reservas/clientes/{cliente_id}": {
       "get": {
         "tags": ["Clientes"],
         "summary": "Obtener un cliente por ID",
@@ -201,7 +201,7 @@
         }
       }
     },
-    "/reservas": {
+    "/reservas/reservas": {
       "post": {
         "tags": ["Reservas"],
         "summary": "Crear una nueva reserva",
@@ -386,7 +386,7 @@
         }
       }
     },
-  "/mesas/disponibles/{fecha}": {
+  "/reservas/mesas/disponibles/{fecha}": {
     "get": {
       "tags": ["Mesas"],
       "summary": "Obtener mesas disponibles por fecha y opcionalmente por franja",
@@ -427,7 +427,7 @@
       }
     }
   },
-  "/mesas/list": {
+  "/reservas/mesas/list": {
     "get": {
       "tags": [
         "Mesas"
@@ -448,7 +448,7 @@
       }
     }
   },
-    "/anticipos": {
+    "/reservas/anticipos": {
       "post": {
         "tags": ["Anticipos"],
         "summary": "Registrar un anticipo para una reserva",
@@ -476,7 +476,7 @@
         }
       }
     },
-    "/anticipos/reserva/{idreserva}": {
+    "/reservas/anticipos/reserva/{idreserva}": {
       "get": {
         "tags": ["Anticipos"],
         "summary": "Obtener anticipo asociado a una reserva",
@@ -504,7 +504,7 @@
         }
       }
     },
-    "/reportes/periodo": {
+    "/reservas/reportes/periodo": {
       "get": {
         "tags": ["Reportes"],
         "summary": "Reporte de reservas por período (total y por estado)",
@@ -560,7 +560,7 @@
         }
       }
     },
-    "/reportes/top-clientes": {
+    "/reservas/reportes/top-clientes": {
       "get": {
         "tags": ["Reportes"],
         "summary": "Top clientes con más reservas",
@@ -607,7 +607,7 @@
         }
       }
     },
-    "/reportes/uso-mesas": {
+    "/reservas/reportes/uso-mesas": {
       "get": {
         "tags": ["Reportes"],
         "summary": "Uso y ocupación de mesas",
@@ -652,7 +652,7 @@
         }
       }
     },
-    "/reportes/tasas": {
+    "/reservas/reportes/tasas": {
   "post": {
     "tags": ["Reportes"],
     "summary": "Tasa de asistencia, no-show y cancelaciones en un período",
@@ -719,7 +719,7 @@
     }
   }
 },
-    "/reportes/franjas": {
+    "/reservas/reportes/franjas": {
       "get": {
         "tags": ["Reportes"],
         "summary": "Reservas por franja horaria",
@@ -762,7 +762,7 @@
         }
       }
     },
-    "/franjas/local/{idlocal}": {
+    "/reservas/franjas/local/{idlocal}": {
   "get": {
     "tags": ["Franjas"],
     "summary": "Listar franjas horarias de un local específico",
