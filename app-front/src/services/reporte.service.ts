@@ -9,7 +9,7 @@ export const getReportePorPeriodo = async (
     fecha_fin: string
 ): Promise<ReportePorPeriodo[]> => {
   try {
-    const res = await api.get("/reportes/periodo", {
+    const res = await api.get("/reservas/reportes/periodo", {
       params: {
         inicio: fecha_inicio,
         fin: fecha_fin,
@@ -29,7 +29,7 @@ export const getReportePorPeriodo = async (
 // 2. Top clientes con más reservas
 export const getTopClientes = async (limit: number = 10): Promise<TopCliente[]> => {
    try {
-        const res = await api.get("/reportes/top-clientes", {
+        const res = await api.get("/reservas/reportes/top-clientes", {
          params: { limit },
       });
       return res.data.data || [];
@@ -43,7 +43,7 @@ export const getTopClientes = async (limit: number = 10): Promise<TopCliente[]> 
 // 3. Uso y ocupación de mesas
 export const getUsoMesas = async (): Promise<UsoMesa[]> => {
   try {
-    const res = await api.get("/reportes/uso-mesas");
+    const res = await api.get("/reservas/reportes/uso-mesas");
     return res.data.data || [];
   } catch (error: any) {
     const msg = error.response?.data?.message || "Error al obtener uso de mesas";
@@ -59,7 +59,7 @@ export const getTasasAsistencia = async (
   fecha_fin: string
 ): Promise<TasasAsistencia> => {
   try {
-    const res = await api.get("/reportes/tasas", {
+    const res = await api.get("/reservas/reportes/tasas", {
       params: {
         inicio: fecha_inicio,
         fin: fecha_fin,

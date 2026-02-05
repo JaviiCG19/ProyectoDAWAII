@@ -7,7 +7,7 @@ export async function crearReserva(
   data: ReservaCreateRequest
 ) {
   try {
-    const res = await api.post("/reservas", data);
+    const res = await api.post("/reservas/reservas", data);
     return res.data;
   } catch (error: any) {
 
@@ -33,7 +33,7 @@ export const buscarUltimaReservaCreada = async (
   numper: number
 ) => {
   try {
-    const res = await api.get("/reservas/list"); 
+    const res = await api.get("/reservas/reservas/list"); 
 
     const reservas = res.data?.data || [];
 
@@ -57,7 +57,7 @@ export const buscarUltimaReservaCreada = async (
 
 export const listarReservasActivas = async () => {
   try {
-    const res = await api.get("/reservas/list");
+    const res = await api.get("/reservas/reservas/list");
     
     return res.data?.data || res.data || [];
   } catch (error: any) {
@@ -68,7 +68,7 @@ export const listarReservasActivas = async () => {
 
 export const confirmarReserva = async (reservaId: number) => {
   try {
-    const res = await api.put(`/reservas/${reservaId}/confirmar`);
+    const res = await api.put(`/reservas/reservas/${reservaId}/confirmar`);
     return res.data;
   } catch (error: any) {
     throw new Error(
@@ -99,7 +99,7 @@ export const cancelarReserva = async (reservaId: number) => {
 
 export const checkInReserva = async (reservaId: number) => {
   try {
-    const res = await api.put(`/reservas/${reservaId}/checkin`);
+    const res = await api.put(`/reservas/reservas/${reservaId}/checkin`);
     return res.data;
   } catch (error: any) {
     throw new Error(
@@ -112,7 +112,7 @@ export const checkInReserva = async (reservaId: number) => {
 
 export const marcarNoShow = async (reservaId: number) => {
   try {
-    const res = await api.put(`/reservas/${reservaId}/noshow`);
+    const res = await api.put(`/reservas/reservas/${reservaId}/noshow`);
     return res.data;
   } catch (error: any) {
     throw new Error(

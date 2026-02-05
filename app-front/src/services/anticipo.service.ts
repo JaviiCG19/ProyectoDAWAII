@@ -7,7 +7,7 @@ export interface AnticipoCreateRequest {
 
 export const registrarAnticipo = async (data: AnticipoCreateRequest) => {
   try {
-    const res = await api.post("/anticipos", data);
+    const res = await api.post("/reservas/anticipos", data);
     return res.data;
   } catch (error: any) {
     if (error.response?.status === 400) {
@@ -26,7 +26,7 @@ export const agregarAnticipo = async ({
   monto: number;
 }) => {
   try {
-    const res = await api.post("/anticipos", {
+    const res = await api.post("/reservas/anticipos", {
       idreserva: reservaId,
       monto
     });
@@ -40,7 +40,7 @@ export const agregarAnticipo = async ({
 
 export const getAnticipoByReserva = async (idreserva: number) => {
   try {
-    const res = await api.get(`/anticipos/reserva/${idreserva}`);
+    const res = await api.get(`/reservas/anticipos/reserva/${idreserva}`);
     return res.data;
   } catch (error: any) {
     if (error.response?.status === 404) {

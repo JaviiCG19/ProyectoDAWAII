@@ -3,7 +3,7 @@ import api from "@/lib/api";
 
 export const getFranjasByLocal = async (idlocal: number): Promise<any[]> => {
   try {
-    const response = await api.get(`/franjas/local/${idlocal}`);
+    const response = await api.get(`/admin/franjas/local/${idlocal}`);
     
    
     if (response.data?.result === true) {
