@@ -32,20 +32,35 @@ export default function RecepcionPage() {
 
   // Cargar datos iniciales
   useEffect(() => {
+
+    console.log("useEffect iniciado", { checking, localId });
     const cargarDatos = async () => {
       if (!checking && localId) {
+
+        console.log("Entrando a cargar datos → localId:", localId);
         setLoading(true);
+
         try {
+          console.log("Intentando getMesasByLocal...");
           const mesasData = await getMesasByLocal(localId);
+          console.log("Mesas OK:", mesasData?.length);
+
+
+         console.log("Intentando getClientes...");
           const clientesData = await getClientes(0, 50);
+          console.log("Clientes OK:", clientesData?.length);
+
 
           setMesas(mesasData);
           setClientes(clientesData);
         } catch (error) {
-          console.error("❌ Error cargando datos:", error);
+          console.error("ERROR GRAVE en carga de datos:", error);
         } finally {
-          setLoading(false);
+          console.log("Finally → seteando loading false")
+          setLoading(false);          
         }
+      } else {
+        console.log("No se cargan datos porque:", { checking, localId });
       }
     };
 

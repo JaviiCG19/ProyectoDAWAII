@@ -1,9 +1,0 @@
-services:
-  ms-security:
-    container_name: ms-security
-    image: 'ecuinfoec/ms-security:v1'
-    restart: always
-    ports:
-      - '10100:10100'
-    volumes:
-      - c:/tmp/LOGS/ms-sec:/app/dawa/src/utils/general/LOGS
