@@ -31,6 +31,8 @@ class LocalService:
 
             LocalService._sincronizar_mesas(id_generado, int(data.get('totmesas', 0)))
 
+            return res
+
 
     @staticmethod
     def actualizar_local(id_local, data):
