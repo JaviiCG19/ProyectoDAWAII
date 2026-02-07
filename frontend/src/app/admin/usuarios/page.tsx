@@ -16,27 +16,33 @@ import {
 import { getEmpresas } from "@/services/empresa.service";
 import { getSucursalesByEmpresa } from "@/services/local.service";
 
-//Modales
+// Modales
 import ModalCrearUsuario from "@/components/modals/ModalCrearUsuario";
 import ModalEditarUsuario from "@/components/modals/ModalEditarUsuario";
+import ModalEliminarUsuario from "@/components/modals/ModalEliminarUsuario";
 
 export default function UsuariosPage() {
   const router = useRouter();
   const checkingAuth = useAuth(["1"]);
 
-  //Estados de Datos
+  // Estados de Datos
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [empresas, setEmpresas] = useState<Restaurante[]>([]);
   const [locales, setLocales] = useState<Sucursal[]>([]);
 
-  //Estados de UI/Carga 
+  // Estados de UI/Carga 
   const [loading, setLoading] = useState(true);
   const [loadingLocales, setLoadingLocales] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
 
-  //Formulario 
+  // ESTADOS PARA ELIMINACIÓN
+  const [showDelete, setShowDelete] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<Usuario | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Formulario 
   const [formData, setFormData] = useState({
     usr_id: null as number | null,
     usr_nombre: "",
@@ -57,12 +63,10 @@ export default function UsuariosPage() {
     { id: "5", nombre: "Mesero" },
   ];
 
-
   useEffect(() => {
     if (!checkingAuth) fetchData();
   }, [checkingAuth]);
 
-  //Carga de Sucursales cuando cambia la Empresa
   useEffect(() => {
     const empresaId = Number(formData.usr_id_res);
     if (empresaId && empresaId > 0) {
@@ -76,7 +80,6 @@ export default function UsuariosPage() {
     }
   }, [formData.usr_id_res]);
 
- 
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -101,7 +104,6 @@ export default function UsuariosPage() {
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-
     try {
       const payload = {
         ...formData,
@@ -111,12 +113,9 @@ export default function UsuariosPage() {
         usr_id_local: Number(formData.usr_id_local),
       };
 
-    
       if (!payload.usr_respuesta || payload.usr_respuesta.trim() === "") {
         delete (payload as any).usr_respuesta;
       }
-
-      console.log("Enviando este payload:", payload); 
 
       const res = isEditing 
         ? await actualizarUsuario(payload) 
@@ -152,6 +151,33 @@ export default function UsuariosPage() {
     setShowEdit(true);
   };
 
+  // Función para abrir el modal de borrado
+  const handleDeleteClick = (u: Usuario) => {
+    setUserToDelete(u);
+    setShowDelete(true);
+  };
+
+  // Función para ejecutar el borrado
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
+    try {
+      setIsDeleting(true);
+      const res = await eliminarUsuario(userToDelete.id);
+      if (res.result) {
+        setShowDelete(false);
+        setUserToDelete(null);
+        fetchData();
+      } else {
+        alert("Error al eliminar: " + res.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error de conexión al eliminar.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const resetForm = () => {
     setFormData({ 
       usr_id: null, usr_nombre: "", usr_clave: "", usr_detalle: "", 
@@ -161,13 +187,11 @@ export default function UsuariosPage() {
     setIsEditing(false);
   };
 
-
   if (checkingAuth) return null;
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       
-    
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
           <button 
@@ -187,7 +211,6 @@ export default function UsuariosPage() {
         </button>
       </div>
 
- 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
           <div className="col-span-full flex justify-center py-20">
@@ -205,7 +228,6 @@ export default function UsuariosPage() {
                 key={u.id} 
                 className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm group hover:shadow-md transition-all relative overflow-hidden"
               >
-    
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex gap-4">
                     <div className="p-3 bg-orange-50 text-orange-600 rounded-2xl">
@@ -217,13 +239,12 @@ export default function UsuariosPage() {
                     </div>
                   </div>
                   
-          
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => handleEditClick(u)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg">
                       <Edit size={18} />
                     </button>
                     <button 
-                      onClick={() => { if(confirm(`¿Eliminar a ${u.nombre}?`)) eliminarUsuario(u.id).then(fetchData); }} 
+                      onClick={() => handleDeleteClick(u)} 
                       className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
                     >
                       <Trash2 size={18} />
@@ -231,7 +252,6 @@ export default function UsuariosPage() {
                   </div>
                 </div>
 
-  
                 <div className="space-y-2 mb-4 bg-gray-50 p-3 rounded-2xl">
                   <div className="flex items-center gap-2 text-gray-600">
                     <Building2 size={14} className="text-orange-400" />
@@ -245,7 +265,6 @@ export default function UsuariosPage() {
                   </div>
                 </div>
 
-   
                 <div className="flex flex-wrap gap-1.5 pt-3 border-t border-gray-50">
                   {u.roles.split(";").filter(r => r).map(r => (
                     <span 
@@ -266,7 +285,6 @@ export default function UsuariosPage() {
         )}
       </div>
 
-   
       <ModalCrearUsuario
         isOpen={showCreate}
         onClose={() => setShowCreate(false)}
@@ -291,6 +309,14 @@ export default function UsuariosPage() {
         toggleRol={toggleRol} 
         rolesDisponibles={rolesDisponibles} 
         handleSave={handleSave}
+      />
+
+      <ModalEliminarUsuario
+        isOpen={showDelete}
+        onClose={() => setShowDelete(false)}
+        onConfirm={confirmDelete}
+        nombreUsuario={userToDelete?.nombre || ""}
+        loading={isDeleting}
       />
     </div>
   );
