@@ -84,6 +84,40 @@ class ReservaComponent:
             return internal_response(result, data, message)
 
     @staticmethod
+    def listar_todas_reservas():
+        try:
+            result = False
+            data = None
+            message = None
+
+            sql = """
+                  SELECT id,
+                         idlocal,
+                         idmesa,
+                         idcliente,
+                         fecha,
+                         franja_id,
+                         numper,
+                         estado,
+                         fecact
+                  FROM dawa.reservas
+                  ORDER BY fecha DESC, franja_id ASC
+                  """
+            result_query = DataBaseHandle.getRecords(sql, 0)
+
+            if result_query['result']:
+                data = result_query['data']
+                result = True
+            else:
+                message = result_query['message']
+
+        except Exception as ex:
+            HandleLogs.write_error(ex)
+            message = ex.__str__()
+        finally:
+            return internal_response(result, data, message)
+
+    @staticmethod
     def obtener_reserva(reserva_id):
         try:
             result = False

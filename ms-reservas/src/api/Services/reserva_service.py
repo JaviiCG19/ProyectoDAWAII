@@ -65,7 +65,6 @@ class ReservaListService(Resource):
             HandleLogs.write_error(err)
             return response_error(err.__str__())
 
-
 class ReservaDetailService(Resource):
 
     @staticmethod
@@ -178,6 +177,27 @@ class ReservaNoShowService(Resource):
             HandleLogs.write_log(f"Servicio para marcar no-show reserva {reserva_id} ejecutado")
 
             resultado = ReservaComponent.marcar_no_show(reserva_id)
+
+            if resultado['result']:
+                return response_success(resultado['data'])
+            else:
+                return response_not_found()
+
+        except Exception as err:
+            HandleLogs.write_error(err)
+            return response_error(err.__str__())
+
+
+class ReservaListAllService(Resource):
+
+    @staticmethod
+    @valida_api_token
+    def get():
+
+        try:
+            HandleLogs.write_log("Servicio para listar TODAS las reservas ejecutado")
+
+            resultado = ReservaComponent.listar_todas_reservas()
 
             if resultado['result']:
                 return response_success(resultado['data'])
