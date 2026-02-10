@@ -1,66 +1,110 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { User, Phone, CreditCard, Edit, Trash2, Search } from "lucide-react";
 import api from "@/lib/api";
 import { getClientes } from "@/services/cliente.service";
 
+import ModalConfirmacionEliminar from "@/components/modals/ModalConfirmacionEliminar";
+import ModalEditarCliente from "@/components/modals/ModalEditarCliente";
+
 export default function ListadoClientesPage() {
+  const params = useParams();
+  const localId = Number(params?.id); // Obtenemos el ID de la sucursal desde la URL
+
   const [clientes, setClientes] = useState<any[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Cargar clientes al montar el componente
-  useEffect(() => {
-    const cargar = async () => {
-      setLoading(true);
-      try {
-        const data = await getClientes(0, 100);
-        setClientes(data);
-      } catch (error) {
-        console.error("Error al cargar clientes:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [clienteToDelete, setClienteToDelete] = useState<number | null>(null);
 
-    cargar();
-  }, []);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [clienteToEdit, setClienteToEdit] = useState<any | null>(null);
 
-  // Eliminar cliente
-  const eliminar = async (id: number) => {
-    if (!confirm("¿Estás seguro de eliminar este cliente?")) return;
+  const cargarClientes = async () => {
+    if (!localId || isNaN(localId)) {
+      console.error("No se encontró ID de sucursal en la URL");
+      setLoading(false);
+      return;
+    }
 
+    setLoading(true);
     try {
-      await api.delete(`/clientes/${id}`);
-      // Recargar la lista después de eliminar
-      const data = await getClientes(0, 100);
+      const data = await getClientes(localId, 0, 100); // ← Ahora pasa localId
       setClientes(data);
     } catch (error) {
-      alert("No se pudo eliminar el cliente");
-      console.error(error);
+      console.error("Error al cargar clientes:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Editar cliente (prompt simple)
-  const editar = async (c: any) => {
-    const nombre = prompt("Nuevo nombre", c.nombre);
-    const telefono = prompt("Nuevo teléfono", c.telefono);
+  useEffect(() => {
+    cargarClientes();
+  }, [localId]); // Se recarga si cambia la sucursal
 
-    if (!nombre || !telefono) return;
+  // Abrir modal de eliminar
+  const handleOpenDelete = (id: number) => {
+    setClienteToDelete(id);
+    setDeleteModalOpen(true);
+  };
+
+  // Confirmar eliminación
+  const handleConfirmDelete = async () => {
+    if (!clienteToDelete) return;
 
     try {
-      await api.put(`/reservas/clientes/${c.id}`, { nombre, telefono });
-      // Recargar la lista después de editar
-      const data = await getClientes(0, 100);
-      setClientes(data);
+      await api.delete(`/reservas/clientes/${clienteToDelete}`);
+
+      // Recargar lista con el mismo localId
+      await cargarClientes();
+
+      alert("Cliente eliminado correctamente");
+    } catch (error: any) {
+      console.error("Error al eliminar cliente:", error);
+      console.log("Respuesta del servidor:", error.response?.data);
+
+      let mensaje = "No se pudo eliminar el cliente";
+
+      if (error.response?.status === 404) {
+        mensaje = "Cliente no encontrado";
+      } else if (error.response?.status === 400 || error.response?.status === 422) {
+        mensaje = error.response?.data?.message || "El cliente tiene reservas asociadas";
+      } else if (error.response?.status === 403) {
+        mensaje = "No tienes permiso para eliminar este cliente";
+      }
+
+      alert(mensaje);
+    } finally {
+      setDeleteModalOpen(false);
+      setClienteToDelete(null);
+    }
+  };
+
+  // Editar
+  const handleOpenEdit = (c: any) => {
+    setClienteToEdit(c);
+    setEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async (nombre: string, telefono: string) => {
+    if (!clienteToEdit) return;
+    try {
+      await api.put(`/reservas/clientes/${clienteToEdit.id}`, { nombre, telefono });
+
+      // Recargar lista con el mismo localId
+      await cargarClientes();
     } catch (error) {
       alert("Error al actualizar el cliente");
       console.error(error);
+    } finally {
+      setEditModalOpen(false);
+      setClienteToEdit(null);
     }
   };
 
-  // Filtrado de clientes
   const clientesFiltrados = clientes.filter(
     (c) =>
       c.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -145,14 +189,14 @@ export default function ListadoClientesPage() {
                       <td className="px-4 py-4 sm:px-6 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center gap-4">
                           <button
-                            onClick={() => editar(c)}
+                            onClick={() => handleOpenEdit(c)}
                             className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
                           >
                             <Edit size={16} />
                             Editar
                           </button>
                           <button
-                            onClick={() => eliminar(c.id)}
+                            onClick={() => handleOpenDelete(c.id)}
                             className="flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors"
                           >
                             <Trash2 size={16} />
@@ -174,6 +218,20 @@ export default function ListadoClientesPage() {
           </div>
         </div>
       </div>
+
+      {/* Modales */}
+      <ModalConfirmacionEliminar
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+      />
+
+      <ModalEditarCliente
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        cliente={clienteToEdit}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 }

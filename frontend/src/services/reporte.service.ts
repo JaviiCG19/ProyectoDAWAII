@@ -25,7 +25,7 @@ export const getReportePorPeriodo = async (
   }
 };
 
-
+/*
 // 2. Top clientes con más reservas
 export const getTopClientes = async (limit: number = 10): Promise<TopCliente[]> => {
    try {
@@ -51,6 +51,61 @@ export const getUsoMesas = async (): Promise<UsoMesa[]> => {
     throw new Error(msg);
   }
 };
+*/
+
+
+// 2. Top clientes con más reservas (ahora con filtro opcional por idlocal)
+export const getTopClientes = async (
+  limit: number = 10,
+  idlocal?: number
+): Promise<TopCliente[]> => {
+  try {
+    const params: any = { limit };
+    
+    // Si se pasa idlocal, lo agregamos al query
+    if (idlocal !== undefined && !isNaN(idlocal)) {
+      params.idlocal = idlocal;
+    }
+
+    const res = await api.get("/reservas/reportes/top-clientes", {
+      params,
+    });
+
+    return res.data.data || [];
+  } catch (error: any) {
+    const msg = error.response?.data?.message || "Error al obtener top clientes";
+    console.error("Detalle error:", error.response?.status, msg);
+    throw new Error(msg);
+  }
+};
+
+// 3. Uso y ocupación de mesas (ahora con filtro opcional por idlocal)
+export const getUsoMesas = async (idlocal?: number): Promise<UsoMesa[]> => {
+  try {
+    const params: any = {};
+
+    // Si se pasa idlocal, lo agregamos
+    if (idlocal !== undefined && !isNaN(idlocal)) {
+      params.idlocal = idlocal;
+    }
+
+    const res = await api.get("/reservas/reportes/uso-mesas", {
+      params,
+    });
+
+    return res.data.data || [];
+  } catch (error: any) {
+    const msg = error.response?.data?.message || "Error al obtener uso de mesas";
+    console.error("Detalle error:", error.response?.status, msg);
+    throw new Error(msg);
+  }
+};
+
+
+
+
+
+
 
 
 // 4 Reporte por Tasa de Asistencia

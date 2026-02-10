@@ -1,29 +1,20 @@
 import api from "@/lib/api";
 import { ReservaCreateRequest } from "@/interface/reserva.interface";
 
-
-
-export async function crearReserva(
-  data: ReservaCreateRequest
-) {
+export async function crearReserva(data: ReservaCreateRequest) {
   try {
     const res = await api.post("/reservas/reservas", data);
     return res.data;
   } catch (error: any) {
-
     if (error.response?.status === 409) {
       throw new Error(
         error.response.data?.message ||
-        "Conflicto: ya existe una reserva para esa franja"
+          "Conflicto: ya existe una reserva para esa franja"
       );
     }
-
-
     throw new Error("Error al crear la reserva");
   }
 }
-
-
 
 export const buscarUltimaReservaCreada = async (
   idlocal: number,
@@ -33,17 +24,17 @@ export const buscarUltimaReservaCreada = async (
   numper: number
 ) => {
   try {
-    const res = await api.get("/reservas/list"); 
+    const res = await api.get(`/reservas/list?idlocal=${idlocal}`);
 
     const reservas = res.data?.data || [];
 
-    const ultima = reservas.find((r: any) => 
+    const ultima = reservas.find((r: any) =>
       r.idlocal === idlocal &&
       r.idcliente === idcliente &&
       r.fecha === fecha &&
       r.franja_id === franja_id &&
       r.numper === numper &&
-      r.estado === 0 
+      r.estado === 0
     );
 
     return ultima || null;
@@ -53,18 +44,18 @@ export const buscarUltimaReservaCreada = async (
   }
 };
 
-
-
-export const listarReservasActivas = async () => {
+export const listarReservasActivas = async (idLocal?: number) => {
   try {
-    const res = await api.get("/reservas/list");
-    
+    let url = "/reservas/list";
+    if (idLocal !== undefined) {
+      url += `?idlocal=${idLocal}`;
+    }
+    const res = await api.get(url);
     return res.data?.data || res.data || [];
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Error al listar reservas");
   }
 };
-
 
 export const confirmarReserva = async (reservaId: number) => {
   try {
@@ -77,7 +68,6 @@ export const confirmarReserva = async (reservaId: number) => {
   }
 };
 
-
 export const cancelarReserva = async (reservaId: number) => {
   try {
     const res = await api.put(`/reservas/${reservaId}/cancelar`);
@@ -88,14 +78,6 @@ export const cancelarReserva = async (reservaId: number) => {
     );
   }
 };
-
-
-
-
-
-
-
-
 
 export const checkInReserva = async (reservaId: number) => {
   try {
@@ -108,8 +90,6 @@ export const checkInReserva = async (reservaId: number) => {
   }
 };
 
-
-
 export const marcarNoShow = async (reservaId: number) => {
   try {
     const res = await api.put(`/reservas/${reservaId}/noshow`);
@@ -120,3 +100,27 @@ export const marcarNoShow = async (reservaId: number) => {
     );
   }
 };
+
+// PARA MESERO
+export const getReservasDelDia = async (idLocal: number): Promise<any[]> => {
+  try {
+    const res = await api.get(`/reservas/list?idlocal=${idLocal}`);
+    return res.data?.data || res.data || [];
+  } catch (err) {
+    console.error("Error al obtener reservas del día:", err);
+    return [];
+  }
+};
+
+/*
+export const getReservasDelDia = async (): Promise<any[]> => {
+  try {
+
+    const res = await api.get("/reservas/list"); 
+
+    return res.data?.data || res.data || [];
+  } catch (err) {
+    console.error("Error al obtener reservas del día:", err);
+    return [];
+  }
+};*/

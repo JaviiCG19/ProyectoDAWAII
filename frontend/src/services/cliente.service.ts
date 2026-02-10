@@ -1,5 +1,21 @@
 import api from "@/lib/api";
+import { Cliente } from "@/interface/cliente.interface";  
 
+// cliente.service.ts (ajusta el nombre si es diferente)
+
+export const getClientes = async (idLocal: number, skip = 0, limit = 50): Promise<Cliente[]> => {
+  try {
+    const url = `/reservas/clientes/list?idlocal=${idLocal}&skip=${skip}&limit=${limit}`;
+    const res = await api.get(url);
+    return res.data?.data || res.data || [];
+  } catch (error: any) {
+    console.error("Error al obtener clientes:", error);
+    throw new Error(error.response?.data?.message || "No se pudieron cargar los clientes");
+  }
+}
+
+
+/*
 export async function getClientes(skip = 0, limit = 50) {
   const res = await api.get("/reservas/clientes/list", {
     params: { skip, limit },
@@ -7,6 +23,11 @@ export async function getClientes(skip = 0, limit = 50) {
 
   return res.data?.data || [];
 }
+*/
+
+
+
+
 
 
 // Nueva función: contar nuevos clientes del día actual

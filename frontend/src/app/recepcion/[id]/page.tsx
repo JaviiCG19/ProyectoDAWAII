@@ -22,7 +22,7 @@ export default function RecepcionPage() {
   const router = useRouter();
 
   const localId = Number(params?.id);
-  const checking = useAuth(["4"]); // Rol recepción
+  const checking = useAuth(["4"]); 
 
   const [loading, setLoading] = useState(true);
 
@@ -30,7 +30,6 @@ export default function RecepcionPage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<number | null>(null);
 
-  // Cargar datos iniciales
   useEffect(() => {
 
     console.log("useEffect iniciado", { checking, localId });
@@ -45,11 +44,9 @@ export default function RecepcionPage() {
           const mesasData = await getMesasByLocal(localId);
           console.log("Mesas OK:", mesasData?.length);
 
-
-         console.log("Intentando getClientes...");
-          const clientesData = await getClientes(0, 50);
+          console.log("Intentando getClientes...");
+          const clientesData = await getClientes(localId, 0, 50);
           console.log("Clientes OK:", clientesData?.length);
-
 
           setMesas(mesasData);
           setClientes(clientesData);
