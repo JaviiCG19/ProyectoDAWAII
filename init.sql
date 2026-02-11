@@ -22,8 +22,8 @@ CREATE TABLE dawa.usuarios (
     detalle character varying(30),
     rol_prioritario integer NOT NULL,
     respuesta character varying(150),
-    id_res integer DEFAULT 0 NOT NULL,
-    id_local integer DEFAULT 0 NOT NULL
+    id_res integer DEFAULT NULL, 
+    id_local integer DEFAULT NULL
 );
 
 CREATE TABLE dawa.empresas (
@@ -182,8 +182,8 @@ AFTER INSERT ON dawa.franjas
 FOR EACH ROW
 EXECUTE FUNCTION dawa.crear_franjas_desde_horario();
 
--- 4. Inserci�n de Datos (DML)
--- NOTA: Se usan los IDs expl�citos de tus archivos para mantener coherencia
+-- 4. Inserci n de Datos (DML)
+-- NOTA: Se usan los IDs expl citos de tus archivos para mantener coherencia
 
 -- Roles
 INSERT INTO dawa.roles (nombre) VALUES 
@@ -209,8 +209,8 @@ INSERT INTO dawa.locales (idcia, detalle, direccion, totmesas, fecact, estado) V
 
 -- Usuarios
 INSERT INTO dawa.usuarios (nombre, clave, estado, roles, detalle, rol_prioritario, id_res, id_local) VALUES
-('admin', 'scrypt:32768:8:1$ytUcOf98BZJyheyS$fa77b3f5d788dcdbc0fee44473a080343c186aea33e50aea02718d08b5e99bb507779c581ad2e30f1897a521187497286e3967d6b6c89c16faed9d23aa8472db', 0, '1;2;3;', 'Administrador del sistema', 1, 0,0),
-('gerente', 'scrypt:32768:8:1$ytUcOf98BZJyheyS$fa77b3f5d788dcdbc0fee44473a080343c186aea33e50aea02718d08b5e99bb507779c581ad2e30f1897a521187497286e3967d6b6c89c16faed9d23aa8472db', 0, '1;3;4;', 'Gerencia General', 2, 1,0);
+('admin', 'scrypt:32768:8:1$ytUcOf98BZJyheyS$fa77b3f5d788dcdbc0fee44473a080343c186aea33e50aea02718d08b5e99bb507779c581ad2e30f1897a521187497286e3967d6b6c89c16faed9d23aa8472db', 0, '1;2;3;', 'Administrador del sistema', 1, NULL,NULL),
+('gerente', 'scrypt:32768:8:1$ytUcOf98BZJyheyS$fa77b3f5d788dcdbc0fee44473a080343c186aea33e50aea02718d08b5e99bb507779c581ad2e30f1897a521187497286e3967d6b6c89c16faed9d23aa8472db', 0, '1;3;4;', 'Gerencia General', 2, 1,NULL);
 
 -- Clientes
 INSERT INTO dawa.clientes (nombre, ruc_cc, telefono, fecing) VALUES
@@ -254,7 +254,7 @@ INSERT INTO dawa.mesas (idlocal, numero, maxper, estado, fecact) VALUES
 (3, 'Mesa 06', 8, 0, '2026-02-04');
 
 
--- Permisos finales para tu usuario de aplicaci�n
+-- Permisos finales para tu usuario de aplicaci n
 ALTER SCHEMA dawa OWNER TO user_dawa;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA dawa TO user_dawa;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA dawa TO user_dawa;
