@@ -50,7 +50,7 @@ CREATE TABLE dawa.clientes (
     nombre character(60) NOT NULL,
     ruc_cc character(13) NOT NULL,
     telefono character(10) NOT NULL,
-    fecing date NOT NULL
+    fecing date NOT NULL,
     idlocal INTEGER NOT NULL,
 
     CONSTRAINT fk_cliente_local
