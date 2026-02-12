@@ -1,0 +1,18 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="Flask" />
+          <option value="flask-restful" />
+          <option value="flask-cors" />
+          <option value="flask-swagger-ui" />
+          <option value="marshmallow" />
+          <option value="PyJWT" />
+          <option value="pytz" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

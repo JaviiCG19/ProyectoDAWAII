@@ -1,0 +1,18 @@
+services:
+  ms-reservas:
+    container_name: ms-reservas
+    image: dawaproyecto2/ms-reservas:latest
+
+    restart: always
+    ports:
+      - '10102:10102'
+    environment:
+      - PORT=10102
+    volumes:
+      - ./logs:/app/reservas/src/utils/general/LOGS
+    networks:
+      - reservas-network
+
+networks:
+  reservas-network:
+    driver: bridge

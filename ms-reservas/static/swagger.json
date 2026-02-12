@@ -1,0 +1,1103 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Documentación del Microservicio de Reservas - DAWA",
+    "version": "1.0.0",
+    "title": "API de Reservas - DAWA",
+    "contact": {
+      "email": "suarezvalarezojorge@gmail.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "none"
+    }
+  },
+  "tags": [
+    {
+      "name": "Clientes",
+      "description": "Gestión de clientes"
+    },
+    {
+      "name": "Reservas",
+      "description": "Gestión de reservas"
+    },
+    {
+      "name": "Mesas",
+      "description": "Consulta de mesas disponibles"
+    },
+    {
+      "name": "Anticipos",
+      "description": "Gestión de anticipos"
+    },
+    {
+      "name": "Reportes",
+      "description": "Reportes y estadísticas de reservas"
+    }
+  ],
+  "paths": {
+    "/reservas/clientes": {
+      "post": {
+        "tags": [
+          "Clientes"
+        ],
+        "summary": "Crear un nuevo cliente",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "description": "Token de autenticación",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ClienteCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Cliente creado exitosamente",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "integer",
+                  "description": "ID del cliente creado"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reservas/clientes/list": {
+      "get": {
+        "tags": [
+          "Clientes"
+        ],
+        "summary": "Listar clientes con paginación",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "type": "integer",
+            "default": 0,
+            "description": "Registros a saltar"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "default": 10,
+            "description": "Límite de registros por página"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de clientes",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Cliente"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reservas/clientes/{cliente_id}": {
+      "get": {
+        "tags": [
+          "Clientes"
+        ],
+        "summary": "Obtener un cliente por ID",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "cliente_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cliente encontrado",
+            "schema": {
+              "$ref": "#/definitions/Cliente"
+            }
+          },
+          "404": {
+            "description": "Cliente no encontrado"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Clientes"
+        ],
+        "summary": "Actualizar datos de un cliente",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "cliente_id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ClienteUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cliente actualizado"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Clientes"
+        ],
+        "summary": "Eliminar un cliente",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "cliente_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cliente eliminado"
+          }
+        }
+      }
+    },
+    "/reservas/reservas": {
+      "post": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "Crear una nueva reserva",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ReservaCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Reserva creada",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflicto - Mesa ya reservada o no disponible"
+          }
+        }
+      }
+    },
+    "/reservas/list": {
+      "get": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "Listar reservas activas (pendientes)",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de reservas"
+          }
+        }
+      }
+    },
+    "/reservas/{reserva_id}": {
+      "get": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "Obtener detalles de una reserva",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "reserva_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalles de la reserva"
+          },
+          "404": {
+            "description": "Reserva no encontrada"
+          }
+        }
+      }
+    },
+    "/reservas/{reserva_id}/confirmar": {
+      "put": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "Confirmar una reserva (requiere anticipo)",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "reserva_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reserva confirmada"
+          }
+        }
+      }
+    },
+    "/reservas/{reserva_id}/cancelar": {
+      "put": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "Cancelar una reserva",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "reserva_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reserva cancelada"
+          }
+        }
+      }
+    },
+    "/reservas/{reserva_id}/checkin": {
+      "put": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "Realizar check-in de una reserva",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "reserva_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Check-in realizado"
+          }
+        }
+      }
+    },
+    "/reservas/{reserva_id}/noshow": {
+      "put": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "Marcar reserva como no-show",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "reserva_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No-show marcado"
+          }
+        }
+      }
+    },
+    "/reservas/mesas/disponibles/{fecha}": {
+      "get": {
+        "tags": [
+          "Mesas"
+        ],
+        "summary": "Obtener mesas disponibles por fecha y opcionalmente por franja",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "fecha",
+            "required": true,
+            "type": "string",
+            "format": "date",
+            "description": "Fecha en formato YYYY-MM-DD"
+          },
+          {
+            "in": "query",
+            "name": "franja_id",
+            "required": false,
+            "type": "integer",
+            "description": "ID de la franja horaria (opcional)"
+          },
+          {
+            "in": "query",
+            "name": "idlocal",
+            "required": false,
+            "type": "integer",
+            "description": "ID del local (opcional)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de mesas disponibles"
+          }
+        }
+      }
+    },
+    "/reservas/mesas/list": {
+      "get": {
+        "tags": [
+          "Mesas"
+        ],
+        "summary": "Listar todas las mesas del sistema",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de todas las mesas"
+          }
+        }
+      }
+    },
+    "/reservas/anticipos": {
+      "post": {
+        "tags": [
+          "Anticipos"
+        ],
+        "summary": "Registrar un anticipo para una reserva",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AnticipoCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Anticipo registrado"
+          }
+        }
+      }
+    },
+    "/reservas/anticipos/reserva/{idreserva}": {
+      "get": {
+        "tags": [
+          "Anticipos"
+        ],
+        "summary": "Obtener anticipo asociado a una reserva",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "idreserva",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Datos del anticipo"
+          },
+          "404": {
+            "description": "No hay anticipo para esta reserva"
+          }
+        }
+      }
+    },
+    "/reservas/reportes/periodo": {
+      "get": {
+        "tags": [
+          "Reportes"
+        ],
+        "summary": "Reporte de reservas por período (total y por estado)",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "inicio",
+            "type": "string",
+            "format": "date",
+            "description": "Fecha inicio (YYYY-MM-DD)",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "fin",
+            "type": "string",
+            "format": "date",
+            "description": "Fecha fin (YYYY-MM-DD)",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reporte de reservas por período",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "fecha": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "total": {
+                        "type": "integer"
+                      },
+                      "pendientes": {
+                        "type": "integer"
+                      },
+                      "confirmadas": {
+                        "type": "integer"
+                      },
+                      "canceladas": {
+                        "type": "integer"
+                      },
+                      "no_show": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reservas/reportes/top-clientes": {
+      "get": {
+        "tags": [
+          "Reportes"
+        ],
+        "summary": "Top clientes con más reservas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "type": "integer",
+            "default": 10,
+            "description": "Número de clientes a mostrar"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de top clientes",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "nombre": {
+                        "type": "string"
+                      },
+                      "ruc_cc": {
+                        "type": "string"
+                      },
+                      "telefono": {
+                        "type": "string"
+                      },
+                      "total_reservas": {
+                        "type": "integer"
+                      },
+                      "total_personas": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reservas/reportes/uso-mesas": {
+      "get": {
+        "tags": [
+          "Reportes"
+        ],
+        "summary": "Uso y ocupación de mesas",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "mes",
+            "type": "string",
+            "description": "Mes en formato YYYY-MM (opcional)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reporte de uso de mesas",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "idmesa": {
+                        "type": "integer"
+                      },
+                      "total_reservas": {
+                        "type": "integer"
+                      },
+                      "confirmadas": {
+                        "type": "integer"
+                      },
+                      "canceladas": {
+                        "type": "integer"
+                      },
+                      "no_show": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reservas/reportes/tasas": {
+      "post": {
+        "tags": [
+          "Reportes"
+        ],
+        "summary": "Tasa de asistencia, no-show y cancelaciones en un período",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "description": "Token de autenticación",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Rango de fechas para el reporte",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "fecha_inicio",
+                "fecha_fin"
+              ],
+              "properties": {
+                "fecha_inicio": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "Fecha de inicio (YYYY-MM-DD)",
+                  "example": "2026-01-01"
+                },
+                "fecha_fin": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "Fecha de fin (YYYY-MM-DD)",
+                  "example": "2026-02-28"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tasas de reservas en el período",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "total_reservas": {
+                      "type": "integer"
+                    },
+                    "confirmadas": {
+                      "type": "integer"
+                    },
+                    "canceladas": {
+                      "type": "integer"
+                    },
+                    "no_show": {
+                      "type": "integer"
+                    },
+                    "porcentaje_no_show": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "porcentaje_canceladas": {
+                      "type": "number",
+                      "format": "float"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Faltan parámetros fecha_inicio o fecha_fin"
+          }
+        }
+      }
+    },
+    "/reservas/reportes/franjas": {
+      "get": {
+        "tags": [
+          "Reportes"
+        ],
+        "summary": "Reservas por franja horaria",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "fecha",
+            "type": "string",
+            "format": "date",
+            "description": "Fecha específica (opcional)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reservas agrupadas por franja",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "franja_id": {
+                        "type": "integer"
+                      },
+                      "total_reservas": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reservas/franjas/local/{idlocal}": {
+      "get": {
+        "tags": [
+          "Franjas"
+        ],
+        "summary": "Listar franjas horarias de un local específico",
+        "description": "Obtiene todas las franjas horarias activas (estado = 0) asociadas a un local determinado por su ID.",
+        "operationId": "listarFranjasPorLocal",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "tokenapp",
+            "description": "Token de autenticación JWT (obligatorio)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "idlocal",
+            "description": "ID del local para el cual se consultan las franjas horarias",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de franjas horarias del local",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "idlocal": {
+                        "type": "integer",
+                        "example": 5
+                      },
+                      "hora_inicio": {
+                        "type": "string",
+                        "example": "08:00"
+                      },
+                      "hora_fin": {
+                        "type": "string",
+                        "example": "11:00"
+                      },
+                      "estado": {
+                        "type": "integer",
+                        "example": 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado - Token faltante, inválido o expirado"
+          },
+          "404": {
+            "description": "No se encontraron franjas para este local o el local no existe"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ClienteCreate": {
+      "type": "object",
+      "required": [
+        "nombre",
+        "ruc_cc",
+        "telefono"
+      ],
+      "properties": {
+        "nombre": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "ruc_cc": {
+          "type": "string",
+          "maxLength": 13
+        },
+        "telefono": {
+          "type": "string",
+          "maxLength": 10
+        }
+      }
+    },
+    "ClienteUpdate": {
+      "type": "object",
+      "properties": {
+        "nombre": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "telefono": {
+          "type": "string",
+          "maxLength": 10
+        }
+      }
+    },
+    "Cliente": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "nombre": {
+          "type": "string"
+        },
+        "ruc_cc": {
+          "type": "string"
+        },
+        "telefono": {
+          "type": "string"
+        },
+        "fecing": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "ReservaCreate": {
+      "type": "object",
+      "required": [
+        "idlocal",
+        "idmesa",
+        "idcliente",
+        "fecha",
+        "franja_id"
+      ],
+      "properties": {
+        "idlocal": {
+          "type": "integer"
+        },
+        "idmesa": {
+          "type": "integer"
+        },
+        "idcliente": {
+          "type": "integer"
+        },
+        "fecha": {
+          "type": "string",
+          "format": "date"
+        },
+        "franja_id": {
+          "type": "integer"
+        },
+        "numper": {
+          "type": "integer",
+          "default": 1
+        }
+      }
+    },
+    "AnticipoCreate": {
+      "type": "object",
+      "required": [
+        "idreserva",
+        "monto"
+      ],
+      "properties": {
+        "idreserva": {
+          "type": "integer"
+        },
+        "monto": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+17:31:00 - INF - <module> - ('Servicio Iniciado',)
+17:31:01 - INF - <module> - ('Servicio Iniciado',)
+17:31:29 - INF - post - ('Servicio para Validar login del usaurio',)
+17:31:33 - INF - post - ('Servicio para Validar login del usaurio',)
+17:31:39 - INF - post - ('Servicio para Validar login del usaurio',)
+17:31:49 - INF - token_generate - ('Token Generado-> eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjkwMzQ3MDksImV4cCI6MTc2OTAzNTYwOSwidXNlcm5hbWUiOiJhZG1pbiJ9.oE5hufiJlIGPo2ktJ35CG_mD3v0wcBoH75gkuLaCnGE',)
+19:35:45 - INF - <module> - ('Servicio Finalizado',)
+19:35:45 - INF - <module> - ('Servicio Finalizado',)

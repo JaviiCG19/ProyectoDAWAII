@@ -1,0 +1,117 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Documentación Micro servicio Administracion.",
+    "version": "1.5.0",
+    "title": "Microservicio ms-administracion",
+    "termsOfService": "Leer wwww.ug.edu.ec",
+    "contact": { "email": "anthony.merchana@ug.edu.ec" }
+  },
+  "host": "localhost:10102",
+  "basePath": "/",
+  "schemes": ["http"],
+  "securityDefinitions": {
+    "TokenAuth": {
+      "type": "apiKey",
+      "name": "tokenapp",
+      "in": "header",
+      "description": "Ingrese el JWT. El API valida permisos por Rol internamente."
+    }
+  },
+  "security": [{ "TokenAuth": [] }],
+  "tags": [
+    { "name": "Dashboard", "description": "Resumen adaptativo Global o por Compañía" },
+    { "name": "Empresas", "description": "CRUD de Marcas y Entidades Legales" },
+    { "name": "Locales", "description": "Gestión de Sucursales y generación de inventario" },
+    { "name": "Operaciones", "description": "Mesas y Franjas Horarias de atención" },
+    { "name": "Marketing", "description": "Campaña de Promociones y Soft-Delete" }
+  ],
+  "paths": {
+    "/admin/dashboard": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "KPIs Adaptativos",
+        "parameters": [{ "name": "idcia", "in": "query", "required": false, "type": "string" }],
+        "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/DashboardData" } } }
+      }
+    },
+    "/admin/empresas": {
+      "get": { "tags": ["Empresas"], "summary": "Listar Empresas activas", "responses": { "200": { "description": "OK" } } },
+      "post": {
+        "tags": ["Empresas"], "summary": "Crear Empresa",
+        "parameters": [{ "in": "body", "name": "body", "schema": { "$ref": "#/definitions/EmpresaSave" } }],
+        "responses": { "201": { "description": "Creado" } }
+      }
+    },
+    "/admin/empresas/{id}": {
+      "put": { "tags": ["Empresas"], "summary": "Actualizar Empresa", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }, { "in": "body", "name": "body", "schema": { "$ref": "#/definitions/EmpresaSave" } }], "responses": { "200": { "description": "Actualizado" } } },
+      "delete": { "tags": ["Empresas"], "summary": "Desactivar Empresa", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }], "responses": { "200": { "description": "Eliminado" } } }
+    },
+    "/admin/locales": {
+      "get": { "tags": ["Locales"], "summary": "Listar Sucursales", "parameters": [{ "name": "idcia", "in": "query", "type": "integer", "required": true }], "responses": { "200": { "description": "OK" } } },
+      "post": {
+        "tags": ["Locales"], "summary": "Crear Sucursal y Mesas",
+        "parameters": [{ "in": "body", "name": "body", "schema": { "$ref": "#/definitions/LocalSave" } }],
+        "responses": { "201": { "description": "Creado" } }
+      }
+    },
+    "/admin/locales/restaurar/{id}": {
+      "post": { "tags": ["Locales"], "summary": "Restaurar Sucursal", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }], "responses": { "200": { "description": "Restaurado" } } }
+    },
+    "/admin/franjas": {
+      "get": { "tags": ["Operaciones"], "summary": "Ver horarios", "parameters": [{ "name": "idlocal", "in": "query", "type": "integer" }], "responses": { "200": { "description": "OK" } } },
+      "post": { "tags": ["Operaciones"], "summary": "Crear horario", "parameters": [{ "in": "body", "name": "body", "schema": { "$ref": "#/definitions/FranjaSave" } }], "responses": { "201": { "description": "Creado" } } }
+    },
+    "/admin/franjas/eliminadas": {
+      "get": { "tags": ["Operaciones"], "summary": "Papelera de horarios", "parameters": [{ "name": "idlocal", "in": "query", "type": "integer" }], "responses": { "200": { "description": "OK" } } }
+    },
+    "/admin/promociones": {
+      "get": { "tags": ["Marketing"], "summary": "Listar Promociones", "parameters": [{ "name": "idlocal", "in": "query", "type": "integer" }], "responses": { "200": { "description": "OK" } } },
+      "post": {
+        "tags": ["Marketing"], "summary": "Crear Promo",
+        "parameters": [{ "in": "body", "name": "body", "schema": { "$ref": "#/definitions/PromoSave" } }],
+        "responses": { "201": { "description": "Creado" } }
+      }
+    },
+    "/admin/promociones/{id}": {
+      "delete": { "tags": ["Marketing"], "summary": "Baja de Promoción", "parameters": [{ "name": "id", "in": "path", "required": true, "type": "integer" }], "responses": { "200": { "description": "Desactivado" } } }
+    }
+  },
+  "definitions": {
+    "DashboardData": {
+      "type": "object",
+      "properties": {
+        "result": { "type": "boolean" },
+        "data": {
+          "type": "object",
+          "properties": {
+            "locales": { "type": "integer" },
+            "mesas_disponibles": { "type": "integer" },
+            "promos_activas": { "type": "integer" },
+            "reservas_hoy": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "EmpresaSave": {
+      "type": "object",
+      "required": ["nomleg", "ruc"],
+      "properties": { "nomleg": { "type": "string" }, "nomfan": { "type": "string" }, "ruc": { "type": "string" } }
+    },
+    "LocalSave": {
+      "type": "object",
+      "required": ["idcia", "detalle", "totmesas"],
+      "properties": { "idcia": { "type": "integer" }, "detalle": { "type": "string" }, "direccion": { "type": "string" }, "totmesas": { "type": "integer" } }
+    },
+    "FranjaSave": {
+      "type": "object",
+      "required": ["idlocal", "horini", "horfin", "diasem"],
+      "properties": { "idlocal": { "type": "integer" }, "horini": { "type": "string", "example": "09:00" }, "horfin": { "type": "string", "example": "18:00" }, "diasem": { "type": "integer", "description": "0-6" } }
+    },
+    "PromoSave": {
+      "type": "object",
+      "required": ["idlocal", "nombre", "fec_inicio"],
+      "properties": { "idlocal": { "type": "integer" }, "nombre": { "type": "string" }, "fec_inicio": { "type": "string", "format": "date" }, "fec_fin": { "type": "string", "format": "date" }, "descuento": { "type": "number" } }
+    }
+  }
+}
