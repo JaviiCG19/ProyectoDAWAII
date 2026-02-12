@@ -42,17 +42,15 @@ export default function ModalChangePassword({
       });
 
       if (!res.result) {
-        setError(res.message);
+        setError(res.message || "La contraseña actual es incorrecta");
         return;
       }
 
-      
       onSuccess();
       setOldPassword("");
       setNewPassword("");
     } catch (err) {
-      console.error(err);
-      setError("Error inesperado");
+      setError("Error al procesar el cambio de contraseña");
     } finally {
       setLoading(false);
     }
@@ -87,16 +85,20 @@ export default function ModalChangePassword({
           className="w-full mb-3 border rounded-lg px-3 py-2"
         />
 
-        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-xs mb-4 font-medium animate-pulse">
+            {error}
+          </p>
+        )}
 
         <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 rounded-lg">
+          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm">
             Cancelar
           </button>
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="bg-orange-500 text-white px-4 py-2 rounded-lg disabled:opacity-60"
+            className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-60 transition-opacity"
           >
             {loading ? "Actualizando..." : "Actualizar"}
           </button>

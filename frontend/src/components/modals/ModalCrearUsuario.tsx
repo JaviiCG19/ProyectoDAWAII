@@ -66,7 +66,6 @@ export default function ModalCrearUsuario({
 
         <form onSubmit={handleSave} className="space-y-10">
 
-          {/* 1. ROLES Y PERMISOS –– se muestra primero */}
           <div className="space-y-6 bg-orange-50/40 p-7 rounded-2xl border border-orange-100">
             <h3 className="font-black text-orange-700 text-base uppercase tracking-wide">
               1. Selecciona Rol Principal y Permisos
@@ -109,7 +108,6 @@ export default function ModalCrearUsuario({
             </div>
           </div>
 
-          {/* 2. DATOS DE IDENTIDAD */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-5">
               <h3 className="font-bold text-yellow-700 border-b border-yellow-200 pb-2 text-sm uppercase">
@@ -148,7 +146,7 @@ export default function ModalCrearUsuario({
               </div>
             </div>
 
-            {/* 3. ASIGNACIÓN DE SEDE */}
+    
             <div className="space-y-5">
               <h3 className="font-bold text-yellow-700 border-b border-yellow-200 pb-2 text-sm uppercase">
                 3. Asignación de Sede
@@ -201,7 +199,7 @@ export default function ModalCrearUsuario({
             </div>
           </div>
 
-          {/* 4. SEGURIDAD –– al final */}
+
           <div className="space-y-4 bg-orange-50/60 p-6 rounded-2xl border border-orange-100">
             <h3 className="font-bold text-orange-700 border-b border-orange-200 pb-2 text-sm uppercase">
               4. Seguridad de Cuenta
@@ -223,7 +221,7 @@ export default function ModalCrearUsuario({
             </div>
           </div>
 
-          {/* Botones finales */}
+   
           <div className="flex justify-end gap-4 pt-8 border-t">
             <button 
               type="button" 

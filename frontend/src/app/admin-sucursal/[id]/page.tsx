@@ -10,18 +10,18 @@ import {
   deletePromocion 
 } from "@/services/admin-sucursal.service";
 import { Franja, Promocion } from "@/interface/admin.interface";
-import { Clock, Tag, Calendar, Plus, Trash2, Edit3, ArrowLeft } from "lucide-react";
+import { Clock, Tag, Calendar, Plus, Trash2, Edit3} from "lucide-react";
 import Link from "next/link";
 
 import ModalFranja from "@/components/modals/ModalFranja";
 import ModalPromocion from "@/components/modals/ModalPromocion";
 import ModalPapeleraFranja from "@/components/modals/ModalPapeleraFranja";
 import ModalPapeleraPromocion from "@/components/modals/ModalPapeleraPromocion";
+import ModalConfirmacionEmpresa from "@/components/modals/ModalConfirmacionEmpresa";
 
 export default function AdminSucursalPage() {
   const params = useParams();
   
-
   const localId = Number(params?.id);
   
   const checking = useAuth(["3"]); 
@@ -37,13 +37,23 @@ export default function AdminSucursalPage() {
   const [showPapeleraPromo, setShowPapeleraPromo] = useState(false);
 
 
-  const loadData = useCallback(async () => {
+  const [confirmarBorrado, setConfirmarBorrado] = useState<{
+    open: boolean;
+    id: number | null;
+    tipo: "franja" | "promocion" | null;
+    loading: boolean;
+  }>({
+    open: false,
+    id: null,
+    tipo: null,
+    loading: false,
+  });
 
+  const loadData = useCallback(async () => {
     if (!checking && localId) {
       console.log("Ejecutando carga para localId:", localId);
       setLoading(true);
       try {
-
         const idStr = String(localId);
         
         const [dataFranjas, dataPromos] = await Promise.all([
@@ -61,25 +71,35 @@ export default function AdminSucursalPage() {
     }
   }, [checking, localId]);
 
-
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  const handleDeleteFranja = async (id: number) => {
-    if (confirm("¿Mover esta franja a la papelera?")) {
-      await deleteFranja(id);
-      loadData();
-    }
+  const handleDeleteFranja = (id: number) => {
+    setConfirmarBorrado({ open: true, id, tipo: "franja", loading: false });
   };
 
-  const handleDeletePromo = async (id: number) => {
-    if (confirm("¿Mover esta promoción a la papelera?")) {
-      await deletePromocion(id);
-      loadData();
-    }
+  const handleDeletePromo = (id: number) => {
+    setConfirmarBorrado({ open: true, id, tipo: "promocion", loading: false });
   };
 
+  const confirmDeleteAction = async () => {
+    if (!confirmarBorrado.id || !confirmarBorrado.tipo) return;
+    
+    setConfirmarBorrado(prev => ({ ...prev, loading: true }));
+    try {
+      if (confirmarBorrado.tipo === "franja") {
+        await deleteFranja(confirmarBorrado.id);
+      } else {
+        await deletePromocion(confirmarBorrado.id);
+      }
+      await loadData();
+      setConfirmarBorrado({ open: false, id: null, tipo: null, loading: false });
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      setConfirmarBorrado(prev => ({ ...prev, loading: false }));
+    }
+  };
 
   if (checking || loading) {
     return (
@@ -96,13 +116,6 @@ export default function AdminSucursalPage() {
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Link 
-            href="/admin/locales" 
-            prefetch={false}
-            className="p-2 hover:bg-white rounded-full transition-colors text-gray-400 hover:text-gray-800"
-          >
-            <ArrowLeft size={24} />
-          </Link>
           <div>
             <h1 className="text-2xl font-black text-gray-800 tracking-tight">Administración de Sucursal</h1>
             <p className="text-gray-500 text-sm flex items-center gap-1">
@@ -264,6 +277,15 @@ export default function AdminSucursalPage() {
         onClose={() => setShowPapeleraPromo(false)} 
         idLocal={String(localId)} 
         onRestored={loadData} 
+      />
+
+      <ModalConfirmacionEmpresa 
+        isOpen={confirmarBorrado.open}
+        loading={confirmarBorrado.loading}
+        onClose={() => setConfirmarBorrado(prev => ({ ...prev, open: false }))}
+        onConfirm={confirmDeleteAction}
+        titulo={`¿Eliminar ${confirmarBorrado.tipo === 'franja' ? 'Horario' : 'Promoción'}?`}
+        mensaje="Esta acción moverá el elemento a la papelera. Podrás restaurarlo más adelante si lo necesitas."
       />
     </div>
   );

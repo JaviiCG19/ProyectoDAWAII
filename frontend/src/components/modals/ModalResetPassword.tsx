@@ -13,6 +13,7 @@ interface Props {
 export default function ModalResetPassword({ isOpen, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false); 
+  const [error, setError] = useState<string | null>(null); 
   const [form, setForm] = useState({
     usr_nombre: "",
     usr_respuesta: "",
@@ -22,13 +23,14 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null); 
 
     if (form.new_password !== form.confirm_password) {
-      return alert("Las contraseñas no coinciden");
+      return setError("Las contraseñas no coinciden");
     }
 
     if (form.new_password.length < 4) {
-      return alert("La contraseña debe tener al menos 4 caracteres");
+      return setError("La contraseña debe tener al menos 4 caracteres");
     }
 
     setLoading(true);
@@ -40,18 +42,16 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
     });
 
     if (res.result) {
-    
       setShowSuccess(true);
       setForm({ usr_nombre: "", usr_respuesta: "", new_password: "", confirm_password: "" });
       
-   
       setTimeout(() => {
         setShowSuccess(false);
         onClose();
       }, 3000);
       
     } else {
-      alert(res.message || "No se pudo restablecer la contraseña");
+      setError(res.message || "No se pudo restablecer la contraseña");
     }
     setLoading(false);
   };
@@ -127,6 +127,12 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
               />
             </div>
 
+            {error && (
+              <div className="text-red-500 text-xs text-center font-bold animate-pulse">
+                {error}
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading || showSuccess}
@@ -139,7 +145,7 @@ export default function ModalResetPassword({ isOpen, onClose }: Props) {
         </div>
       </div>
 
-     
+      
       {showSuccess && (
         <div className="fixed bottom-6 right-6 bg-green-600 text-white px-6 py-4 rounded-2xl shadow-2xl z-[200] flex items-center gap-3 font-bold animate-bounce">
           <Check size={20} /> 

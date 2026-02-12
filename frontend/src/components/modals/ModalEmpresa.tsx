@@ -20,7 +20,7 @@ export default function ModalEmpresa({
   const [nomfan, setNomfan] = useState("");
   const [ruc, setRuc] = useState("");
   const [cargando, setCargando] = useState(false);
-
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (empresaEdit) {
@@ -36,20 +36,19 @@ export default function ModalEmpresa({
 
   const manejarEnvio = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
-   
     const nombreLegal = nomleg.trim();
     const nombreFantasia = nomfan.trim();
     const rucLimpio = ruc.trim();
 
-    
     if (nombreLegal.length < 3 || nombreFantasia.length < 3) {
-      alert("Los nombres deben tener al menos 3 caracteres.");
+      setError("Los nombres deben tener al menos 3 caracteres.");
       return;
     }
 
     if (rucLimpio.length !== 13) {
-      alert("El RUC debe tener exactamente 13 dígitos");
+      setError("El RUC debe tener exactamente 13 dígitos");
       return;
     }
 
@@ -63,23 +62,19 @@ export default function ModalEmpresa({
 
       let respuesta;
       if (empresaEdit?.id) {
-        // Lógica de Actualización
         respuesta = await actualizarEmpresa(empresaEdit.id, payload);
       } else {
-        // Lógica de Creación
         respuesta = await crearEmpresa(payload);
       }
 
-   
       if (respuesta.result) {
         alGuardar();
         alCerrar();
       } else {
-        alert("Error de validación: " + JSON.stringify(respuesta.message));
+        setError("Error de validación: " + (respuesta.message || "Datos incorrectos"));
       }
-    } catch (error) {
-      console.error("Error en la petición:", error);
-      alert("Ocurrió un error al conectar con el servidor.");
+    } catch (err) {
+      setError("Ocurrió un error al conectar con el servidor.");
     } finally {
       setCargando(false);
     }
@@ -130,11 +125,17 @@ export default function ModalEmpresa({
                 className="w-full px-4 py-2 border rounded-xl mt-1 focus:ring-2 focus:ring-[#dc902b] outline-none font-mono"
                 placeholder="13 dígitos numéricos"
                 value={ruc}
-                onChange={(e) => setRuc(e.target.value)}
+                onChange={(e) => setRuc(e.target.value.replace(/\D/g, ""))}
                 maxLength={13}
                 required
               />
             </div>
+
+            {error && (
+              <div className="text-red-500 text-xs text-center font-bold animate-pulse">
+                {error}
+              </div>
+            )}
 
             <div className="flex gap-3 pt-2">
               <button

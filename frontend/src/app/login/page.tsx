@@ -14,9 +14,11 @@ export default function LoginPage() {
   const [pass, setPass] = useState("");
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async () => {
     if (!user || !pass) return;
+    setError(null); 
 
     try {
       setLoading(true);
@@ -26,7 +28,6 @@ export default function LoginPage() {
         login_password: pass,
       });
 
-      
       localStorage.setItem("token", data.token);
       localStorage.setItem("token_exp", String(data.token_exp)); 
       
@@ -47,7 +48,7 @@ export default function LoginPage() {
       router.replace(getRedirectPathByRole(String(data.usr_rolp), data.id_local, data.id_res));
       
     } catch (err) {
-      alert("Credenciales inválidas");
+      setError("Credenciales inválidas");
     } finally {
       setLoading(false);
     }
@@ -98,6 +99,12 @@ export default function LoginPage() {
               />
             </div>
           </div>
+
+          {error && (
+            <div className="text-red-500 text-xs text-center font-medium animate-pulse">
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"

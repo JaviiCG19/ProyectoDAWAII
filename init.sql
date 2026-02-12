@@ -200,66 +200,9 @@ INSERT INTO dawa.empresas (nomleg, nomfan, ruc, fecact, estado) VALUES
 ('Comelon SAS', 'El comelon', '0909090909001', '2026-01-22', 1),
 ('Favorita', 'Baraton', '0999556366689', '2026-02-04', 1);
 
--- Franjas
-INSERT INTO dawa.franjas (id, idlocal, diasem, horini, horfin, tipres, estado, fecact) VALUES
-(1, 1, 1, '08:00', '23:00', 0, 1, '2026-02-04'),
-(2, 2, 1, '08:00', '23:00', 0, 1, '2026-02-04'),
-(3, 3, 1, '08:00', '23:00', 0, 1, '2026-02-04');
-SELECT setval(pg_get_serial_sequence('dawa.franjas', 'id'), coalesce(max(id), 0) + 1, false) FROM dawa.franjas;
-
--- Locales
-INSERT INTO dawa.locales (idcia, detalle, direccion, totmesas, fecact, estado) VALUES 
-(1, 'Restaurante Centro', 'Av. 9 de Octubre #123', 10, '2026-02-04', 1),
-(1, 'Restaurante Norte', 'Av. Francisco de Orellana #456', 8, '2026-02-04', 1),
-(1, 'Restaurante Sur', 'Av. 25 de Julio #789', 6, '2026-02-04', 1);
-
-
 -- Usuarios
 INSERT INTO dawa.usuarios (nombre, clave, estado, roles, detalle, rol_prioritario, id_res, id_local) VALUES
-('admin', 'scrypt:32768:8:1$ytUcOf98BZJyheyS$fa77b3f5d788dcdbc0fee44473a080343c186aea33e50aea02718d08b5e99bb507779c581ad2e30f1897a521187497286e3967d6b6c89c16faed9d23aa8472db', 0, '1;2;3;', 'Administrador del sistema', 1, NULL,NULL),
-('gerente', 'scrypt:32768:8:1$ytUcOf98BZJyheyS$fa77b3f5d788dcdbc0fee44473a080343c186aea33e50aea02718d08b5e99bb507779c581ad2e30f1897a521187497286e3967d6b6c89c16faed9d23aa8472db', 0, '1;3;4;', 'Gerencia General', 2, 1,NULL);
-
-
--- Clientes
-INSERT INTO dawa.clientes (nombre, ruc_cc, telefono, fecing, idlocal) VALUES
-('Galo Izquierdo', '0000000000', '0909094654', '2026-01-22', 1),
-('Alexis Valarezo', '0987654321222', '0999888111', '2026-01-30', 1),
-('Juan Carlos Perez', '0899999999', '0988777666', '2026-01-26', 1);
-
-
-
--- Mesas para Local 1 (10 mesas)
-INSERT INTO dawa.mesas (idlocal, numero, maxper, estado, fecact) VALUES
-(1, 'Mesa 01', 4, 0, '2026-02-04'),
-(1, 'Mesa 02', 4, 0, '2026-02-04'),
-(1, 'Mesa 03', 6, 0, '2026-02-04'),
-(1, 'Mesa 04', 2, 0, '2026-02-04'),
-(1, 'Mesa 05', 4, 0, '2026-02-04'),
-(1, 'Mesa 06', 8, 0, '2026-02-04'),
-(1, 'Mesa 07', 2, 0, '2026-02-04'),
-(1, 'Mesa 08', 4, 0, '2026-02-04'),
-(1, 'Mesa 09', 6, 0, '2026-02-04'),
-(1, 'Mesa 10', 4, 0, '2026-02-04');
-
--- Mesas para Local 2 (8 mesas)
-INSERT INTO dawa.mesas (idlocal, numero, maxper, estado, fecact) VALUES
-(2, 'Mesa 01', 4, 0, '2026-02-04'),
-(2, 'Mesa 02', 4, 0, '2026-02-04'),
-(2, 'Mesa 03', 6, 0, '2026-02-04'),
-(2, 'Mesa 04', 2, 0, '2026-02-04'),
-(2, 'Mesa 05', 4, 0, '2026-02-04'),
-(2, 'Mesa 06', 8, 0, '2026-02-04'),
-(2, 'Mesa 07', 2, 0, '2026-02-04'),
-(2, 'Mesa 08', 4, 0, '2026-02-04');
-
--- Mesas para Local 3 (6 mesas)
-INSERT INTO dawa.mesas (idlocal, numero, maxper, estado, fecact) VALUES
-(3, 'Mesa 01', 4, 0, '2026-02-04'),
-(3, 'Mesa 02', 4, 0, '2026-02-04'),
-(3, 'Mesa 03', 6, 0, '2026-02-04'),
-(3, 'Mesa 04', 2, 0, '2026-02-04'),
-(3, 'Mesa 05', 4, 0, '2026-02-04'),
-(3, 'Mesa 06', 8, 0, '2026-02-04');
+('admin', 'scrypt:32768:8:1$ytUcOf98BZJyheyS$fa77b3f5d788dcdbc0fee44473a080343c186aea33e50aea02718d08b5e99bb507779c581ad2e30f1897a521187497286e3967d6b6c89c16faed9d23aa8472db', 0, '1;2;3;', 'Administrador del sistema', 1, NULL,NULL);
 
 
 -- Permisos finales para tu usuario de aplicaci n

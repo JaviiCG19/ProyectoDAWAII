@@ -17,8 +17,8 @@ export default function ModalSucursal({ idEmpresa, onClose, onSaved, sucursalEdi
   const [direccion, setDireccion] = useState("");
   const [totmesas, setTotmesas] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  
   useEffect(() => {
     if (sucursalEdit) {
       setDetalle(sucursalEdit.detalle);
@@ -28,8 +28,10 @@ export default function ModalSucursal({ idEmpresa, onClose, onSaved, sucursalEdi
   }, [sucursalEdit]);
 
   const guardarSucursal = async () => {
+    setError(null);
+
     if (!detalle.trim() || !direccion.trim() || totmesas <= 0) {
-      alert("Complete todos los campos correctamente.");
+      setError("Complete todos los campos correctamente.");
       return;
     }
 
@@ -43,17 +45,14 @@ export default function ModalSucursal({ idEmpresa, onClose, onSaved, sucursalEdi
 
     try {
       if (sucursalEdit?.id) {
-        //Lógica de Edición
         await actualizarSucursal(sucursalEdit.id, payload);
       } else {
-        //Lógica de Creación
         await crearSucursal(payload);
       }
       onSaved();
       onClose();
     } catch (error) {
-      console.error(error);
-      alert("Error al procesar la sucursal.");
+      setError("Error al procesar la sucursal.");
     } finally {
       setLoading(false);
     }
@@ -100,6 +99,12 @@ export default function ModalSucursal({ idEmpresa, onClose, onSaved, sucursalEdi
             />
           </div>
         </div>
+
+        {error && (
+          <p className="text-red-500 text-xs text-center font-bold animate-pulse">
+            {error}
+          </p>
+        )}
 
         <div className="flex gap-3 pt-4">
           <button onClick={onClose} className="flex-1 px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-xl">
